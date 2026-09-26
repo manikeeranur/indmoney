@@ -1,0 +1,37 @@
+@import "../styles/theme.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers in a trading UI must not shift width as they tick. */
+.tabular { font-variant-numeric: tabular-nums; font-family: var(--font-mono); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.live-pulse { animation: live-pulse 1.5s ease-in-out infinite; }
+
+/* ── Option chain desktop grid — ported from frontend/app/globals.css ──── */
+.chain-grid { display: grid; grid-template-columns: 36px 1fr 70px 1fr 36px; }
+.chain-col-oi { display: none !important; }
+@media (min-width: 768px) {
+  .chain-grid { grid-template-columns: 36px 1fr 1fr 70px 1fr 1fr 36px; }
+  .chain-col-oi { display: block !important; }
+}

@@ -1,0 +1,119 @@
+/* ─── INDMONEY design tokens ──────────────────────────────────────────────────
+ * These are NOT an invented brand palette — they are pulled directly, value
+ * for value, from the existing Kite app's actual dark theme
+ * (frontend/app/globals.css's [data-theme="dark"] block + the CE/PE/up/down
+ * colors used throughout frontend/app/options/page.tsx), per the explicit
+ * instruction to keep the exact same UI. Correcting a value here means
+ * re-checking it against that file, not picking a new one.
+ * ---------------------------------------------------------------------------*/
+:root {
+  /* surfaces — frontend/app/globals.css [data-theme="dark"] */
+  --bg:            #080b0f;  /* --bg-page */
+  --bg-elevated:   #0a0f16;  /* --bg-surface */
+  --card:          #0d1420;  /* --bg-surface2 */
+  --card-hover:    #0f1923;  /* --bg-surface3 */
+  --border:        #1e2a3a;  /* --border-1 / --border-2 */
+  --border-strong: #2a3a4a;
+
+  /* text */
+  --text:          #e2e8f0;  /* --text-1 */
+  --text-muted:    #94a3b8;  /* --text-2 */
+  --text-faint:    #4a6080;  /* --text-3 */
+
+  /* brand accent — the sky→orange gradient used on the loading ring / active
+   * tab indicator in options/page.tsx */
+  --accent:        #0284c7;
+  --accent-hover:  #0ea5e9;
+  --accent-soft:   rgba(2, 132, 199, 0.14);
+  --accent-2:      #ea580c;
+
+  /* market direction — exact hex from options/page.tsx (TARGET/SL colors,
+   * trend-ok checkmark, CE/PE side coloring) */
+  --up:            #16a34a;
+  --up-soft:       rgba(22, 163, 74, 0.12);
+  --down:          #dc2626;
+  --down-soft:     rgba(220, 38, 38, 0.12);
+  --flat:          #94a3b8;
+
+  /* status */
+  --warn:          #f59e0b;
+  --info:          #0284c7;
+
+  /* option chain sides — CE is sky blue, PE is rose; tints are the dark-mode
+   * overrides globals.css maps the light-mode #e8f4ff / #fff0f3 chain
+   * backgrounds to */
+  --ce:            #0284c7;
+  --pe:            #e11d48;
+  --ce-tint:       #040d18;
+  --pe-tint:       #150008;
+
+  /* shape — globals.css's shadcn --radius */
+  --radius:        6px;
+  --radius-sm:     4px;
+  --radius-lg:     12px;
+
+  /* typography — verified against frontend/app/options/page.tsx: MONO
+   * ('Space Mono') and BEBAS ('Bebas Neue') are applied explicitly and
+   * pervasively (prices, times, headers), but the base body font is NEVER
+   * set to DM Sans there — frontend has no font-family override on body or
+   * in its tailwind.config.js, so ordinary text renders in Tailwind's
+   * default sans stack. 'DM Sans' appears exactly once in the whole 8k-line
+   * file (one modal heading), not as the app-wide body font — matching that
+   * one spot is not worth diverging the entire app's base font over, so
+   * --font-sans here is Tailwind's actual default stack instead. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: 'Space Mono', ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: 'Bebas Neue', sans-serif;
+}
+
+/* ─── Light theme ──────────────────────────────────────────────────────────────
+ * Same variable NAMES as the dark block above (every component reads these,
+ * never a hardcoded hex), values pulled from frontend/app/globals.css's
+ * [data-theme="light"] block — the old app's DEFAULT theme, which the first
+ * pass of this migration dropped entirely and only shipped dark.
+ * --------------------------------------------------------------------------- */
+:root[data-theme="light"] {
+  --bg:            #f0f4f8;
+  --bg-elevated:   #ffffff;
+  --card:          #f8fafc;
+  --card-hover:    #f1f5f9;
+  --border:        #cbd5e1;
+  --border-strong: #94a3b8;
+
+  --text:          #1e293b;
+  --text-muted:    #64748b;
+  --text-faint:    #94a3b8;
+
+  --accent:        #0284c7;
+  --accent-hover:  #0ea5e9;
+  --accent-soft:   rgba(2, 132, 199, 0.1);
+  --accent-2:      #ea580c;
+
+  --up:            #16a34a;
+  --up-soft:       rgba(22, 163, 74, 0.1);
+  --down:          #dc2626;
+  --down-soft:     rgba(220, 38, 38, 0.1);
+  --flat:          #94a3b8;
+
+  --warn:          #f59e0b;
+  --info:          #0284c7;
+
+  --ce:            #0284c7;
+  --pe:            #e11d48;
+  --ce-tint:       #f0f7ff;
+  --pe-tint:       #fff0f3;
+}
+
+/* Sidebar/header in the real app are hardcoded per-theme rather than routed
+ * through the shared palette (see options/page.tsx: background: isDark ?
+ * "#0f172a" : "#fff") — kept as the same two dedicated tokens here so
+ * AppShell.tsx can branch on theme exactly like the original instead of
+ * guessing a value. */
+:root[data-theme="dark"], :root:not([data-theme]) {
+  --shell-bg: #0f172a;
+  --shell-border: #1e293b;
+}
+:root[data-theme="light"] {
+  --shell-bg: #ffffff;
+  --shell-border: #e2e8f0;
+}
