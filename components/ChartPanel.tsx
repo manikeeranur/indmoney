@@ -196,7 +196,13 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
   const [rsiHeight, setRsiHeight] = useState(80);
   const rsiHeightRef = useRef(80);
   const rsiDragRef = useRef<{ startY: number; startH: number } | null>(null);
-  const dropRef = useRef<HTMLDivElement>(null);
+  // Separate refs per dropdown — a single shared ref only ever points at the
+  // LAST of the three mounted wrapper divs (Indicators, since it renders
+  // last), so clicks inside the Duration/Chart Type dropdowns registered as
+  // "outside" and closed themselves before the click on an option could land.
+  const tfDropRef = useRef<HTMLDivElement>(null);
+  const ctDropRef = useRef<HTMLDivElement>(null);
+  const indDropRef = useRef<HTMLDivElement>(null);
 
   const [replayMode, setReplayMode] = useState(false);
   const [replayPicking, setReplayPicking] = useState(false);
@@ -225,7 +231,12 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
   // Close dropdowns on outside click
   useEffect(() => {
     if (!indOpen && !tfOpen && !ctOpen) return;
-    const handler = (e: MouseEvent) => { if (dropRef.current && !dropRef.current.contains(e.target as Node)) { setIndOpen(false); setTfOpen(false); setCtOpen(false); } };
+    const handler = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (tfDropRef.current && !tfDropRef.current.contains(t)) setTfOpen(false);
+      if (ctDropRef.current && !ctDropRef.current.contains(t)) setCtOpen(false);
+      if (indDropRef.current && !indDropRef.current.contains(t)) setIndOpen(false);
+    };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [indOpen, tfOpen, ctOpen]);
@@ -642,7 +653,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
       const price = liveLtp ?? acctLivePos.currentPrice ?? acctLivePos.buyPrice;
       const r = await fetch("/api/account/exit", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ security_id: token, tradingsymbol: acctLivePos.tradingsymbol, quantity: acctLivePos.quantity, limit_price: price }) }).then(r => r.json());
       if (r.error) throw new Error(r.error);
-      setExitState("done"); setAcctLivePos(null);
+      setExitState("done"); setAcctLivePos(null); setTL(null);
     } catch { setExitState("error"); }
   }
 
@@ -653,6 +664,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
     if (!s.main) return;
     const rr = calcRR(acctLivePos.buyPrice);
     const tl = { entry: acctLivePos.buyPrice, target: rr.target1, target2: rr.target2, sl: rr.sl, entryTime: "" };
+    tlDataRef.current = tl; setTL(tl);
     removeTLs(s.main);
     try { tlSeriesRef.current = mkTLs(s.main, tl); } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -689,7 +701,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
             <button onClick={() => setTO(v => !v)} className="h-7 cursor-pointer rounded px-2.5 text-[9px] font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#16a34a" : "#16a34a20", color: tradeOpen ? "#fff" : "#16a34a", border: "1px solid #16a34a40" }}>Buy</button>
           </div>
           <div className="flex-1" />
-          <div className="relative flex-shrink-0" ref={dropRef}>
+          <div className="relative flex-shrink-0" ref={tfDropRef}>
             <button onClick={() => setTfOpen(v => !v)} className="h-7 w-[68px] cursor-pointer rounded px-2 text-[9px] font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>{tf}</button>
             {tfOpen && (
               <div className="absolute right-0 top-8 z-[200] max-h-64 overflow-y-auto rounded-lg shadow-xl" style={{ background: panelBg, border: `1px solid ${border}` }}>
@@ -699,7 +711,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
               </div>
             )}
           </div>
-          <div className="relative flex-shrink-0" ref={dropRef}>
+          <div className="relative flex-shrink-0" ref={ctDropRef}>
             <button onClick={() => setCtOpen(v => !v)} className="h-7 w-[90px] cursor-pointer rounded px-2 text-[9px] font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>
               {chartType === "candle" ? "Candle" : chartType === "ha" ? "Heikin Ashi" : chartType === "line" ? "Line" : "Area"}
             </button>
@@ -711,7 +723,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
               </div>
             )}
           </div>
-          <div className="relative flex-shrink-0" ref={dropRef}>
+          <div className="relative flex-shrink-0" ref={indDropRef}>
             <button onClick={() => setIndOpen(v => !v)} className="flex h-7 cursor-pointer items-center gap-1 rounded px-2 text-[9px] font-bold transition-all"
               style={{ ...MONO, background: indicators.size > 0 ? (isDark ? "#1e3a5f" : "#dbeafe") : btnBg, color: indicators.size > 0 ? (isDark ? "#60a5fa" : "#1d4ed8") : txtMuted, border: `1px solid ${indicators.size > 0 ? (isDark ? "#3b82f660" : "#93c5fd") : border}` }}>
               Indicators
