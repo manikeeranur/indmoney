@@ -14,6 +14,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   IconWallet, IconLayoutGrid, IconScan, IconClock, IconBookmark, IconBookmarkFilled,
   IconChartLine, IconFileAnalytics, IconNotebook, IconCalendarEvent, IconPower,
+  IconCopy, IconCopyCheck,
 } from "@tabler/icons-react";
 import { useChainStore } from "@/lib/store/chainStore";
 import { useLiveSocket } from "@/lib/useLiveSocket";
@@ -50,6 +51,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [watchCount, setWatchCount] = useState(0);
   const [holidays, setHolidays] = useState<{ date: string; name: string }[]>([]);
   const [profile, setProfile] = useState<{ user_name: string | null; user_id: string | null } | null>(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
+
+  async function handleCopyToken() {
+    try {
+      const d = await fetch("/api/auth/token-value").then(r => r.json());
+      if (!d.access_token) return;
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(d.access_token);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = d.access_token;
+        ta.style.cssText = "position:fixed;left:-9999px;top:-9999px;opacity:0";
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2000);
+    } catch {}
+  }
 
   useLiveSocket();
   const connected = useChainStore((s) => s.connected);
@@ -194,6 +215,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
           <div className="flex-1" />
+          <button
+            onClick={handleCopyToken}
+            title={tokenCopied ? "Copied!" : `Copy token${profile?.user_id ? ` (${profile.user_id})` : ""}`}
+            className="flex h-11 w-11 flex-shrink-0 cursor-pointer flex-col items-center justify-center rounded-xl transition-all"
+            style={{ color: tokenCopied ? "#16a34a" : inactive }}
+          >
+            {tokenCopied ? <IconCopyCheck size={20} /> : <IconCopy size={20} />}
+          </button>
           <ThemeToggle variant="icon" />
           <button
             onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.replace("/login"); }}

@@ -75,6 +75,26 @@ export default function AccountPage() {
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 2800);
   }
 
+  async function copyAccessToken() {
+    try {
+      const d = await fetch("/api/auth/token-value").then(r => r.json());
+      if (d.error || !d.access_token) { showToast(d.error ?? "No token available", "error"); return; }
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(d.access_token);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = d.access_token;
+        ta.style.cssText = "position:fixed;left:-9999px;top:-9999px;opacity:0";
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      showToast("Access token copied to clipboard");
+    } catch (e: any) {
+      showToast(`Copy failed — ${e.message}`, "error");
+    }
+  }
+
   const [accountDefaults, setAccountDefaults] = useState<AccountDefaults | null>(null);
   const [globalLockOn, setGlobalLockOn] = useState(false);
   const [globalLockPts, setGlobalLockPts] = useState<number | null>(null);
@@ -281,6 +301,20 @@ export default function AccountPage() {
 
       <div className="mb-4 rounded-[var(--radius-sm)] border p-2.5 text-xs" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--text-muted)" }}>
         Charges (including the STT/exchange/SEBI/GST/stamp-duty split) are computed per order via INDstocks&apos; own <code>GET /margin</code> — the same figures a contract note would show, not an estimate. Only falls back to a rate-schedule approximation if that call is ever unreachable.
+      </div>
+
+      {/* ── Copy Access Token — ported from the Kite app's own "Copy Access
+          Token / For manual use" row: lets you grab the current token to
+          hand-paste into IND_ACCESS_TOKEN on a deployment that isn't running
+          TOTP auto-refresh yet. ── */}
+      <div className="mb-4 flex items-center justify-between rounded-2xl border px-3.5 py-3" style={{ borderColor: border, background: isDark ? "#0f172a" : "#f8f8ff" }}>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[11px] font-semibold" style={{ color: "var(--text)" }}>Copy Access Token</span>
+          <span className="text-[9px]" style={{ ...MONO, color: subtext }}>For manual use</span>
+        </div>
+        <button onClick={copyAccessToken} className="flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[10px] font-bold transition-all" style={{ borderColor: border, background: isDark ? "#1e293b" : "#f1f5f9", color: subtext }}>
+          Copy Token
+        </button>
       </div>
 
       {/* ── Lock All / Stop Loss / Target / Breakeven — one shared toggle row ── */}
