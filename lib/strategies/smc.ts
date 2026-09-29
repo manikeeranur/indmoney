@@ -36,7 +36,15 @@ function ema(vals: number[], p: number): number[] {
   return out;
 }
 
-type Sig = { bull: boolean; bear: boolean };
+// A drawable rectangle for a detected concept — top/bottom in price, from/to
+// in unix seconds (matching lightweight-charts' own `time` field). Purely
+// additive alongside the existing bull/bear booleans; none of the detection
+// conditions below changed, only exposing the price levels each detector
+// already computes internally instead of discarding them.
+export type PatternZone = { concept: string; top: number; bottom: number; fromTime: number; toTime: number };
+function toUnix(d: Date): number { return Math.floor(d.getTime() / 1000); }
+
+type Sig = { bull: boolean; bear: boolean; bullZone?: PatternZone; bearZone?: PatternZone };
 
 // 1. Liquidity Grab (Sweep + Rejection)
 function detectLiqGrab(cs: Candle[]): Sig {
@@ -47,9 +55,12 @@ function detectLiqGrab(cs: Candle[]): Sig {
   const lookback   = cs.slice(Math.max(0, n - 26), n - 3);
   const recentLow  = Math.min(...lookback.map(c => c.low));
   const recentHigh = Math.max(...lookback.map(c => c.high));
+  const bull = c1.low < recentLow - 1 && c0.close > recentLow && isBull(c0) && isStrong(c0, 5);
+  const bear = c1.high > recentHigh + 1 && c0.close < recentHigh && isBear(c0) && isStrong(c0, 5);
   return {
-    bull: c1.low < recentLow - 1 && c0.close > recentLow && isBull(c0) && isStrong(c0, 5),
-    bear: c1.high > recentHigh + 1 && c0.close < recentHigh && isBear(c0) && isStrong(c0, 5),
+    bull, bear,
+    bullZone: bull ? { concept: "LiqGrab", top: recentLow, bottom: c1.low, fromTime: toUnix(c1.date), toTime: toUnix(c0.date) } : undefined,
+    bearZone: bear ? { concept: "LiqGrab", top: c1.high, bottom: recentHigh, fromTime: toUnix(c1.date), toTime: toUnix(c0.date) } : undefined,
   };
 }
 
@@ -58,9 +69,12 @@ function detectFVG(cs: Candle[]): Sig {
   if (cs.length < 3) return { bull: false, bear: false };
   const n = cs.length;
   const a = cs[n - 3], b = cs[n - 2], c = cs[n - 1];
+  const bull = a.high < c.low && isBull(b) && isStrong(b, 15);
+  const bear = a.low  > c.high && isBear(b) && isStrong(b, 15);
   return {
-    bull: a.high < c.low && isBull(b) && isStrong(b, 15),
-    bear: a.low  > c.high && isBear(b) && isStrong(b, 15),
+    bull, bear,
+    bullZone: bull ? { concept: "FVG", top: c.low, bottom: a.high, fromTime: toUnix(a.date), toTime: toUnix(c.date) } : undefined,
+    bearZone: bear ? { concept: "FVG", top: a.low, bottom: c.high, fromTime: toUnix(a.date), toTime: toUnix(c.date) } : undefined,
   };
 }
 
@@ -69,16 +83,17 @@ function detectOB(cs: Candle[], spot: number): Sig {
   if (cs.length < 8) return { bull: false, bear: false };
   const look = cs.slice(Math.max(0, cs.length - 40));
   let bull = false, bear = false;
+  let bullZone: PatternZone | undefined, bearZone: PatternZone | undefined;
   for (let i = 0; i < look.length - 2; i++) {
     const a = look[i], b = look[i + 1], c2 = look[i + 2];
     if (isBear(a) && isStrong(a, 5) && isBull(b) && isStrong(b, 10) && isBull(c2)) {
-      if (spot >= a.low - 30 && spot <= a.high + 40) bull = true;
+      if (spot >= a.low - 30 && spot <= a.high + 40) { bull = true; bullZone = { concept: "OrdBlock", top: a.high, bottom: a.low, fromTime: toUnix(a.date), toTime: toUnix(c2.date) }; }
     }
     if (isBull(a) && isStrong(a, 5) && isBear(b) && isStrong(b, 10) && isBear(c2)) {
-      if (spot >= a.low - 40 && spot <= a.high + 30) bear = true;
+      if (spot >= a.low - 40 && spot <= a.high + 30) { bear = true; bearZone = { concept: "OrdBlock", top: a.high, bottom: a.low, fromTime: toUnix(a.date), toTime: toUnix(c2.date) }; }
     }
   }
-  return { bull, bear };
+  return { bull, bear, bullZone, bearZone };
 }
 
 // 4. Breaker Block
@@ -86,21 +101,22 @@ function detectBreaker(cs: Candle[], spot: number): Sig {
   if (cs.length < 18) return { bull: false, bear: false };
   const look = cs.slice(Math.max(0, cs.length - 60));
   let bull = false, bear = false;
+  let bullZone: PatternZone | undefined, bearZone: PatternZone | undefined;
   for (let i = 0; i < look.length - 4; i++) {
     const a = look[i], b = look[i + 1], c2 = look[i + 2];
     const later = look.slice(i + 3);
     if (isBear(a) && isStrong(a, 5) && isBull(b) && isStrong(b, 10) && isBull(c2)) {
       if (later.some(c => c.close > a.high + 5)) {
-        if (spot >= a.low - 20 && spot <= a.high + 25) bull = true;
+        if (spot >= a.low - 20 && spot <= a.high + 25) { bull = true; bullZone = { concept: "Breaker", top: a.high, bottom: a.low, fromTime: toUnix(a.date), toTime: toUnix(look[look.length - 1].date) }; }
       }
     }
     if (isBull(a) && isStrong(a, 5) && isBear(b) && isStrong(b, 10) && isBear(c2)) {
       if (later.some(c => c.close < a.low - 5)) {
-        if (spot >= a.low - 25 && spot <= a.high + 20) bear = true;
+        if (spot >= a.low - 25 && spot <= a.high + 20) { bear = true; bearZone = { concept: "Breaker", top: a.high, bottom: a.low, fromTime: toUnix(a.date), toTime: toUnix(look[look.length - 1].date) }; }
       }
     }
   }
-  return { bull, bear };
+  return { bull, bear, bullZone, bearZone };
 }
 
 // 5. Smart Money Trap / Market Structure Shift
@@ -111,9 +127,12 @@ function detectSMT(cs: Candle[]): Sig {
   const look = cs.slice(Math.max(0, n - 22), n - 3);
   const recentLow  = Math.min(...look.map(c => c.low));
   const recentHigh = Math.max(...look.map(c => c.high));
+  const bull = c1.low  < recentLow  - 2 && isBull(c0) && c0.close > c2.high && isStrong(c0, 12);
+  const bear = c1.high > recentHigh + 2 && isBear(c0) && c0.close < c2.low  && isStrong(c0, 12);
   return {
-    bull: c1.low  < recentLow  - 2 && isBull(c0) && c0.close > c2.high && isStrong(c0, 12),
-    bear: c1.high > recentHigh + 2 && isBear(c0) && c0.close < c2.low  && isStrong(c0, 12),
+    bull, bear,
+    bullZone: bull ? { concept: "SMTrap", top: recentLow, bottom: c1.low, fromTime: toUnix(c1.date), toTime: toUnix(c0.date) } : undefined,
+    bearZone: bear ? { concept: "SMTrap", top: c1.high, bottom: recentHigh, fromTime: toUnix(c1.date), toTime: toUnix(c0.date) } : undefined,
   };
 }
 
@@ -127,7 +146,7 @@ function emaTrend(cs: Candle[]): Sig {
   return { bull: last > lastEMA && lastEMA > prevEMA, bear: last < lastEMA && lastEMA < prevEMA };
 }
 
-type SideScore = { score: number; bonus: number; concepts: string[]; trendOk: boolean };
+type SideScore = { score: number; bonus: number; concepts: string[]; trendOk: boolean; zones: PatternZone[] };
 
 export function analyzeCandles(cs: Candle[], spot: number): { bull: SideScore; bear: SideScore } {
   const lg = detectLiqGrab(cs), fvg = detectFVG(cs), ob = detectOB(cs, spot);
@@ -141,7 +160,9 @@ export function analyzeCandles(cs: Candle[], spot: number): { bull: SideScore; b
       bb[key]  && "Breaker",
       smt[key] && "SMTrap",
     ].filter((x): x is string => !!x);
-    return { score: list.length, bonus: trend[key] ? 1 : 0, concepts: list, trendOk: trend[key] };
+    const zoneKey = key === "bull" ? "bullZone" as const : "bearZone" as const;
+    const zones = [lg[zoneKey], fvg[zoneKey], ob[zoneKey], bb[zoneKey], smt[zoneKey]].filter((z): z is PatternZone => !!z);
+    return { score: list.length, bonus: trend[key] ? 1 : 0, concepts: list, trendOk: trend[key], zones };
   }
   return { bull: buildSide("bull"), bear: buildSide("bear") };
 }
@@ -191,15 +212,15 @@ export async function runSMCScan(expiry: string): Promise<ScanResult> {
   const { bull, bear } = analyzeCandles(candles, spot);
   const bullEff = bull.score + bull.bonus, bearEff = bear.score + bear.bonus;
 
-  let dir: "CE" | "PE" | null = null, score = 0, effScore = 0, concepts: string[] = [], trendOk = false;
+  let dir: "CE" | "PE" | null = null, score = 0, effScore = 0, concepts: string[] = [], trendOk = false, zones: PatternZone[] = [];
   if (bull.score >= 2 && bullEff >= bearEff) {
-    dir = "CE"; score = bull.score; effScore = bullEff; concepts = bull.concepts; trendOk = bull.trendOk;
+    dir = "CE"; score = bull.score; effScore = bullEff; concepts = bull.concepts; trendOk = bull.trendOk; zones = bull.zones;
   } else if (bear.score >= 2 && bearEff > bullEff) {
-    dir = "PE"; score = bear.score; effScore = bearEff; concepts = bear.concepts; trendOk = bear.trendOk;
+    dir = "PE"; score = bear.score; effScore = bearEff; concepts = bear.concepts; trendOk = bear.trendOk; zones = bear.zones;
   } else if (bull.score >= 2) {
-    dir = "CE"; score = bull.score; effScore = bullEff; concepts = bull.concepts; trendOk = bull.trendOk;
+    dir = "CE"; score = bull.score; effScore = bullEff; concepts = bull.concepts; trendOk = bull.trendOk; zones = bull.zones;
   } else if (bear.score >= 2) {
-    dir = "PE"; score = bear.score; effScore = bearEff; concepts = bear.concepts; trendOk = bear.trendOk;
+    dir = "PE"; score = bear.score; effScore = bearEff; concepts = bear.concepts; trendOk = bear.trendOk; zones = bear.zones;
   }
 
   if (!dir) return { signal: false, reason: `No confluence — bull:${bull.score} bear:${bear.score}` };
@@ -226,7 +247,7 @@ export async function runSMCScan(expiry: string): Promise<ScanResult> {
     id: `${dir}_${leg.strike}_${Date.now()}`,
     entryTime, direction: dir, strike: leg.strike,
     leg: { token: leg.token, tradingsymbol: leg.tradingsymbol, strike: leg.strike, type: leg.type, ltp: leg.ltp },
-    rr, score, effScore, strength, trendOk, concepts,
+    rr, score, effScore, strength, trendOk, concepts, patternZones: zones,
     status: "ACTIVE", currentPnL: 0, pnlPct: 0, peakMove: 0,
     spot, expiry, createdAt: now.toISOString(),
   };

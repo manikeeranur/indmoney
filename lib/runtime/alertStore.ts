@@ -237,7 +237,7 @@ export async function getAlerts(cfg: StoreConfig, expiry: string) {
           const restored: AlertRecord[] = missing.map((d: any) => ({
             id: d.alertId, alertId: d.alertId, date: d.date, direction: d.direction, strike: d.strike, expiry: d.expiry,
             entryTime: d.entryTime, exitTime: d.exitTime, exitedAt: d.exitedAt, spot: d.spot,
-            concepts: d.concepts ?? [], score: d.score, effScore: d.effScore, strength: d.strength, trendOk: d.trendOk, rr: d.rr,
+            concepts: d.concepts ?? [], patternZones: d.patternZones ?? [], score: d.score, effScore: d.effScore, strength: d.strength, trendOk: d.trendOk, rr: d.rr,
             status: d.status, currentPnL: d.currentPnL ?? 0, pnlPct: d.pnlPct ?? 0, peakMove: d.peakMove ?? 0,
             t1Hit: d.t1Hit, t1HitTime: d.t1HitTime, vwap: d.vwap, vwapCE: d.vwapCE, vwapPE: d.vwapPE,
             lastLtp: d.lastLtp, createdAt: d.createdAt, tradingsymbol: d.tradingsymbol ?? null,

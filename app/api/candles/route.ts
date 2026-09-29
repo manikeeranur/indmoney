@@ -41,8 +41,15 @@ export async function GET(req: Request) {
   const expired = searchParams.get("expired") === "true";
   const tradingsymbol = searchParams.get("tradingsymbol"); // required for expired contracts
   const skipIndicators = searchParams.get("skipIndicators") === "true";
+  const index = searchParams.get("index") === "SENSEX" ? "SENSEX" : "NIFTY";
 
-  if (!token || (!date && !fromParam)) return NextResponse.json({ error: "token and date (or from/to) are required" }, { status: 400 });
+  // An expired-contract request identifies the option by tradingsymbol, not
+  // token — ChartPanel's expired-branch fetch never sends a token param, so
+  // requiring it unconditionally here rejected every expired-chart request
+  // outright, before ever reaching the expired/tradingsymbol branch below.
+  if ((!expired && !token) || (expired && !tradingsymbol) || (!date && !fromParam)) {
+    return NextResponse.json({ error: expired ? "tradingsymbol and date (or from/to) are required" : "token and date (or from/to) are required" }, { status: 400 });
+  }
 
   try {
     // Computed from the RAW param, not the normalised one — normaliseInterval
@@ -58,11 +65,11 @@ export async function GET(req: Request) {
     let candles;
     if (expired) {
       if (!tradingsymbol) return NextResponse.json({ error: "tradingsymbol is required for expired contracts" }, { status: 400 });
-      const map = await getHistoricalExpired([tradingsymbol], interval, from, to);
+      const map = await getHistoricalExpired([tradingsymbol], interval, from, to, index);
       candles = map[tradingsymbol] ?? [];
     } else {
-      const code = scripCode(token, "NIFTY");
-      const map = await getHistorical([code], interval, from, to);
+      const code = scripCode(token, index);
+      const map = await getHistorical([code], interval, from, to, index);
       candles = map[code] ?? [];
     }
 

@@ -27,6 +27,7 @@ export async function saveAlert(alert: AlertRecord): Promise<void> {
           exitedAt:   alert.exitedAt ?? null,
           spot:       alert.spot,
           concepts:   alert.concepts ?? [],
+          patternZones: alert.patternZones ?? [],
           score:      alert.score,
           effScore:   alert.effScore,
           strength:   alert.strength,

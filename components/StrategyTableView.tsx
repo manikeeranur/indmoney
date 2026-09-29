@@ -195,9 +195,13 @@ export function StrategyTableView({ api, expiry }: { api: StrategyApi; expiry: s
   const totalLotPnl = tableAlerts.reduce((s, a) => s + (a.currentPnL ?? 0) * LOT_QTY, 0);
   const realizedLotPnl = tableAlerts.filter(a => a.status !== "ACTIVE").reduce((s, a) => s + (a.currentPnL ?? 0) * LOT_QTY, 0);
 
-  const COLS = api.hasTwoTargets
-    ? "40px 60px 1fr 150px 70px 70px 72px 72px 72px 90px 155px 80px 65px 130px 80px"
-    : "60px 150px 70px 70px 72px 72px 90px 155px 80px 65px 130px 80px";
+  // Same column layout for both strategies now — VWAP930 only has one real
+  // target (rr.target, no target1/target2 split), so its T2 cell just shows
+  // "—" rather than a fabricated duplicate value, and its SIGNALS cell stays
+  // empty (no concepts/score data exists for it). The "#" and SIGNALS columns
+  // being genuinely used is also what gives this layout its natural 1fr
+  // stretch to fill wide screens — no special-cased filler column needed.
+  const COLS = "40px 75px 1fr max-content 70px 70px 72px 72px 72px 90px 155px 80px 65px 130px 80px";
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -304,7 +308,7 @@ export function StrategyTableView({ api, expiry }: { api: StrategyApi; expiry: s
           <div className="flex-1 space-y-3 overflow-auto px-3 py-3 md:hidden">
             {tableAlerts.map((a, idx) => (
               <MobileCard key={a.id ?? idx} a={a} api={api} isDark={isDark} accent={accent} LOT_QTY={LOT_QTY}
-                onOpenChart={() => a.leg && setChartTarget({ token: a.leg.token, tradingsymbol: a.leg.tradingsymbol, strike: a.strike, type: a.direction, expiry: a.expiry })} />
+                onOpenChart={() => a.leg && setChartTarget({ token: a.leg.token, tradingsymbol: a.leg.tradingsymbol, strike: a.strike, type: a.direction, expiry: a.expiry, patternZones: a.patternZones })} />
             ))}
             <div className="overflow-hidden rounded-xl" style={{ background: isDark ? "#0d1420" : "#f8fafc", border: `1px solid ${isDark ? "#1e2a3a" : "#e2e8f0"}` }}>
               <div className="grid grid-cols-3" style={{ gap: "1px", background: isDark ? "#1e2a3a" : "#e2e8f0" }}>
@@ -324,19 +328,16 @@ export function StrategyTableView({ api, expiry }: { api: StrategyApi; expiry: s
 
           {/* ── Desktop table ── */}
           <div className="hidden flex-1 overflow-auto md:block">
-            <div style={{ minWidth: api.hasTwoTargets ? 1200 : 1080 }}>
+            <div style={{ minWidth: 1200 }}>
               <div className="sticky top-0 z-10 grid border-b-2" style={{ gridTemplateColumns: COLS, borderColor: isDark ? "#1e2a3a" : "#cbd5e1", background: isDark ? "#080d14" : "#f8fafc" }}>
-                {(api.hasTwoTargets
-                  ? ["#", "TIME", "SIGNALS", "STRIKE", "ENTRY", "CMP", "SL", "T1", "T2", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS", ""]
-                  : ["TIME", "STRIKE", "ENTRY", "CMP", "SL", "TARGET", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS", ""]
-                ).map((h, i) => (
+                {["#", "TIME", "SIGNALS", "STRIKE", "ENTRY", "CMP", "SL", "T1", "T2", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS", ""].map((h, i) => (
                   <div key={i} className="px-2 py-2 text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{h}</div>
                 ))}
               </div>
               {tableAlerts.map((a, idx) => (
                 <DesktopRow key={a.id ?? idx} a={a} idx={idx} api={api} isDark={isDark} accent={accent} LOT_QTY={LOT_QTY} cols={COLS}
                   watched={a.leg ? watchedTokens.has(a.leg.token) : false}
-                  onOpenChart={() => a.leg && setChartTarget({ token: a.leg.token, tradingsymbol: a.leg.tradingsymbol, strike: a.strike, type: a.direction, expiry: a.expiry })}
+                  onOpenChart={() => a.leg && setChartTarget({ token: a.leg.token, tradingsymbol: a.leg.tradingsymbol, strike: a.strike, type: a.direction, expiry: a.expiry, patternZones: a.patternZones })}
                   onAddWatch={() => addToWatch(a.leg)} />
               ))}
             </div>
@@ -411,7 +412,7 @@ function MobileCard({ a, api, isDark, accent, LOT_QTY, onOpenChart }: { a: Alert
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-[15px] font-bold leading-tight" style={{ ...BEBAS, color: isDark ? "#e2e8f0" : "#1e293b" }}>NIFTY {a.strike} {a.direction === "CE" ? "Call" : "Put"}</div>
-            <div className="mt-0.5 text-[8px]" style={{ ...MONO, color: "#64748b" }}>{fmtTime(a.entryTime)}{a.exitTime ? ` → ${fmtTime(a.exitTime)}` : " → ACTIVE"}{a.spot ? `  ·  spot ${a.spot.toFixed(0)}` : ""}</div>
+            <div className="mt-0.5 overflow-hidden text-ellipsis whitespace-nowrap text-[8px]" style={{ ...MONO, color: "#64748b" }}>{fmtTime(a.entryTime)}{a.exitTime ? ` → ${fmtTime(a.exitTime)}` : " → ACTIVE"}{a.spot ? `  ·  spot ${a.spot.toFixed(0)}` : ""}</div>
             <div className="mt-1.5 flex flex-wrap gap-1">
               {api.hasTwoTargets ? (
                 <>
@@ -509,25 +510,35 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
   const charges = calcCharges(entry, exitP, LOT_QTY);
 
   return (
-    <div className="grid items-center border-b px-5 transition-colors hover:bg-[rgba(124,58,237,0.04)]" style={{ gridTemplateColumns: cols, borderColor: isDark ? "#0f1923" : "#f1f5f9", background: rowBg }}>
-      {api.hasTwoTargets && <div className="px-2 py-2.5 text-[9px]" style={{ ...MONO, color: "#94a3b8" }}>{idx + 1}</div>}
+    <div className="grid items-center border-b transition-colors hover:bg-[rgba(124,58,237,0.04)]" style={{ gridTemplateColumns: cols, borderColor: isDark ? "#0f1923" : "#f1f5f9", background: rowBg }}>
+      <div className="px-2 py-2.5 text-[9px]" style={{ ...MONO, color: "#94a3b8" }}>{idx + 1}</div>
 
       <div className="px-2 py-2.5">
-        <div className="text-[10px] font-bold" style={{ ...MONO, color: "var(--text)" }}>{fmtTime(a.entryTime)}</div>
-        {a.exitTime ? (
-          <div className="text-[8px]" style={{ ...MONO, color: "#94a3b8" }}>→{fmtTime(a.exitTime)}</div>
+        {api.hasTwoTargets ? (
+          <>
+            <div className="whitespace-nowrap text-[10px] font-bold" style={{ ...MONO, color: "var(--text)" }}>{fmtTime(a.entryTime)}</div>
+            {a.exitTime ? (
+              <div className="whitespace-nowrap text-[8px]" style={{ ...MONO, color: "#94a3b8" }}>→{fmtTime(a.exitTime)}</div>
+            ) : (
+              <div className="whitespace-nowrap text-[8px]" style={{ ...MONO, color: "#94a3b8" }}>{a.strength}</div>
+            )}
+          </>
         ) : (
-          <div className="text-[8px]" style={{ ...MONO, color: "#94a3b8" }}>{api.hasTwoTargets ? a.strength : `VWAP ₹${a.vwap?.toFixed?.(2) ?? a.vwap ?? "—"}`}</div>
+          <div className="whitespace-nowrap text-[10px] font-bold" style={{ ...MONO, color: "var(--text)" }}>
+            {fmtTime(a.entryTime)}{a.exitTime ? ` → ${fmtTime(a.exitTime)}` : ""}
+          </div>
         )}
       </div>
 
-      {api.hasTwoTargets && (
-        <div className="flex flex-wrap gap-1 px-2 py-2.5">
-          <span className="rounded-sm px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: `${dirClr}18`, color: dirClr, border: `1px solid ${dirClr}30` }}>{a.direction} {a.score}/5</span>
-          {(a.concepts ?? []).map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: `${CONCEPT_COLOR[c] ?? "#64748b"}14`, color: CONCEPT_COLOR[c] ?? "#64748b" }}>{c}</span>)}
-          {a.trendOk && <span className="text-[7px]" style={{ ...MONO, color: "#16a34a" }}>+EMA✓</span>}
-        </div>
-      )}
+      <div className="flex flex-wrap gap-1 px-2 py-2.5">
+        {api.hasTwoTargets && (
+          <>
+            <span className="rounded-sm px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: `${dirClr}18`, color: dirClr, border: `1px solid ${dirClr}30` }}>{a.direction} {a.score}/5</span>
+            {(a.concepts ?? []).map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: `${CONCEPT_COLOR[c] ?? "#64748b"}14`, color: CONCEPT_COLOR[c] ?? "#64748b" }}>{c}</span>)}
+            {a.trendOk && <span className="text-[7px]" style={{ ...MONO, color: "#16a34a" }}>+EMA✓</span>}
+          </>
+        )}
+      </div>
 
       <div className="px-2 py-2.5">
         <div className="whitespace-nowrap text-[10px] font-bold leading-tight" style={{ ...MONO, color: dirClr }}>NIFTY {fmtExpiry(a.expiry)} {a.strike} {a.direction}</div>
@@ -545,14 +556,11 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
 
       <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#e11d48" }}>₹{a.rr?.sl?.toFixed(2) ?? "—"}</div>
 
-      {api.hasTwoTargets ? (
-        <>
-          <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#b45309" }}>₹{a.rr?.target1?.toFixed(2) ?? "—"}</div>
-          <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{a.rr?.target2?.toFixed(2) ?? "—"}</div>
-        </>
-      ) : (
-        <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{a.rr?.target?.toFixed(2) ?? "—"}</div>
-      )}
+      {/* T1: SMC's own target1, or VWAP930's single target shown here. T2:
+          only ever real for SMC — VWAP930 has no second target, so this
+          stays a plain "—" rather than duplicating T1's value. */}
+      <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#b45309" }}>₹{(a.rr?.target1 ?? a.rr?.target)?.toFixed(2) ?? "—"}</div>
+      <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#16a34a" }}>{a.rr?.target2 != null ? `₹${a.rr.target2.toFixed(2)}` : "—"}</div>
 
       <div className="px-2 py-2.5">
         <div className="mb-0.5 flex items-center gap-1">
@@ -616,6 +624,9 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
           <button onClick={onAddWatch} title="Add to watchlist" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border text-[11px] font-bold transition-all" style={{ background: `${dirClr}15`, borderColor: `${dirClr}50`, color: dirClr }}>+</button>
         )}
       </div>
+      {/* Trailing filler column (VWAP930 only) — soaks up leftover width on
+          wide screens without stretching any real data column. */}
+      {!api.hasTwoTargets && <div />}
     </div>
   );
 }

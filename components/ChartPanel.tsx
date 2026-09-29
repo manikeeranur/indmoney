@@ -34,7 +34,8 @@ type ChartType = "candle" | "ha" | "line" | "area";
 type Indicator = "RSI" | "BB" | "VOL" | "VWAP";
 type Candle = { time: number; open: number; high: number; low: number; close: number; volume: number };
 
-export type ChartTarget = { token: number; tradingsymbol: string; strike: number; type: "CE" | "PE"; expiry: string; index?: "NIFTY" | "SENSEX" };
+export type PatternZone = { concept: string; top: number; bottom: number; fromTime: number; toTime: number };
+export type ChartTarget = { token: number; tradingsymbol: string; strike: number; type: "CE" | "PE"; expiry: string; index?: "NIFTY" | "SENSEX"; patternZones?: PatternZone[] };
 
 type TfConfig = { label: TfLabel; interval: string; fromDays: number; aggMinutes: number };
 const TF_LIST: TfConfig[] = [
@@ -142,9 +143,23 @@ function getExpiryStart(expiry: string): string {
   return (exp > today ? today : exp).toISOString().split("T")[0];
 }
 
+// The EXPIRED-contract historical endpoint needs its own compact symbol
+// format — <UNDERLYING><YYMMMDD><STRIKE><CE|PE>, e.g. "NIFTY26SEP2922900PE"
+// (2-digit year, 3-letter month, 2-digit day, no separators) — verified
+// against api-docs.indstocks.com/utility/. This is NOT the same string the
+// live option-chain returns as trading_symbol (that one looks like
+// "NIFTY-Aug2026-24450-CE" — hyphenated, full month, 4-digit year), so it
+// has to be built fresh from the strike/type/expiry fields already on hand
+// rather than reusing the live-chain tradingsymbol prop.
+function expiredSymbol(underlying: string, expiry: string, strike: number, type: "CE" | "PE"): string {
+  const MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const [y, m, d] = expiry.split("-").map(Number);
+  return `${underlying}${String(y).slice(2)}${MON[m - 1]}${String(d).padStart(2, "0")}${strike}${type}`;
+}
+
 type LivePos = { tradingsymbol: string; buyPrice: number; currentPrice: number; quantity: number; status: string; direction: string | null };
 
-export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index = "NIFTY", startInTechnical = false, onClose }: ChartTarget & { startInTechnical?: boolean; onClose: () => void }) {
+export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index = "NIFTY", patternZones, startInTechnical = false, onClose }: ChartTarget & { startInTechnical?: boolean; onClose: () => void }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const panelBg = isDark ? "#0f172a" : "#ffffff";
@@ -219,6 +234,13 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
   const chartRef = useRef<any>(null);
   const seriesRef = useRef<Record<string, any>>({});
   const rawRef = useRef<Candle[]>([]);
+  // Pixel rects for the SMC concept(s) that fired this entry — a bounded box
+  // in BOTH price and time (unlike the entry/SL/target lines, which are
+  // full-width), so it actually shows the order block / FVG / liquidity
+  // sweep candle range, not just a price level. Recomputed every animation
+  // frame while a chart with pattern data is open, same technique as the
+  // price-line sync elsewhere, so it tracks panning/zooming/resizing.
+  const [zoneRects, setZoneRects] = useState<{ concept: string; left: number; right: number; top: number; bottom: number }[]>([]);
   const currentRef = useRef<Candle | null>(null);
   const tfMinRef = useRef(1);
   const ctRef = useRef<ChartType>("candle");
@@ -303,14 +325,27 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
   useEffect(() => {
     setLoading(true); setError(null);
     rawRef.current = []; currentRef.current = null;
-    const today = new Date().toISOString().split("T")[0];
+    const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+    const today = nowIST.toISOString().split("T")[0];
     const mapRows = (d: any): Candle[] => (d.rows ?? []).map((r: any) => ({ time: istToUnix(r.date), open: r.open, high: r.high, low: r.low, close: r.close, volume: r.volume ?? 0 }));
     const from = tfCfg.interval === "day" ? dateFromDaysAgo(tfCfg.fromDays) : getExpiryStart(expiry);
-    fetch(`/api/candles?token=${token}&from=${from}&to=${today}&interval=${tfCfg.interval}&skipIndicators=true`)
+    // Options stop appearing on the regular historical-candle endpoint the
+    // moment they stop TRADING — 15:30 IST on expiry day itself, not
+    // midnight. Comparing calendar dates alone (expiry < today) missed the
+    // exact case this was built for: viewing a chart at, say, 23:00 on the
+    // SAME calendar day as expiry — the date compare says "not expired yet"
+    // (they're equal) while the contract has been closed for hours, so it
+    // silently took the normal (empty) path again. Needs the current IST
+    // clock time too, not just the date.
+    const isExpired = expiry < today || (expiry === today && (nowIST.getHours() > 15 || (nowIST.getHours() === 15 && nowIST.getMinutes() >= 30)));
+    const params = isExpired
+      ? `expired=true&tradingsymbol=${encodeURIComponent(expiredSymbol(index, expiry, strike, type))}&from=${from}&to=${expiry}&interval=${tfCfg.interval}&skipIndicators=true&index=${index}`
+      : `token=${token}&from=${from}&to=${today}&interval=${tfCfg.interval}&skipIndicators=true&index=${index}`;
+    fetch(`/api/candles?${params}`)
       .then(r => r.json())
       .then(d => { if (d.error) throw new Error(d.error); const candles = mapRows(d); rawRef.current = tfCfg.interval === "day" ? candles : filterMarketHours(candles); setLoading(false); })
       .catch((e: any) => { setError(e?.message ?? "Failed to load"); setLoading(false); });
-  }, [token, tf, expiry]);
+  }, [token, tf, expiry, strike, type, index]);
 
   // Build/rebuild chart
   useEffect(() => {
@@ -670,6 +705,32 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [acctLivePos, loading]);
 
+  // Keep the SMC pattern-zone rectangle(s) in sync with the chart's price
+  // and time scales — recomputed every frame while patternZones is set.
+  useEffect(() => {
+    if (!patternZones?.length) { setZoneRects([]); return; }
+    let raf = 0;
+    const tick = () => {
+      const series = seriesRef.current.main;
+      const chart = chartRef.current;
+      if (series && chart) {
+        const ts = chart.timeScale();
+        const rects = patternZones.map(z => {
+          const left = ts.timeToCoordinate(z.fromTime);
+          const right = ts.timeToCoordinate(z.toTime);
+          const top = series.priceToCoordinate(z.top);
+          const bottom = series.priceToCoordinate(z.bottom);
+          return left != null && right != null && top != null && bottom != null
+            ? { concept: z.concept, left, right, top, bottom } : null;
+        }).filter((r): r is NonNullable<typeof r> => r != null);
+        setZoneRects(rects);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [patternZones]);
+
   // Simple view computed
   const currentPrice = liveLtp ?? rawRef.current[rawRef.current.length - 1]?.close ?? 0;
   const changeVal = derivedPrevClose && derivedPrevClose > 0 ? currentPrice - derivedPrevClose : 0;
@@ -911,6 +972,17 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
         )}
 
         <div ref={chartDivRef} className="absolute inset-0" />
+
+        {zoneRects.map((r, i) => {
+          const color = { LiqGrab: "#f59e0b", FVG: "#a855f7", OrdBlock: "#0ea5e9", Breaker: "#ec4899", SMTrap: "#16a34a" }[r.concept] ?? "#94a3b8";
+          const left = Math.min(r.left, r.right), width = Math.max(2, Math.abs(r.right - r.left));
+          const top = Math.min(r.top, r.bottom), height = Math.max(2, Math.abs(r.bottom - r.top));
+          return (
+            <div key={i} className="pointer-events-none absolute z-10" style={{ left, width, top, height, background: `${color}22`, border: `1px solid ${color}80` }}>
+              <span className="absolute -top-4 left-0 whitespace-nowrap rounded px-1 text-[8px] font-bold" style={{ ...MONO, background: color, color: "#fff" }}>{r.concept}</span>
+            </div>
+          );
+        })}
       </div>
 
       {simpleMode && (

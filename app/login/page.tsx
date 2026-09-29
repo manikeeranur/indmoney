@@ -102,12 +102,14 @@ export default function LoginPage() {
             ) : (
               <>
                 <Field label="Access token">
-                  <textarea
+                  <input
+                    type="text"
+                    name="ind_access_token"
+                    autoComplete="on"
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="Paste the token from indstocks.com → API trading → Access tokens"
-                    rows={4}
-                    className={`${inputCls} resize-none font-mono text-xs`}
+                    className={`${inputCls} font-mono text-xs`}
                     required
                   />
                 </Field>

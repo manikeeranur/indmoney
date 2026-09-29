@@ -47,6 +47,9 @@ export type AlertRecord = {
   strength?: string;
   trendOk?: boolean;
   concepts?: string[];
+  // Drawable price-level rectangles for whichever concepts fired — one per
+  // entry in `concepts`, same order. See lib/strategies/smc.ts's PatternZone.
+  patternZones?: { concept: string; top: number; bottom: number; fromTime: number; toTime: number }[];
   t1Hit?: boolean;
   t1HitTime?: string | null;
   // VWAP930-only

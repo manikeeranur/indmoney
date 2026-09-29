@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node server.js",
+    "restart": "kill-port 3200 && node server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "typecheck": "tsc --noEmit"
@@ -29,6 +30,7 @@
     "@types/react-dom": "^19.3.0",
     "@types/ws": "^8.5.13",
     "autoprefixer": "^10.4.20",
+    "kill-port": "^2.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.0"

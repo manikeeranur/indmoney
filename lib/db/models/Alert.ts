@@ -13,6 +13,7 @@ const AlertSchema = new mongoose.Schema({
   exitedAt:   String,
   spot:       Number,
   concepts:   [String],
+  patternZones: mongoose.Schema.Types.Mixed,
   score:      Number,
   effScore:   Number,
   strength:   String,
