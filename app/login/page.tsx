@@ -54,7 +54,7 @@ export default function LoginPage() {
             IM
           </div>
           <h1 className="text-xl font-semibold tracking-tight">INDMONEY</h1>
-          <p className="mt-1 text-sm text-muted">Sign in with your INDstocks account</p>
+          <p className="mt-1 text-sm text-muted">Sign in with your INDstocks account...</p>
         </div>
 
         <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-card p-5">
