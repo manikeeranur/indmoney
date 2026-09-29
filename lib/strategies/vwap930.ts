@@ -191,12 +191,14 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
 
   const instruments = await getFnoInstruments();
   const tokenMap = new Map<string, number>();
+  const strikesByType: { CE: number[]; PE: number[] } = { CE: [], PE: [] };
   for (const inst of instruments) {
     if (inst.name !== "NIFTY" || inst.kind !== "OPTIDX" || inst.expiry !== expiry || inst.strike == null) continue;
     tokenMap.set(`${inst.strike}_${inst.type}`, inst.token);
+    if (inst.type === "CE" || inst.type === "PE") strikesByType[inst.type].push(inst.strike);
   }
-
-  const offsets = [0, -50, 50, -100, 100, -150, 150];
+  strikesByType.CE.sort((a, b) => a - b);
+  strikesByType.PE.sort((a, b) => a - b);
 
   const checkpoints: Date[] = [];
   {
@@ -241,8 +243,12 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
     const atm = getATM(spot);
 
     async function fetchCandidate(type: "CE" | "PE"): Promise<Cand | null> {
-      for (const off of offsets) {
-        const strike = atm + off;
+      // Every real strike for this expiry, closest-to-ATM first — same
+      // selection order as live's findCandidateLegs(), instead of the old
+      // fixed ±50/100/150 offset list, which could never find (and so could
+      // never enter) a real strike further from ATM than that.
+      const strikes = [...strikesByType[type]].sort((a, b) => Math.abs(a - atm) - Math.abs(b - atm));
+      for (const strike of strikes) {
         const series = await getSeries(strike, type);
         if (!series) continue;
         const { token, candles, candlesNm, vwapNm } = series;
@@ -294,11 +300,22 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
 
     const laterCandles = chosen.candles.slice(chosen.entryIdx + 1);
     let status: AlertRecord["status"] = "ACTIVE", exitPrice = entry, exitTime: string | Date | null = null, peakMove = 0;
+    // Mirrors updateAlertPnL's breakeven move exactly — once peakMove crosses
+    // the trigger %, the SL used for the rest of the trade becomes entry,
+    // not the original risk-based level. Without this, a trade that live
+    // would exit at breakeven could show as a full SL loss (or a win it
+    // never would have reached) in the backtest instead.
+    let sl = rr.sl;
+    let slMovedToBreakeven = false;
     for (const c of laterCandles) {
       const { h: ch, m: cm } = toIST(c.date);
       const move = +(c.high - entry).toFixed(2);
       if (move > peakMove) peakMove = move;
-      if (c.low <= rr.sl) { status = "SL"; exitPrice = rr.sl; exitTime = c.date; break; }
+      if (!slMovedToBreakeven && peakMove > 0 && (peakMove / entry) * 100 >= VWAP930_BREAKEVEN_TRIGGER_PCT) {
+        sl = entry;
+        slMovedToBreakeven = true;
+      }
+      if (c.low <= sl) { status = "SL"; exitPrice = sl; exitTime = c.date; break; }
       if (c.high >= rr.target) { status = "TARGET"; exitPrice = rr.target; exitTime = c.date; break; }
       if (ch === 15 && cm >= 20) { status = "TIME_EXIT"; exitPrice = c.close; exitTime = c.date; break; }
       if (new Date(c.date).getTime() >= stagnantCutoffMs && peakMove < VWAP930_STAGNANT_MAX_POINTS) {
