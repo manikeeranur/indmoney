@@ -325,8 +325,13 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
   useEffect(() => {
     setLoading(true); setError(null);
     rawRef.current = []; currentRef.current = null;
+    // .toISOString() always renders in UTC no matter how the Date was built
+    // — using it to read off "today's date" is wrong by a full day for any
+    // IST time before 05:30 (UTC+5:30 means that window falls on the
+    // PREVIOUS UTC calendar date). toLocaleDateString with an explicit
+    // timeZone is the correct way to get the real IST calendar date.
     const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-    const today = nowIST.toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
     const mapRows = (d: any): Candle[] => (d.rows ?? []).map((r: any) => ({ time: istToUnix(r.date), open: r.open, high: r.high, low: r.low, close: r.close, volume: r.volume ?? 0 }));
     const from = tfCfg.interval === "day" ? dateFromDaysAgo(tfCfg.fromDays) : getExpiryStart(expiry);
     // Options stop appearing on the regular historical-candle endpoint the

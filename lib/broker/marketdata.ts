@@ -59,6 +59,21 @@ export function indexScripCode(token: number, index: Index = "NIFTY"): string {
   return `${exchangeFor(index)}_${token}`;
 }
 
+/** The EXPIRED-contract historical endpoint needs its own compact symbol
+ *  format — <UNDERLYING><YYMMMDD><STRIKE><CE|PE>, e.g. "NIFTY26SEP2922900PE"
+ *  (2-digit year, 3-letter month, 2-digit day, no separators) — verified
+ *  against api-docs.indstocks.com/utility/. NOT the same string the live
+ *  option-chain returns as trading_symbol ("NIFTY-Sep2026-22900-PE" style),
+ *  so it has to be built fresh from strike/type/expiry rather than reusing
+ *  that one. Shared here so both the chart panel's candle route and the
+ *  strategy backtests (which hit this the moment they test an already-past
+ *  expiry) use the exact same, verified format. */
+export function expiredOptionSymbol(underlying: string, expiry: string, strike: number, type: "CE" | "PE"): string {
+  const MON = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const [y, m, d] = expiry.split("-").map(Number);
+  return `${underlying}${String(y).slice(2)}${MON[m - 1]}${String(d).padStart(2, "0")}${strike}${type}`;
+}
+
 // ─── Option chain ─────────────────────────────────────────────────────────────
 
 type RawLeg = {

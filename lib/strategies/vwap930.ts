@@ -3,7 +3,7 @@
 // VWAP/candle math is pure and unchanged; only candle fetch, option chain and
 // auth calls move to the INDstocks adapter.
 import { hasToken } from "@/lib/broker/auth";
-import { getOptionChain, getATM, scripCode, indexScripCode, getHistorical } from "@/lib/broker/marketdata";
+import { getOptionChain, getATM, scripCode, indexScripCode, getHistorical, getHistoricalExpired, expiredOptionSymbol } from "@/lib/broker/marketdata";
 import { getFnoInstruments, getLotSize } from "@/lib/broker/instruments";
 import { calcVWAP, aggregateCandles } from "./vwap";
 import {
@@ -184,6 +184,26 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
   const from = new Date(`${date}T09:15:00+05:30`);
   const to   = new Date(`${date}T15:30:00+05:30`);
 
+  // Options stop appearing on the regular historical-candle endpoint the
+  // moment they stop trading (15:30 IST on the CONTRACT's own expiry day) —
+  // same rule as ChartPanel's fix, just checked here against the real
+  // current clock instead of the backtest's own `date` (a backtest date is
+  // always in the past by definition, but its `expiry` might still be a
+  // live, not-yet-expired contract — e.g. backtesting last Tuesday against
+  // this week's still-open expiry). Every candle fetch below needs to know
+  // this up front, since every single strike would otherwise silently
+  // return empty and look exactly like "no signal found" rather than "wrong
+  // endpoint for an expired contract."
+  // .toISOString() always renders in UTC no matter how the Date was built —
+  // using it to read off "today's date" is wrong by a full day for any IST
+  // time before 05:30 (UTC+5:30 means that window falls on the PREVIOUS UTC
+  // calendar date). toLocaleDateString with an explicit timeZone is the
+  // correct way to get the real IST calendar date (same pattern used
+  // elsewhere in this codebase, e.g. accountService.ts's todayIST()).
+  const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const todayIST = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const contractExpired = expiry < todayIST || (expiry === todayIST && (nowIST.getHours() > 15 || (nowIST.getHours() === 15 && nowIST.getMinutes() >= 30)));
+
   const niftyCode = indexScripCode(NIFTY_INDEX_ID, "NIFTY");
   const niftyMap  = await getHistorical([niftyCode], "1minute", from, to, "NIFTY");
   const rawNifty  = niftyMap[niftyCode] ?? [];
@@ -218,9 +238,17 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
     const token = tokenMap.get(key);
     let series: Series | null = null;
     if (token) {
-      const code = scripCode(token, "NIFTY");
-      const map  = await getHistorical([code], "1minute", from, to, "NIFTY").catch(() => ({} as Record<string, Candle[]>));
-      const raw  = map[code] ?? [];
+      const raw = contractExpired
+        ? await (async () => {
+            const sym = expiredOptionSymbol("NIFTY", expiry, strike, type);
+            const map = await getHistoricalExpired([sym], "1minute", from, to, "NIFTY").catch(() => ({} as Record<string, Candle[]>));
+            return map[sym] ?? [];
+          })()
+        : await (async () => {
+            const code = scripCode(token, "NIFTY");
+            const map = await getHistorical([code], "1minute", from, to, "NIFTY").catch(() => ({} as Record<string, Candle[]>));
+            return map[code] ?? [];
+          })();
       if (raw.length >= VWAP930_CANDLE_MINUTES * 2) {
         const candlesNm = aggregateCandles(raw, VWAP930_CANDLE_MINUTES);
         const vwapNm = calcVWAP(candlesNm);
