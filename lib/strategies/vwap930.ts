@@ -5,7 +5,7 @@
 import { hasToken } from "@/lib/broker/auth";
 import { getOptionChain, getATM, scripCode, indexScripCode, getHistorical } from "@/lib/broker/marketdata";
 import { getFnoInstruments, getLotSize } from "@/lib/broker/instruments";
-import { calcVWAP, aggregateCandles, isStrongGreenCandle } from "./vwap";
+import { calcVWAP, aggregateCandles } from "./vwap";
 import {
   VWAP930_MIN_PREMIUM, VWAP930_MAX_PREMIUM, VWAP930_SL_PCT, VWAP930_TARGET_PCT,
   VWAP930_CANDLE_MINUTES, VWAP930_ENTRY_START_HOUR, VWAP930_ENTRY_START_MINUTE,
@@ -74,8 +74,8 @@ async function getLegNMinState(token: number, from: Date, now: Date): Promise<Le
 function decideDirection(
   ce: Leg | null, pe: Leg | null, stateCE: LegState | null, statePE: LegState | null,
 ): { direction: "CE" | "PE"; leg: Leg; vwap: number } | null {
-  const ceQualifies = !!ce && !!stateCE && stateCE.close > stateCE.vwap && isStrongGreenCandle(stateCE.candle);
-  const peQualifies = !!pe && !!statePE && statePE.close > statePE.vwap && isStrongGreenCandle(statePE.candle);
+  const ceQualifies = !!ce && !!stateCE && stateCE.close > stateCE.vwap;
+  const peQualifies = !!pe && !!statePE && statePE.close > statePE.vwap;
   if (!ceQualifies && !peQualifies) return null;
 
   if (ceQualifies && peQualifies) {
@@ -262,8 +262,8 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
     }
 
     const [ceCand, peCand] = await Promise.all([fetchCandidate("CE"), fetchCandidate("PE")]);
-    const ceQualifies = !!ceCand && ceCand.premium > ceCand.vwap && isStrongGreenCandle(ceCand.candle3);
-    const peQualifies = !!peCand && peCand.premium > peCand.vwap && isStrongGreenCandle(peCand.candle3);
+    const ceQualifies = !!ceCand && ceCand.premium > ceCand.vwap;
+    const peQualifies = !!peCand && peCand.premium > peCand.vwap;
     if (!ceQualifies && !peQualifies) return null;
 
     let chosen: Cand, dir: "CE" | "PE";
