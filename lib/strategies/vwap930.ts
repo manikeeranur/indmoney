@@ -452,7 +452,10 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
     const rr = buildRR(entry);
     const stagnantCutoffMs = entryMark.getTime() + VWAP930_STAGNANT_HOURS * 3_600_000;
 
-    const laterCandles = chosen.candles.slice(chosen.entryIdx + 1);
+    // From the entry minute itself: entry is at that minute's start (right
+    // after the signal candle closed), so its own high/low can already hit
+    // SL/target — slicing from entryIdx + 1 skipped a full minute of price.
+    const laterCandles = chosen.candles.slice(chosen.entryIdx);
     let status: AlertRecord["status"] = "ACTIVE", exitPrice = entry, exitTime: string | Date | null = null, peakMove = 0;
     // Mirrors updateAlertPnL's breakeven move exactly — once peakMove crosses
     // the trigger %, the SL used for the rest of the trade becomes entry,
