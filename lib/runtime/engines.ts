@@ -3,7 +3,7 @@
 // scan/backtest/pnl functions, Mongo models and Telegram templates — the thin
 // per-strategy layer that replaces the Kite app's duplicated route files.
 import { runSMCScan, runHistoricalSMCScan, updateAlertPnL as updateSMCAlertPnL } from "@/lib/strategies/smc";
-import { runVWAP930Scan, runHistoricalVWAP930Scan, updateAlertPnL as updateVwap930AlertPnL, isAfterEntryStart } from "@/lib/strategies/vwap930";
+import { runVWAP930Scan, runHistoricalVWAP930Scan, updateAlertPnL as updateVwap930AlertPnL, isAfterEntryStart, rebuildEntryReason } from "@/lib/strategies/vwap930";
 import { SMC_MAX_TRADES_PER_DAY, SMC_REENTRY_COOLDOWN_MIN, SMC_BREAKEVEN_TRIGGER_PCT,
          VWAP930_MAX_TRADES_PER_DAY, VWAP930_REENTRY_COOLDOWN_MIN, VWAP930_BREAKEVEN_TRIGGER_PCT } from "@/lib/strategies/constants";
 import Alert from "@/lib/db/models/Alert";
@@ -42,6 +42,7 @@ export const vwap930Config: StoreConfig = {
   },
   isScanActive: isAfterEntryStart,
   scanFn: runVWAP930Scan, backtestFn: runHistoricalVWAP930Scan, updateAlertPnLFn: updateVwap930AlertPnL,
+  rebuildReasonFn: rebuildEntryReason,
   targetField: "target", Model: Vwap930Alert, BacktestModel: Vwap930BacktestResult,
   saveAlert: saveVwap930Alert, saveBacktest: saveVwap930Backtest,
   telegram: {

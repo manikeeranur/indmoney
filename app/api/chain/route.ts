@@ -18,7 +18,7 @@ const inFlight = new Map<string, Promise<any>>();
 
 export async function GET(req: Request) {
   const url     = new URL(req.url);
-  const index   = (url.searchParams.get("index") ?? "NIFTY") as Index;
+  const index: Index = "NIFTY";
   const strikes = Number(url.searchParams.get("strikes") ?? 15);
 
   try {

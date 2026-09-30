@@ -14,7 +14,7 @@
 // column and its extra exit statuses (STAGNANT_EXIT, VWAP_EXIT).
 import { useEffect, useState, useCallback } from "react";
 import { IconChartCandle } from "@tabler/icons-react";
-import type { AlertRecord } from "@/lib/strategies/types";
+import type { AlertRecord, EntryReasonSide } from "@/lib/strategies/types";
 import { useTheme } from "@/lib/theme";
 import { useAccountQty } from "@/lib/useAccountQty";
 import { LOT_SIZE, NUM_LOTS } from "@/lib/strategies/constants";
@@ -195,13 +195,18 @@ export function StrategyTableView({ api, expiry }: { api: StrategyApi; expiry: s
   const totalLotPnl = tableAlerts.reduce((s, a) => s + (a.currentPnL ?? 0) * LOT_QTY, 0);
   const realizedLotPnl = tableAlerts.filter(a => a.status !== "ACTIVE").reduce((s, a) => s + (a.currentPnL ?? 0) * LOT_QTY, 0);
 
-  // Same column layout for both strategies now — VWAP930 only has one real
-  // target (rr.target, no target1/target2 split), so its T2 cell just shows
-  // "—" rather than a fabricated duplicate value, and its SIGNALS cell stays
-  // empty (no concepts/score data exists for it). The "#" and SIGNALS columns
-  // being genuinely used is also what gives this layout its natural 1fr
-  // stretch to fill wide screens — no special-cased filler column needed.
-  const COLS = "40px 75px 1fr max-content 70px 70px 72px 72px 72px 90px 155px 80px 65px 130px 80px";
+  // VWAP930 only has one real target (rr.target, no target1/target2 split),
+  // so its T2 cell just shows "—" rather than a fabricated duplicate value.
+  // It has no SIGNALS column (no concepts/score data exists for it), so every
+  // data column stretches instead: minmax(min, weight fr) keeps each at least
+  // its old fixed width and shares wide-screen space in proportion. No column
+  // is max-content: header and each row are separate grids, so a
+  // content-sized column would differ per row and misalign the ones after
+  // it. TIME is a fixed fit for "09:25 AM → 09:33 AM" and doesn't stretch.
+  const COLS = api.hasTwoTargets
+    ? "40px 75px 1fr max-content 70px 70px 72px 72px 72px 90px 155px 80px 65px 130px 80px"
+    : ["40px", "136px", ...([[190, 2.4], [70, 1], [70, 1], [72, 1], [72, 1], [72, 1], [90, 1.2], [155, 2], [80, 1], [65, 0.9], [130, 1.7], [80, 0.8]] as const)
+        .map(([min, fr]) => `minmax(${min}px, ${fr}fr)`)].join(" ");
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -330,7 +335,7 @@ export function StrategyTableView({ api, expiry }: { api: StrategyApi; expiry: s
           <div className="hidden flex-1 overflow-auto md:block">
             <div style={{ minWidth: 1200 }}>
               <div className="sticky top-0 z-10 grid border-b-2" style={{ gridTemplateColumns: COLS, borderColor: isDark ? "#1e2a3a" : "#cbd5e1", background: isDark ? "#080d14" : "#f8fafc" }}>
-                {["#", "TIME", "SIGNALS", "STRIKE", "ENTRY", "CMP", "SL", "T1", "T2", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS", ""].map((h, i) => (
+                {["#", "TIME", ...(api.hasTwoTargets ? ["SIGNALS"] : []), "STRIKE", "ENTRY", "CMP", "SL", "T1", "T2", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS", ""].map((h, i) => (
                   <div key={i} className="px-2 py-2 text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{h}</div>
                 ))}
               </div>
@@ -482,6 +487,7 @@ function MobileCard({ a, api, isDark, accent, LOT_QTY, onOpenChart }: { a: Alert
           <div className="text-[8px]" style={{ ...MONO, color: pnlClr }}>{pnlUp ? "+" : ""}{a.pnlPct?.toFixed(1) ?? "0.0"}%</div>
         </div>
       </div>
+      {!api.hasTwoTargets && <div className="pt-2"><EntryReasonPanel a={a} isDark={isDark} /></div>}
     </div>
   );
 }
@@ -510,7 +516,8 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
   const charges = calcCharges(entry, exitP, LOT_QTY);
 
   return (
-    <div className="grid items-center border-b transition-colors hover:bg-[rgba(124,58,237,0.04)]" style={{ gridTemplateColumns: cols, borderColor: isDark ? "#0f1923" : "#f1f5f9", background: rowBg }}>
+    <div className="border-b" style={{ borderColor: isDark ? "#0f1923" : "#f1f5f9", background: rowBg }}>
+    <div className="grid items-center transition-colors hover:bg-[rgba(124,58,237,0.04)]" style={{ gridTemplateColumns: cols }}>
       <div className="px-2 py-2.5 text-[9px]" style={{ ...MONO, color: "#94a3b8" }}>{idx + 1}</div>
 
       <div className="px-2 py-2.5">
@@ -530,15 +537,15 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
         )}
       </div>
 
+      {api.hasTwoTargets && (
       <div className="flex flex-wrap gap-1 px-2 py-2.5">
-        {api.hasTwoTargets && (
           <>
             <span className="rounded-sm px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: `${dirClr}18`, color: dirClr, border: `1px solid ${dirClr}30` }}>{a.direction} {a.score}/5</span>
             {(a.concepts ?? []).map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: `${CONCEPT_COLOR[c] ?? "#64748b"}14`, color: CONCEPT_COLOR[c] ?? "#64748b" }}>{c}</span>)}
             {a.trendOk && <span className="text-[7px]" style={{ ...MONO, color: "#16a34a" }}>+EMA✓</span>}
           </>
-        )}
       </div>
+      )}
 
       <div className="px-2 py-2.5">
         <div className="whitespace-nowrap text-[10px] font-bold leading-tight" style={{ ...MONO, color: dirClr }}>NIFTY {fmtExpiry(a.expiry)} {a.strike} {a.direction}</div>
@@ -624,9 +631,107 @@ function DesktopRow({ a, idx, api, isDark, accent, LOT_QTY, cols, watched, onOpe
           <button onClick={onAddWatch} title="Add to watchlist" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded border text-[11px] font-bold transition-all" style={{ background: `${dirClr}15`, borderColor: `${dirClr}50`, color: dirClr }}>+</button>
         )}
       </div>
-      {/* Trailing filler column (VWAP930 only) — soaks up leftover width on
-          wide screens without stretching any real data column. */}
-      {!api.hasTwoTargets && <div />}
+    </div>
+    {!api.hasTwoTargets && <ReasonLine a={a} />}
+    </div>
+  );
+}
+
+/** VWAP930 desktop: plain-text reason under each entry row — the decision on
+ *  the first line, every in-band premium checked on the second. */
+function ReasonLine({ a }: { a: AlertRecord }) {
+  const er = a.entryReason;
+  if (!er && a.vwapCE == null && a.vwapPE == null) return null;
+  const verdict = (side: "CE" | "PE", d: EntryReasonSide) => {
+    const p = d.picked;
+    if (!p) return <span style={{ color: "#94a3b8" }}>{side} none in band</span>;
+    return (
+      <span style={{ color: p.aboveVwap ? "#16a34a" : "#e11d48" }}>
+        {side} {p.strike} close ₹{p.close.toFixed(2)} {p.aboveVwap ? ">" : "≤"} VWAP ₹{p.vwap.toFixed(2)} {p.aboveVwap ? "✓" : "✗"}
+      </span>
+    );
+  };
+  const list = (d: EntryReasonSide) =>
+    d.checked.length ? d.checked.map(c => `${c.strike} ₹${c.premium.toFixed(2)}`).join(", ") : "none";
+  return (
+    <div className="pb-2 pl-[48px] pr-3 text-[9px] leading-relaxed" style={{ ...MONO, color: "#64748b" }}>
+      {er ? (
+        <>
+          <div>
+            <span className="font-bold" style={{ color: "#7c3aed" }}>WHY</span>
+            {" "}{er.candleTime} 5m candle · {verdict("CE", er.ce)} · {verdict("PE", er.pe)}
+            {" "}→ <span className="font-bold" style={{ color: er.chosen === "CE" ? "#0284c7" : "#e11d48" }}>{er.chosen} entered</span>
+            {er.rebuilt && <span style={{ color: "#94a3b8" }}> · rebuilt from candles</span>}
+          </div>
+          <div>
+            Premiums checked (₹{er.band[0]}–{er.band[1]}, ATM {er.atm}): CE {list(er.ce)}{er.ce.outOfBand ? ` (+${er.ce.outOfBand} out of band)` : ""}
+            {" "}| PE {list(er.pe)}{er.pe.outOfBand ? ` (+${er.pe.outOfBand} out of band)` : ""}
+          </div>
+        </>
+      ) : (
+        <div>
+          <span className="font-bold" style={{ color: "#7c3aed" }}>WHY</span> {a.direction} {a.strike} closed above VWAP ₹{a.vwap?.toFixed(2) ?? "—"} · VWAP CE ₹{a.vwapCE?.toFixed(2) ?? "—"} · PE ₹{a.vwapPE?.toFixed(2) ?? "—"} · premium scan not saved
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** VWAP930 only: why this entry was taken — every in-band premium checked per
+ *  side, the strike each side was judged on (candle close vs VWAP), and the
+ *  deciding rule. Alerts saved before entryReason existed show just the two
+ *  VWAPs that were stored. */
+function EntryReasonPanel({ a, isDark }: { a: AlertRecord; isDark: boolean }) {
+  const er = a.entryReason;
+  const muted = "#94a3b8";
+  const box = { background: isDark ? "#0b111b" : "#f8fafc", borderColor: isDark ? "#1e2a3a" : "#e2e8f0" };
+  if (!er) {
+    if (a.vwapCE == null && a.vwapPE == null) return null;
+    return (
+      <div className="mx-2 mb-2 rounded border px-2.5 py-1.5 text-[9px]" style={{ ...MONO, ...box, color: muted }}>
+        WHY ENTRY · {a.direction} {a.strike} candle closed above VWAP ₹{a.vwap?.toFixed(2) ?? "—"}
+        {" "}· VWAP CE ₹{a.vwapCE?.toFixed(2) ?? "—"} · PE ₹{a.vwapPE?.toFixed(2) ?? "—"} · (premium scan detail not saved for this trade)
+      </div>
+    );
+  }
+  return (
+    <div className="mx-2 mb-2 space-y-1 rounded border px-2.5 py-1.5 text-[9px]" style={{ ...MONO, ...box }}>
+      <div style={{ color: muted }}>
+        <span className="font-bold" style={{ color: "#7c3aed" }}>WHY ENTRY</span>
+        {" "}· 5m candle {er.candleTime} · band ₹{er.band[0]}–₹{er.band[1]} · ATM {er.atm}
+        {er.rebuilt && <span title="Saved before entry reasons were recorded — rebuilt from 1-min candles; non-entered premiums are candle closes, not live LTPs"> · rebuilt from candles</span>}
+      </div>
+      <ReasonSideLine side="CE" data={er.ce} chosen={er.chosen === "CE"} />
+      <ReasonSideLine side="PE" data={er.pe} chosen={er.chosen === "PE"} />
+      <div className="font-bold" style={{ color: er.chosen === "CE" ? "#0284c7" : "#e11d48" }}>→ {er.summary}</div>
+    </div>
+  );
+}
+
+function ReasonSideLine({ side, data, chosen }: { side: "CE" | "PE"; data: EntryReasonSide; chosen: boolean }) {
+  const clr = side === "CE" ? "#0284c7" : "#e11d48";
+  const p = data.picked;
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <span className="w-5 font-bold" style={{ color: clr }}>{side}</span>
+      {data.checked.length === 0 && <span style={{ color: "#94a3b8" }}>no premium in band</span>}
+      {data.checked.map(c => {
+        const isPicked = p?.strike === c.strike;
+        return (
+          <span key={c.strike} className="rounded-sm px-1 py-0.5" style={isPicked
+            ? { background: `${clr}18`, color: clr, border: `1px solid ${clr}60`, fontWeight: 700 }
+            : { color: "#64748b", border: "1px solid transparent" }}>
+            {c.strike} ₹{c.premium.toFixed(2)}
+          </span>
+        );
+      })}
+      {data.outOfBand > 0 && <span style={{ color: "#94a3b8" }}>+{data.outOfBand} out of band</span>}
+      {p && (
+        <span className="ml-1" style={{ color: p.aboveVwap ? "#16a34a" : "#e11d48" }}>
+          · {p.strike} close ₹{p.close.toFixed(2)} {p.aboveVwap ? ">" : "≤"} VWAP ₹{p.vwap.toFixed(2)} {p.aboveVwap ? "✓" : "✗"}
+        </span>
+      )}
+      {chosen && <span className="rounded-sm px-1 font-bold" style={{ background: clr, color: "#fff" }}>ENTERED</span>}
     </div>
   );
 }

@@ -89,6 +89,7 @@ export async function saveVwap930Alert(alert: AlertRecord): Promise<void> {
           vwap:       alert.vwap,
           vwapCE:     alert.vwapCE,
           vwapPE:     alert.vwapPE,
+          entryReason: alert.entryReason ?? null,
           rr:         alert.rr,
           status:     alert.status,
           currentPnL: alert.currentPnL ?? 0,

@@ -1,37 +1,25 @@
 "use client";
 
 // ─── Option chain (Chain tab) ───────────────────────────────────────────────────
-// Full port of the chain view inside frontend/app/options/page.tsx
-// (OptionsPageInner's activeTab==="chain" branch, ~1802-2443, plus ChainRow
-// ~3306-3719): Scalper/Strategy mode toggle, NIFTY/SENSEX index switch,
-// desktop 7-col chain-grid (bookmark | OI | LTP | STRIKE | LTP | OI |
-// bookmark) with the mobile 3-col card layout (scalper/strategy/browse-mode
-// variants), the ATM sticky divider, per-row bookmark → default watchlist
-// group, split CE+PE chart view, and the two bottom order panels: a
-// single-leg scalper panel (wallet check, lot stepper, market buy/sell via
-// /api/account/order) and a multi-leg strategy/basket panel (max
-// profit/breakeven/max loss, execute-all). Real quantity comes from the
-// chain response's own `lotSize` (INDstocks instrument master), not a
-// hardcoded constant — same "never trust a hardcoded lot size" rule as the
-// rest of this app.
-//
-// SCOPE CUT, stated plainly: the original's Sensibull iframe panel and the
-// dedicated payoff-diagram canvas view are not ported — the basket panel
-// below already carries the same max-profit/breakeven/max-loss numbers as
-// text, which is the metric that matters for a trading decision.
+// Port of the chain view inside frontend/app/options/page.tsx
+// (OptionsPageInner's activeTab==="chain" branch, plus ChainRow): NIFTY only
+// (no SENSEX), desktop 7-col chain-grid (bookmark | OI | LTP | STRIKE | LTP |
+// OI | bookmark) with the mobile 3-col card layout, the ATM sticky divider,
+// per-row bookmark → default watchlist group, payoff view, and split CE+PE
+// chart view. The original's Scalper/Strategy order modes are intentionally
+// not part of this app, and neither is the Sensibull iframe panel.
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { IconBookmark, IconBookmarkFilled, IconChartCandle, IconChartArea, IconColumns, IconX } from "@tabler/icons-react";
+import { IconBookmark, IconBookmarkFilled, IconChartCandle, IconChartArea, IconColumns } from "@tabler/icons-react";
 import { ChartPanel, type ChartTarget } from "./ChartPanel";
 import { PayoffChart, type PayoffTarget } from "./PayoffChart";
 import { useChainStore, useLtp, usePrevLtp } from "@/lib/store/chainStore";
 import { useTheme } from "@/lib/theme";
-import { useAccountQty } from "@/lib/useAccountQty";
-import { NUM_LOTS, MIN_PREMIUM, MAX_PREMIUM } from "@/lib/strategies/constants";
-import type { ChainRow as ChainRowT, OptionChain as Chain, Index, Leg } from "@/lib/broker/types";
+import { MIN_PREMIUM, MAX_PREMIUM } from "@/lib/strategies/constants";
+import type { ChainRow as ChainRowT, OptionChain as Chain, Leg } from "@/lib/broker/types";
 
 const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const index = "NIFTY";
 
-type Order = { strike: number; type: "CE" | "PE"; action: "BUY" | "SELL"; ltp: number; token: number; leg: Leg };
 type WatchedItem = { token: number; tradingsymbol: string; strike: number; type: string; ltp: number };
 
 function fmtOI(n: number): string {
@@ -43,30 +31,15 @@ export function OptionChainView() {
   const isDark = theme === "dark";
   const chain = useChainStore((s) => s.chain);
   const setChain = useChainStore((s) => s.setChain);
-  const [index, setIndexV] = useState<Index>("NIFTY");
   const [expiries, setExpiries] = useState<string[]>([]);
   const [expiry, setExpiry] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [scalperOn, setScalperOn] = useState(true);
-  const [strategyOn, setStrategyOn] = useState(false);
-  const acctQty = useAccountQty(NUM_LOTS);
-  const [orderLots, setOrderLots] = useState(NUM_LOTS);
-  const lotsInitRef = useState({ done: false })[0];
-  useEffect(() => { if (!lotsInitRef.done) { lotsInitRef.done = true; setOrderLots(acctQty); } }, [acctQty, lotsInitRef]);
-
-  const [orderPanel, setOrderPanel] = useState<Order | null>(null);
-  const [basketLegs, setBasketLegs] = useState<Order[]>([]);
-  const [orderState, setOrderState] = useState<{ loading: boolean; result: string | null }>({ loading: false, result: null });
-  const [walletAvailable, setWalletAvailable] = useState<number | null>(null);
-
   const [watchedTokens, setWatchedTokens] = useState<Set<number>>(new Set());
   const [chartTarget, setChartTarget] = useState<ChartTarget | null>(null);
   const [splitTarget, setSplitTarget] = useState<{ ce: ChartTarget; pe: ChartTarget } | null>(null);
   const [payoffTarget, setPayoffTarget] = useState<PayoffTarget | null>(null);
-
-  const lotSize = chain?.rows[0]?.ce.lotSize || (index === "SENSEX" ? 20 : 65);
 
   useEffect(() => {
     fetch("/api/watchlist/groups").then(r => r.json()).then(d => {
@@ -76,18 +49,7 @@ export function OptionChainView() {
   }, []);
 
   useEffect(() => {
-    let alive = true;
-    function poll() {
-      fetch("/api/account").then(r => r.json()).then(d => { if (alive) setWalletAvailable(d.wallet?.available ?? null); }).catch(() => {});
-    }
-    poll();
-    const id = setInterval(poll, 15_000);
-    return () => { alive = false; clearInterval(id); };
-  }, []);
-
-  useEffect(() => {
-    setExpiry("");
-    fetch(`/api/expiries?index=${index}`)
+    fetch("/api/expiries")
       .then((r) => r.json())
       .then((d) => {
         if (d.error) throw new Error(d.error);
@@ -95,7 +57,7 @@ export function OptionChainView() {
         setExpiry((cur) => cur || d.expiries?.[0] || "");
       })
       .catch((e) => setError(e.message));
-  }, [index]);
+  }, []);
 
   useEffect(() => {
     if (!expiry) return;
@@ -103,7 +65,7 @@ export function OptionChainView() {
     setLoading(true);
 
     const load = () =>
-      fetch(`/api/chain?expiry=${expiry}&strikes=15&index=${index}`)
+      fetch(`/api/chain?expiry=${expiry}&strikes=15`)
         .then((r) => r.json())
         .then((d) => {
           if (!alive) return;
@@ -117,7 +79,7 @@ export function OptionChainView() {
     load();
     const id = setInterval(load, 30_000);
     return () => { alive = false; clearInterval(id); };
-  }, [expiry, index, setChain]);
+  }, [expiry, setChain]);
 
   const toggleWatch = useCallback((leg: Leg, strike: number, type: "CE" | "PE") => {
     setWatchedTokens(prev => {
@@ -137,65 +99,6 @@ export function OptionChainView() {
     });
   }, []);
 
-  async function handlePlaceOrder(action: "BUY" | "SELL") {
-    if (!orderPanel) return;
-    setOrderState({ loading: true, result: null });
-    try {
-      const qty = orderLots * lotSize;
-      const r = await fetch("/api/account/order", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tradingsymbol: orderPanel.leg.tradingsymbol, security_id: orderPanel.token, transaction_type: action, quantity: qty, limit_price: orderPanel.ltp }),
-      }).then(r => r.json());
-      if (r.error) throw new Error(r.error);
-      setOrderState({ loading: false, result: `✓ ${action} ${qty} placed · ${r.order_id}` });
-    } catch (e: any) {
-      setOrderState({ loading: false, result: `✕ ${e.message}` });
-    }
-  }
-
-  async function handleExecuteBasket() {
-    setOrderState({ loading: true, result: null });
-    try {
-      const qty = orderLots * lotSize;
-      const ids: string[] = [];
-      for (const leg of basketLegs) {
-        const r = await fetch("/api/account/order", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tradingsymbol: leg.leg.tradingsymbol, security_id: leg.token, transaction_type: leg.action, quantity: qty, limit_price: leg.ltp }),
-        }).then(r => r.json());
-        if (r.error) throw new Error(`${leg.strike}${leg.type}: ${r.error}`);
-        ids.push(r.order_id);
-      }
-      setOrderState({ loading: false, result: `✓ ${basketLegs.length} legs placed · ${ids.join(", ")}` });
-      setBasketLegs([]);
-    } catch (e: any) {
-      setOrderState({ loading: false, result: `✕ ${e.message}` });
-    }
-  }
-
-  function onOrder(leg: Leg, strike: number, type: "CE" | "PE", action: "BUY" | "SELL") {
-    if (strategyOn) {
-      setBasketLegs((prev) => {
-        const key = `${strike}-${type}-${action}`;
-        const exists = prev.find((l) => `${l.strike}-${l.type}-${l.action}` === key);
-        if (exists) return prev.filter((l) => `${l.strike}-${l.type}-${l.action}` !== key);
-        return [...prev, { strike, type, action, ltp: leg.ltp, token: leg.token, leg }];
-      });
-    } else {
-      setOrderPanel({ strike, type, action, ltp: leg.ltp, token: leg.token, leg });
-      setOrderLots(acctQty);
-      setOrderState({ loading: false, result: null });
-    }
-  }
-
-  const panelBg = isDark ? "#0f172a" : "#ffffff";
-  const panelBorder = isDark ? "#1e293b" : "#e2e8f0";
-  const rowDivider = isDark ? "#1e293b" : "#f1f5f9";
-  const btnBg = isDark ? "#1e293b" : "#f1f5f9";
-  const btnColor = isDark ? "#94a3b8" : "#475569";
-  const textPrimary = isDark ? "#e2e8f0" : "#1e293b";
-  const textMuted = isDark ? "#64748b" : "#94a3b8";
-
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="px-3 py-3 md:px-5">
@@ -203,22 +106,6 @@ export function OptionChainView() {
           <div>
             <div className="text-xs text-faint">{index} 50</div>
             <div className="tabular text-2xl font-semibold">{chain ? chain.spot.toFixed(2) : "—"}</div>
-          </div>
-
-          {/* Scalper / Strategy toggles */}
-          <div className="flex items-center gap-3">
-            <ModeToggle label="Scalper" on={scalperOn} onColor="#0284c7" icon="⚡" onClick={() => setScalperOn(v => !v)} />
-            <ModeToggle label="Strategy" on={strategyOn} onColor="#16a34a" icon="🛒" onClick={() => { setStrategyOn(v => !v); setBasketLegs([]); setOrderPanel(null); }} />
-          </div>
-
-          {/* Index switch */}
-          <div className="flex items-center overflow-hidden rounded-full border text-[10px] font-black" style={{ borderColor: "var(--border)", ...MONO }}>
-            {(["NIFTY", "SENSEX"] as const).map((idx) => (
-              <button key={idx} onClick={() => setIndexV(idx)} className="px-2.5 py-1 transition-colors"
-                style={{ background: index === idx ? "var(--accent)" : "transparent", color: index === idx ? "#fff" : "var(--text-muted)" }}>
-                {idx}
-              </button>
-            ))}
           </div>
 
           <label className="ml-auto flex items-center gap-2 text-xs text-muted">
@@ -280,9 +167,6 @@ export function OptionChainView() {
                 <Row
                   row={row}
                   watchedTokens={watchedTokens}
-                  scalperOn={scalperOn}
-                  strategyOn={strategyOn}
-                  onOrder={onOrder}
                   onToggleWatch={toggleWatch}
                   onOpenChart={(leg, strike, type) => { setChartTarget({ token: leg.token, tradingsymbol: leg.tradingsymbol, strike, type, expiry, index }); setSplitTarget(null); }}
                   onOpenPayoff={(leg, strike, type) => setPayoffTarget({ strike, type, ltp: leg.ltp, lotSize: leg.lotSize })}
@@ -297,123 +181,6 @@ export function OptionChainView() {
               </div>
             ))}
           </div>
-
-          {/* ── Scalper order panel ── */}
-          {!strategyOn && orderPanel && (() => {
-            const approxBuy = orderPanel.ltp * orderLots * lotSize;
-            const canBuy = walletAvailable === null || walletAvailable >= approxBuy;
-            const fmtWallet = walletAvailable !== null ? `₹${walletAvailable.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—";
-            const approxColor = !canBuy ? "var(--down)" : textPrimary;
-            return (
-              <div className="z-20 flex-shrink-0 shadow-2xl" style={{ background: panelBg, borderTop: `1px solid ${panelBorder}` }}>
-                <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: `1px solid ${rowDivider}` }}>
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-[11px] font-bold" style={{ ...MONO, color: textPrimary }}>{index} {orderPanel.strike} {orderPanel.type}</span>
-                    <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: orderPanel.action === "BUY" ? "#16a34a20" : "#e11d4820", color: orderPanel.action === "BUY" ? "#16a34a" : "#e11d48" }}>{orderPanel.action}</span>
-                    <span className="flex-shrink-0 text-[13px] font-black" style={{ ...MONO, color: textPrimary }}>₹{orderPanel.ltp.toFixed(2)}</span>
-                  </div>
-                  <div className="flex flex-shrink-0 items-center gap-2">
-                    <button onClick={() => toggleWatch(orderPanel.leg, orderPanel.strike, orderPanel.type)} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full"
-                      style={{ background: watchedTokens.has(orderPanel.token) ? "#fbbf2425" : btnBg, color: watchedTokens.has(orderPanel.token) ? "#f59e0b" : textMuted }}>
-                      {watchedTokens.has(orderPanel.token) ? <IconBookmarkFilled size={13} /> : <IconBookmark size={13} />}
-                    </button>
-                    <button onClick={() => { setOrderPanel(null); setOrderState({ loading: false, result: null }); }} className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full" style={{ background: btnBg, color: textMuted }}><IconX size={13} /></button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: `1px solid ${rowDivider}` }}>
-                  <div className="flex flex-col items-start gap-0.5">
-                    <span className="text-[8px] uppercase" style={{ ...MONO, color: textMuted }}>Available</span>
-                    <span className="text-[12px] font-bold" style={{ ...MONO, color: walletAvailable !== null && !canBuy ? "var(--down)" : "var(--up)" }}>{fmtWallet}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[8px] uppercase" style={{ ...MONO, color: textMuted }}>Approx Req</span>
-                    <span className="text-[12px] font-bold" style={{ ...MONO, color: approxColor }}>₹{approxBuy.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-2.5">
-                  <span className="text-[9px] uppercase" style={{ ...MONO, color: textMuted }}>Lots</span>
-                  <button onClick={() => setOrderLots(v => Math.max(1, v - 1))} className="flex h-7 w-7 items-center justify-center rounded-full text-[14px] font-bold" style={{ background: btnBg, color: btnColor }}>−</button>
-                  <span className="w-6 text-center text-[14px] font-bold" style={{ ...MONO, color: textPrimary }}>{orderLots}</span>
-                  <button onClick={() => setOrderLots(v => v + 1)} className="flex h-7 w-7 items-center justify-center rounded-full text-[14px] font-bold" style={{ background: btnBg, color: btnColor }}>+</button>
-                  <span className="ml-auto text-[9px]" style={{ ...MONO, color: textMuted }}>{orderLots} × {lotSize} = {orderLots * lotSize} qty</span>
-                </div>
-                {orderState.result && <OrderResult text={orderState.result} />}
-                <div className="grid grid-cols-2 gap-2 px-4 pb-3">
-                  <button disabled={!canBuy || orderState.loading} onClick={() => handlePlaceOrder("SELL")} className="rounded-lg py-1.5 text-[10px] font-black tracking-[0.5px] transition-opacity" style={{ background: canBuy ? "#e11d48" : "#e11d4840", color: "#fff", opacity: canBuy && !orderState.loading ? 1 : 0.45, ...MONO }}>{orderState.loading ? "..." : "↙ Sell @ Mkt"}</button>
-                  <button disabled={!canBuy || orderState.loading} onClick={() => handlePlaceOrder("BUY")} className="rounded-lg py-1.5 text-[10px] font-black tracking-[0.5px] transition-opacity" style={{ background: canBuy ? "#16a34a" : "#16a34a40", color: "#fff", opacity: canBuy && !orderState.loading ? 1 : 0.45, ...MONO }}>{orderState.loading ? "..." : "↗ Buy @ Mkt"}</button>
-                </div>
-                {!canBuy && walletAvailable !== null && (
-                  <div className="mx-4 mb-3 rounded-lg px-3 py-2 text-center text-[9px] font-bold" style={{ ...MONO, background: "#e11d4815", color: "#e11d48", border: "1px solid #e11d4830" }}>Insufficient funds · Need ₹{(approxBuy - walletAvailable).toLocaleString("en-IN", { maximumFractionDigits: 0 })} more</div>
-                )}
-              </div>
-            );
-          })()}
-
-          {/* ── Basket / strategy panel ── */}
-          {strategyOn && basketLegs.length > 0 && (() => {
-            const netDebit = basketLegs.reduce((s, l) => s + (l.action === "BUY" ? l.ltp : 0), 0);
-            const netCredit = basketLegs.reduce((s, l) => s + (l.action === "SELL" ? l.ltp : 0), 0);
-            const approxReq = netDebit * orderLots * lotSize;
-            const canExecute = walletAvailable === null || walletAvailable >= approxReq;
-            const firstLeg = basketLegs[0];
-            const breakeven = firstLeg.action === "BUY" ? (firstLeg.type === "CE" ? firstLeg.strike + firstLeg.ltp : firstLeg.strike - firstLeg.ltp) : null;
-            const maxLoss = netDebit > 0 ? -(netDebit * orderLots * lotSize) : null;
-            const fmtWallet = walletAvailable !== null ? `₹${walletAvailable.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—";
-            const approxColor = !canExecute ? "var(--down)" : textPrimary;
-            return (
-              <div className="z-20 flex-shrink-0 shadow-2xl" style={{ background: panelBg, borderTop: `1px solid ${panelBorder}` }}>
-                <div className="flex items-center gap-2 overflow-x-auto px-3 pb-1 pt-2" style={{ borderBottom: `1px solid ${rowDivider}`, scrollbarWidth: "none" }}>
-                  {basketLegs.map((l, i) => (
-                    <div key={i} className="flex flex-shrink-0 items-center gap-1 rounded-lg border px-2 py-1 text-[9px] font-bold"
-                      style={{ borderColor: l.action === "BUY" ? "#16a34a60" : "#e11d4860", background: l.action === "BUY" ? "#16a34a12" : "#e11d4812", color: l.action === "BUY" ? "#16a34a" : "#e11d48", ...MONO }}>
-                      {l.action === "BUY" ? "B" : "S"} {l.strike} {l.type}
-                      <button onClick={() => setBasketLegs(prev => prev.filter((_, j) => j !== i))} className="ml-1 text-[10px] opacity-60">×</button>
-                    </div>
-                  ))}
-                  <button onClick={() => setBasketLegs([])} className="ml-auto flex-shrink-0 rounded-lg px-2 py-1 text-[8px] font-bold" style={{ ...MONO, color: "#e11d48", background: "#e11d4815" }}>Clear All</button>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: `1px solid ${rowDivider}` }}>
-                  <div className="flex flex-col items-start gap-0.5">
-                    <span className="text-[8px] uppercase" style={{ ...MONO, color: textMuted }}>Available</span>
-                    <span className="text-[12px] font-bold" style={{ ...MONO, color: walletAvailable !== null && !canExecute ? "var(--down)" : "var(--up)" }}>{fmtWallet}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[8px] uppercase" style={{ ...MONO, color: textMuted }}>Approx Req</span>
-                    <span className="text-[12px] font-bold" style={{ ...MONO, color: approxColor }}>₹{approxReq.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 px-3 py-2" style={{ borderBottom: `1px solid ${rowDivider}` }}>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[7px] uppercase" style={{ ...MONO, color: textMuted }}>Max Profit</span>
-                    <span className="text-[11px] font-black text-[#16a34a]" style={MONO}>{netCredit > netDebit ? `₹${((netCredit - netDebit) * orderLots * lotSize).toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "Unlimited"}</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-[7px] uppercase" style={{ ...MONO, color: textMuted }}>Breakeven</span>
-                    <span className="text-[11px] font-black" style={{ ...MONO, color: textPrimary }}>{breakeven != null ? breakeven.toFixed(0) : "—"}</span>
-                  </div>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-[7px] uppercase" style={{ ...MONO, color: textMuted }}>Max Loss</span>
-                    <span className="text-[11px] font-black text-[#e11d48]" style={MONO}>{maxLoss != null ? `-₹${Math.abs(maxLoss).toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "Limited"}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 px-4 py-2">
-                  <button onClick={() => setOrderLots(v => Math.max(1, v - 1))} className="flex h-7 w-7 items-center justify-center rounded-full font-bold" style={{ background: btnBg, color: btnColor }}>−</button>
-                  <span className="w-5 text-center text-[12px] font-bold" style={{ ...MONO, color: textPrimary }}>{orderLots}</span>
-                  <span className="text-[9px]" style={{ ...MONO, color: textMuted }}>lot{orderLots > 1 ? "s" : ""}</span>
-                  <button onClick={() => setOrderLots(v => v + 1)} className="flex h-7 w-7 items-center justify-center rounded-full font-bold" style={{ background: btnBg, color: btnColor }}>+</button>
-                </div>
-                {orderState.result && <OrderResult text={orderState.result} />}
-                <div className="px-4 pb-3">
-                  <button disabled={!canExecute || orderState.loading} onClick={handleExecuteBasket} className="w-full rounded-xl py-2.5 text-[12px] font-black tracking-[1px] transition-opacity" style={{ background: canExecute ? "#16a34a" : "#16a34a40", color: "#fff", opacity: canExecute && !orderState.loading ? 1 : 0.5, ...MONO }}>
-                    {orderState.loading ? "Placing..." : `Execute Basket (${basketLegs.length} leg${basketLegs.length > 1 ? "s" : ""})`}
-                  </button>
-                </div>
-                {!canExecute && walletAvailable !== null && (
-                  <div className="mx-4 mb-3 rounded-lg px-3 py-2 text-center text-[9px] font-bold" style={{ ...MONO, background: "#e11d4815", color: "#e11d48", border: "1px solid #e11d4830" }}>Insufficient funds · Need ₹{(approxReq - walletAvailable).toLocaleString("en-IN", { maximumFractionDigits: 0 })} more</div>
-                )}
-              </div>
-            );
-          })()}
         </div>
       ) : null}
 
@@ -426,25 +193,6 @@ export function OptionChainView() {
         </div>
       )}
     </div>
-  );
-}
-
-function ModeToggle({ label, on, onColor, icon, onClick }: { label: string; on: boolean; onColor: string; icon: string; onClick: () => void }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-[9px] font-bold" style={{ ...MONO, color: "var(--text-muted)" }}>{label}</span>
-      <button onClick={onClick} className="relative h-[18px] w-8 flex-shrink-0 rounded-full transition-colors" style={{ background: on ? onColor : "var(--border)" }}>
-        <span className="absolute top-[2px] h-[14px] w-[14px] rounded-full bg-white shadow transition-transform" style={{ left: on ? "18px" : "2px" }} />
-        {on && <span className="absolute inset-0 flex items-center justify-center text-[8px]">{icon}</span>}
-      </button>
-    </div>
-  );
-}
-
-function OrderResult({ text }: { text: string }) {
-  const ok = text.startsWith("✓");
-  return (
-    <div className="mx-4 mb-2 rounded-lg px-3 py-2 text-center text-[9px] font-bold" style={{ ...MONO, background: ok ? "#16a34a15" : "#e11d4815", color: ok ? "#16a34a" : "#e11d48", border: `1px solid ${ok ? "#16a34a30" : "#e11d4830"}` }}>{text}</div>
   );
 }
 
@@ -471,9 +219,8 @@ function Stats({ chain }: { chain: Chain }) {
 
 /** One strike, both mobile card and desktop grid layouts. memo + per-token
  *  price subscriptions mean a tick on this leg re-renders THIS row only. */
-const Row = memo(function Row({ row, watchedTokens, scalperOn, strategyOn, onOrder, onToggleWatch, onOpenChart, onOpenPayoff, onOpenSplit }: {
-  row: ChainRowT; watchedTokens: Set<number>; scalperOn: boolean; strategyOn: boolean;
-  onOrder: (leg: Leg, strike: number, type: "CE" | "PE", action: "BUY" | "SELL") => void;
+const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, onOpenPayoff, onOpenSplit }: {
+  row: ChainRowT; watchedTokens: Set<number>;
   onToggleWatch: (leg: Leg, strike: number, type: "CE" | "PE") => void;
   onOpenChart: (leg: Leg, strike: number, type: "CE" | "PE") => void;
   onOpenPayoff: (leg: Leg, strike: number, type: "CE" | "PE") => void;
@@ -498,42 +245,24 @@ const Row = memo(function Row({ row, watchedTokens, scalperOn, strategyOn, onOrd
       <div className={`border-b md:hidden`} style={{ background: isATM ? "var(--accent-soft)" : undefined, borderColor: "var(--border)" }}>
         <div className="grid grid-cols-[1fr_72px_1fr]">
           <div className="flex flex-col gap-1 px-1.5 py-2" style={{ background: isATM ? "var(--ce-tint)" : undefined }}>
-            {scalperOn ? (
-              <button onClick={() => onOrder(ce, strike, "CE", "BUY")} className="flex w-full flex-col items-end">
-                <span className="tabular-nums text-[13px] font-bold" style={MONO}>₹{ceLtp.toFixed(2)}</span>
-                <span className="text-[9px] font-bold" style={{ ...MONO, color: cePct >= 0 ? "var(--up)" : "var(--down)" }}>{cePct >= 0 ? "+" : ""}{cePct.toFixed(2)}%</span>
-              </button>
-            ) : strategyOn ? (
-              <div className="flex items-center gap-1">
-                <div className="flex flex-col gap-0.5">
-                  <OrderBtn color="#e11d48" label="S" onClick={() => onOrder(ce, strike, "CE", "SELL")} />
-                  <OrderBtn color="#16a34a" label="B" onClick={() => onOrder(ce, strike, "CE", "BUY")} />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col items-end">
-                  <span className="tabular-nums text-[13px] font-bold leading-none" style={MONO}>₹{ceLtp.toFixed(2)}</span>
-                  <span className="mt-0.5 text-[9px] font-bold" style={{ ...MONO, color: cePct >= 0 ? "var(--up)" : "var(--down)" }}>{cePct >= 0 ? "+" : ""}{cePct.toFixed(2)}%</span>
+            <div className="flex w-full flex-col gap-0.5">
+              <div className="flex items-start justify-between">
+                <button onClick={() => onToggleWatch(ce, strike, "CE")} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded" style={{ background: ceWatched ? "#fbbf2420" : "transparent", color: ceWatched ? "#f59e0b" : "var(--text-faint)" }}>
+                  {ceWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
+                </button>
+                <div className="ml-0.5 flex flex-1 flex-col items-end">
+                  <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{ceLtp.toFixed(2)}</span>
+                  <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--ce)" }}>{strike} CE</span>
                 </div>
               </div>
-            ) : (
-              <div className="flex w-full flex-col gap-0.5">
-                <div className="flex items-start justify-between">
-                  <button onClick={() => onToggleWatch(ce, strike, "CE")} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded" style={{ background: ceWatched ? "#fbbf2420" : "transparent", color: ceWatched ? "#f59e0b" : "var(--text-faint)" }}>
-                    {ceWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
-                  </button>
-                  <div className="ml-0.5 flex flex-1 flex-col items-end">
-                    <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{ceLtp.toFixed(2)}</span>
-                    <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--ce)" }}>{strike} CE</span>
-                  </div>
-                </div>
-                <div className="mt-0.5 flex items-center justify-between">
-                  <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(ce.oi)}</span>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => onOpenPayoff(ce, strike, "CE")} title={`Payoff ${strike} CE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartArea size={11} /></button>
-                    <button onClick={() => onOpenChart(ce, strike, "CE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartCandle size={11} /></button>
-                  </div>
+              <div className="mt-0.5 flex items-center justify-between">
+                <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(ce.oi)}</span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => onOpenPayoff(ce, strike, "CE")} title={`Payoff ${strike} CE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartArea size={11} /></button>
+                  <button onClick={() => onOpenChart(ce, strike, "CE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartCandle size={11} /></button>
                 </div>
               </div>
-            )}
+            </div>
             <OIBar pct={row.ceOIBar} color="var(--ce)" />
           </div>
 
@@ -544,42 +273,24 @@ const Row = memo(function Row({ row, watchedTokens, scalperOn, strategyOn, onOrd
           </div>
 
           <div className="flex flex-col gap-1 px-1.5 py-2" style={{ background: isATM ? "var(--pe-tint)" : undefined }}>
-            {scalperOn ? (
-              <button onClick={() => onOrder(pe, strike, "PE", "BUY")} className="flex w-full flex-col items-start">
-                <span className="tabular-nums text-[13px] font-bold" style={MONO}>₹{peLtp.toFixed(2)}</span>
-                <span className="text-[9px] font-bold" style={{ ...MONO, color: pePct >= 0 ? "var(--up)" : "var(--down)" }}>{pePct >= 0 ? "+" : ""}{pePct.toFixed(2)}%</span>
-              </button>
-            ) : strategyOn ? (
-              <div className="flex items-center gap-1">
-                <div className="flex min-w-0 flex-1 flex-col items-start">
-                  <span className="tabular-nums text-[13px] font-bold leading-none" style={MONO}>₹{peLtp.toFixed(2)}</span>
-                  <span className="mt-0.5 text-[9px] font-bold" style={{ ...MONO, color: pePct >= 0 ? "var(--up)" : "var(--down)" }}>{pePct >= 0 ? "+" : ""}{pePct.toFixed(2)}%</span>
+            <div className="flex w-full flex-col gap-0.5">
+              <div className="flex items-start justify-between">
+                <div className="mr-0.5 flex flex-1 flex-col items-start">
+                  <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{peLtp.toFixed(2)}</span>
+                  <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--pe)" }}>{strike} PE</span>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <OrderBtn color="#16a34a" label="B" onClick={() => onOrder(pe, strike, "PE", "BUY")} />
-                  <OrderBtn color="#e11d48" label="S" onClick={() => onOrder(pe, strike, "PE", "SELL")} />
-                </div>
+                <button onClick={() => onToggleWatch(pe, strike, "PE")} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded" style={{ background: peWatched ? "#fbbf2420" : "transparent", color: peWatched ? "#f59e0b" : "var(--text-faint)" }}>
+                  {peWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
+                </button>
               </div>
-            ) : (
-              <div className="flex w-full flex-col gap-0.5">
-                <div className="flex items-start justify-between">
-                  <div className="mr-0.5 flex flex-1 flex-col items-start">
-                    <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{peLtp.toFixed(2)}</span>
-                    <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--pe)" }}>{strike} PE</span>
-                  </div>
-                  <button onClick={() => onToggleWatch(pe, strike, "PE")} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded" style={{ background: peWatched ? "#fbbf2420" : "transparent", color: peWatched ? "#f59e0b" : "var(--text-faint)" }}>
-                    {peWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
-                  </button>
+              <div className="mt-0.5 flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  <button onClick={() => onOpenChart(pe, strike, "PE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartCandle size={11} /></button>
+                  <button onClick={() => onOpenPayoff(pe, strike, "PE")} title={`Payoff ${strike} PE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartArea size={11} /></button>
                 </div>
-                <div className="mt-0.5 flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => onOpenChart(pe, strike, "PE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartCandle size={11} /></button>
-                    <button onClick={() => onOpenPayoff(pe, strike, "PE")} title={`Payoff ${strike} PE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartArea size={11} /></button>
-                  </div>
-                  <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(pe.oi)}</span>
-                </div>
+                <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(pe.oi)}</span>
               </div>
-            )}
+            </div>
             <OIBar pct={row.peOIBar} color="var(--pe)" />
           </div>
         </div>
@@ -602,36 +313,18 @@ const Row = memo(function Row({ row, watchedTokens, scalperOn, strategyOn, onOrd
           </div>
 
           <div className="group border-r px-2 py-2 text-right" style={{ borderColor: "var(--border)" }}>
-            {scalperOn ? (
-              <button onClick={() => onOrder(ce, strike, "CE", "BUY")} className="flex w-full flex-col items-end">
-                <span className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</span>
-                <span className="text-[9px] font-bold" style={{ ...MONO, color: cePct >= 0 ? "var(--up)" : "var(--down)" }}>{cePct >= 0 ? "+" : ""}{cePct.toFixed(2)}%</span>
+            <div className="flex items-center justify-end gap-1.5">
+              <button onClick={() => onOpenPayoff(ce, strike, "CE")} title={`Payoff ${strike} CE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100" style={{ color: "var(--ce)" }}>
+                <IconChartArea size={14} color="var(--ce)" />
               </button>
-            ) : strategyOn ? (
-              <div className="flex items-center justify-end gap-1.5">
-                <div>
-                  <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</div>
-                  <div className="text-[8px]" style={{ ...MONO, color: cePct >= 0 ? "var(--up)" : "var(--down)" }}>{cePct >= 0 ? "+" : ""}{cePct.toFixed(2)}%</div>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <OrderBtn color="#e11d48" label="S" onClick={() => onOrder(ce, strike, "CE", "SELL")} />
-                  <OrderBtn color="#16a34a" label="B" onClick={() => onOrder(ce, strike, "CE", "BUY")} />
-                </div>
+              <button onClick={() => onOpenChart(ce, strike, "CE")} title={`Chart ${strike} CE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100" style={{ color: "var(--ce)" }}>
+                <IconChartCandle size={14} color="var(--ce)" />
+              </button>
+              <div>
+                <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</div>
+                <div className="text-[8px]" style={{ ...MONO, color: ce.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{ce.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(ce.ltpChange).toFixed(2)}</div>
               </div>
-            ) : (
-              <div className="flex items-center justify-end gap-1.5">
-                <button onClick={() => onOpenPayoff(ce, strike, "CE")} title={`Payoff ${strike} CE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100" style={{ color: "var(--ce)" }}>
-                  <IconChartArea size={14} color="var(--ce)" />
-                </button>
-                <button onClick={() => onOpenChart(ce, strike, "CE")} title={`Chart ${strike} CE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100" style={{ color: "var(--ce)" }}>
-                  <IconChartCandle size={14} color="var(--ce)" />
-                </button>
-                <div>
-                  <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</div>
-                  <div className="text-[8px]" style={{ ...MONO, color: ce.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{ce.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(ce.ltpChange).toFixed(2)}</div>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
           <div className="flex flex-col items-center justify-center border-x py-2 text-center" style={{ borderColor: "var(--border)", background: isATM ? "var(--accent-soft)" : "var(--card)" }}>
@@ -641,36 +334,18 @@ const Row = memo(function Row({ row, watchedTokens, scalperOn, strategyOn, onOrd
           </div>
 
           <div className="group border-l px-2 py-2 text-left" style={{ borderColor: "var(--border)" }}>
-            {scalperOn ? (
-              <button onClick={() => onOrder(pe, strike, "PE", "BUY")} className="flex w-full flex-col items-start">
-                <span className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</span>
-                <span className="text-[9px] font-bold" style={{ ...MONO, color: pePct >= 0 ? "var(--up)" : "var(--down)" }}>{pePct >= 0 ? "+" : ""}{pePct.toFixed(2)}%</span>
+            <div className="flex items-center gap-1.5">
+              <div>
+                <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</div>
+                <div className="text-[8px]" style={{ ...MONO, color: pe.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{pe.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(pe.ltpChange).toFixed(2)}</div>
+              </div>
+              <button onClick={() => onOpenChart(pe, strike, "PE")} title={`Chart ${strike} PE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100">
+                <IconChartCandle size={14} color="var(--pe)" />
               </button>
-            ) : strategyOn ? (
-              <div className="flex items-center gap-1.5">
-                <div className="flex flex-col gap-0.5">
-                  <OrderBtn color="#16a34a" label="B" onClick={() => onOrder(pe, strike, "PE", "BUY")} />
-                  <OrderBtn color="#e11d48" label="S" onClick={() => onOrder(pe, strike, "PE", "SELL")} />
-                </div>
-                <div>
-                  <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</div>
-                  <div className="text-[8px]" style={{ ...MONO, color: pePct >= 0 ? "var(--up)" : "var(--down)" }}>{pePct >= 0 ? "+" : ""}{pePct.toFixed(2)}%</div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5">
-                <div>
-                  <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</div>
-                  <div className="text-[8px]" style={{ ...MONO, color: pe.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{pe.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(pe.ltpChange).toFixed(2)}</div>
-                </div>
-                <button onClick={() => onOpenChart(pe, strike, "PE")} title={`Chart ${strike} PE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100">
-                  <IconChartCandle size={14} color="var(--pe)" />
-                </button>
-                <button onClick={() => onOpenPayoff(pe, strike, "PE")} title={`Payoff ${strike} PE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100">
-                  <IconChartArea size={14} color="var(--pe)" />
-                </button>
-              </div>
-            )}
+              <button onClick={() => onOpenPayoff(pe, strike, "PE")} title={`Payoff ${strike} PE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100">
+                <IconChartArea size={14} color="var(--pe)" />
+              </button>
+            </div>
           </div>
 
           <div className="chain-col-oi relative overflow-hidden px-3 py-2 text-left" style={{ background: "var(--pe-tint)" }}>
@@ -727,15 +402,6 @@ function ChainSkeleton() {
         </div>
       </div>
     </div>
-  );
-}
-
-function OrderBtn({ color, label, onClick }: { color: string; label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="flex h-[22px] w-[22px] flex-shrink-0 cursor-pointer items-center justify-center rounded text-[9px] font-black transition-all active:scale-90"
-      style={{ ...MONO, background: `${color}22`, color, border: `1px solid ${color}55` }}>
-      {label}
-    </button>
   );
 }
 

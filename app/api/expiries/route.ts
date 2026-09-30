@@ -4,10 +4,9 @@ import { getExpiries } from "@/lib/broker/instruments";
 export const dynamic = "force-dynamic";
 export const runtime  = "nodejs";
 
-export async function GET(req: Request) {
-  const index = (new URL(req.url).searchParams.get("index") ?? "NIFTY") as "NIFTY" | "SENSEX";
+export async function GET() {
   try {
-    return NextResponse.json({ expiries: await getExpiries(index) });
+    return NextResponse.json({ expiries: await getExpiries("NIFTY") });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 502 });
   }

@@ -15,6 +15,7 @@ const Vwap930AlertSchema = new mongoose.Schema({
   vwap:       Number,
   vwapCE:     Number,
   vwapPE:     Number,
+  entryReason: mongoose.Schema.Types.Mixed,
   rr:         mongoose.Schema.Types.Mixed,
   status:     String,
   currentPnL: Number,

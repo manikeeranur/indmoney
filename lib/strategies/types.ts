@@ -56,6 +56,7 @@ export type AlertRecord = {
   vwap?: number;
   vwapCE?: number;
   vwapPE?: number;
+  entryReason?: EntryReason;
   // backtest-only
   isHistorical?: boolean;
 };
@@ -77,3 +78,27 @@ export type BacktestSummary = {
 };
 
 export type { Candle, ChainLeg };
+
+/** Why a VWAP930 entry was taken — every in-band premium looked at on each
+ *  side, the strike actually tested per side, its candle close vs VWAP, and
+ *  which side won. Shown under the trade's row in the strategy table. */
+export type EntryReasonSide = {
+  /** In-band premiums on this side, closest-to-ATM first (the order they were tried). */
+  checked: { strike: number; premium: number }[];
+  /** How many strikes on this side fell outside the premium band. */
+  outOfBand: number;
+  /** The strike this side was judged on (closest to ATM inside the band). */
+  picked: { strike: number; premium: number; close: number; vwap: number; aboveVwap: boolean } | null;
+};
+export type EntryReason = {
+  candleTime: string;
+  band: [number, number];
+  atm: number;
+  ce: EntryReasonSide;
+  pe: EntryReasonSide;
+  chosen: "CE" | "PE";
+  summary: string;
+  /** Set when rebuilt afterwards from 1-min candles (alert saved before
+   *  entryReason existed) — in-band premiums are candle closes, not live LTPs. */
+  rebuilt?: boolean;
+};

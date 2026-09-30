@@ -14,7 +14,7 @@ import {
 } from "./constants";
 import { checkPriceTouch } from "./priceTouch";
 import type { Candle, Leg } from "@/lib/broker/types";
-import type { AlertRecord, BacktestSummary } from "./types";
+import type { AlertRecord, BacktestSummary, EntryReason, EntryReasonSide } from "./types";
 
 const NIFTY_INDEX_ID = 40000001; // verified live 2026-09-25 — see smc.ts
 
@@ -40,14 +40,40 @@ async function findCandidateLegs(expiry: string) {
   const chain = await getOptionChain(expiry, 15, "NIFTY", lotSize);
   const atm = getATM(chain.spot);
 
-  function pick(side: "CE" | "PE"): Leg | null {
+  function inBandSorted(side: "CE" | "PE") {
     const all = chain.rows.map(r => side === "CE" ? r.ce : r.pe);
     const inBand = all.filter(l => l.ltp >= VWAP930_MIN_PREMIUM && l.ltp <= VWAP930_MAX_PREMIUM);
-    if (!inBand.length) return null;
     inBand.sort((a, b) => Math.abs(a.strike - atm) - Math.abs(b.strike - atm));
-    return inBand[0];
+    return { inBand, outOfBand: all.length - inBand.length };
   }
-  return { ce: pick("CE"), pe: pick("PE"), spot: chain.spot, atm };
+  const ceBand = inBandSorted("CE"), peBand = inBandSorted("PE");
+  return { ce: ceBand.inBand[0] ?? null, pe: peBand.inBand[0] ?? null, ceBand, peBand, spot: chain.spot, atm };
+}
+
+const hhmm = (ms: number) =>
+  new Date(ms).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kolkata" });
+
+/** "09:20–09:25" for an N-min candle whose `date` is its LAST 1-min candle's start. */
+function candleWindow(c: Candle): string {
+  const lastStart = new Date(c.date).getTime();
+  return `${hhmm(lastStart - (VWAP930_CANDLE_MINUTES - 1) * 60_000)}–${hhmm(lastStart + 60_000)}`;
+}
+
+function reasonSide(checked: { strike: number; premium: number }[], outOfBand: number,
+                    picked: { strike: number; premium: number; close: number; vwap: number } | null): EntryReasonSide {
+  return { checked, outOfBand, picked: picked ? { ...picked, aboveVwap: picked.close > picked.vwap } : null };
+}
+
+function buildSummary(dir: "CE" | "PE", ce: EntryReasonSide, pe: EntryReasonSide): string {
+  const win = dir === "CE" ? ce.picked! : pe.picked!;
+  const other = dir === "CE" ? pe.picked : ce.picked;
+  const otherSide = dir === "CE" ? "PE" : "CE";
+  const gap = +(win.close - win.vwap).toFixed(2);
+  let why = `${dir} ${win.strike} closed ₹${win.close.toFixed(2)} above VWAP ₹${win.vwap.toFixed(2)} (+${gap})`;
+  if (!other) why += ` · no ${otherSide} in band`;
+  else if (!other.aboveVwap) why += ` · ${otherSide} ${other.strike} closed ₹${other.close.toFixed(2)} below VWAP ₹${other.vwap.toFixed(2)}`;
+  else why += ` · ${otherSide} ${other.strike} also above VWAP but by less (+${(other.close - other.vwap).toFixed(2)})`;
+  return why;
 }
 
 function toIST(date: string | Date): { h: number; m: number } {
@@ -102,7 +128,7 @@ export async function runVWAP930Scan(expiry: string): Promise<any> {
     return { signal: false, reason: `No entries before ${entryStartStr()} IST (now ${entryTime})` };
   }
 
-  const { ce, pe, spot } = await findCandidateLegs(expiry);
+  const { ce, pe, ceBand, peBand, spot, atm } = await findCandidateLegs(expiry);
   if (!ce && !pe) {
     return { signal: false, reason: `No CE/PE in ₹${VWAP930_MIN_PREMIUM}–₹${VWAP930_MAX_PREMIUM} band`, spot };
   }
@@ -117,7 +143,7 @@ export async function runVWAP930Scan(expiry: string): Promise<any> {
   if (!decision) {
     return {
       signal: false,
-      reason: `Neither CE nor PE has a green, strong-bodied ${VWAP930_CANDLE_MINUTES}-min candle closed above its VWAP at ${entryTime}`,
+      reason: `Neither CE nor PE has a ${VWAP930_CANDLE_MINUTES}-min candle closed above its VWAP at ${entryTime}`,
       spot,
     };
   }
@@ -125,14 +151,84 @@ export async function runVWAP930Scan(expiry: string): Promise<any> {
   const { direction: dir, leg, vwap } = decision;
   const rr = buildRR(leg.ltp);
 
+  const toChecked = (legs: Leg[]) => legs.map(l => ({ strike: l.strike, premium: l.ltp }));
+  const sideCE = reasonSide(toChecked(ceBand.inBand), ceBand.outOfBand,
+    ce && stateCE ? { strike: ce.strike, premium: ce.ltp, close: stateCE.close, vwap: stateCE.vwap } : null);
+  const sidePE = reasonSide(toChecked(peBand.inBand), peBand.outOfBand,
+    pe && statePE ? { strike: pe.strike, premium: pe.ltp, close: statePE.close, vwap: statePE.vwap } : null);
+  const decidedOn = (dir === "CE" ? stateCE : statePE)!.candle;
+  const entryReason: EntryReason = {
+    candleTime: candleWindow(decidedOn), band: [VWAP930_MIN_PREMIUM, VWAP930_MAX_PREMIUM], atm,
+    ce: sideCE, pe: sidePE, chosen: dir, summary: buildSummary(dir, sideCE, sidePE),
+  };
+
   return {
     signal: true,
     id: `VWAP930_${dir}_${leg.strike}_${Date.now()}`,
     entryTime, direction: dir, strike: leg.strike,
     leg: { token: leg.token, tradingsymbol: leg.tradingsymbol, strike: leg.strike, type: leg.type, ltp: leg.ltp },
-    rr, vwap, vwapCE: stateCE?.vwap ?? null, vwapPE: statePE?.vwap ?? null,
+    rr, vwap, vwapCE: stateCE?.vwap ?? null, vwapPE: statePE?.vwap ?? null, entryReason,
     status: "ACTIVE", currentPnL: 0, pnlPct: 0, peakMove: 0,
     spot, expiry, createdAt: now.toISOString(),
+  };
+}
+
+// ─── Rebuild the entry reason for an alert saved without one ───────────────────
+/** Replays the live scan's decision at the alert's own entry moment from 1-min
+ *  candles: same ±15-strike chain window around ATM, same premium band, same
+ *  closest-to-ATM pick per side, same completed 5-min candle vs VWAP. Premiums
+ *  for non-entered strikes are the last completed 1-min close (live used the
+ *  chain LTP a few seconds later), so they can differ by a few paise. */
+export async function rebuildEntryReason(alert: AlertRecord): Promise<EntryReason | null> {
+  if (!alert.createdAt || !alert.spot || !alert.expiry) return null;
+  const entryAt = new Date(alert.createdAt);
+  const minuteStart = Math.floor(entryAt.getTime() / 60_000) * 60_000;
+  const date = entryAt.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const from = new Date(`${date}T09:15:00+05:30`);
+  const atm = getATM(alert.spot);
+
+  const legs: { strike: number; type: "CE" | "PE"; token: number }[] = [];
+  for (const inst of await getFnoInstruments()) {
+    if (inst.name !== "NIFTY" || inst.kind !== "OPTIDX" || inst.expiry !== alert.expiry || inst.strike == null) continue;
+    if (inst.type !== "CE" && inst.type !== "PE") continue;
+    if (Math.abs(inst.strike - atm) > 15 * 50) continue;
+    legs.push({ strike: inst.strike, type: inst.type, token: inst.token });
+  }
+  if (!legs.length) return null;
+
+  const codes = legs.map(l => scripCode(l.token, "NIFTY"));
+  const map = await getHistorical(codes, "1minute", from, new Date(minuteStart), "NIFTY");
+
+  function side(type: "CE" | "PE"): EntryReasonSide {
+    const rows = legs.filter(l => l.type === type).map(l => {
+      const completed = (map[scripCode(l.token, "NIFTY")] ?? []).filter(c => new Date(c.date).getTime() < minuteStart);
+      const isEntered = type === alert.direction && l.strike === alert.strike;
+      const premium = isEntered ? alert.rr.entry : completed[completed.length - 1]?.close;
+      return { ...l, completed, premium };
+    }).filter(r => r.premium != null);
+    const inBand = rows.filter(r => r.premium! >= VWAP930_MIN_PREMIUM && r.premium! <= VWAP930_MAX_PREMIUM)
+      .sort((a, b) => Math.abs(a.strike - atm) - Math.abs(b.strike - atm));
+    const first = inBand[0];
+    let picked: { strike: number; premium: number; close: number; vwap: number } | null = null;
+    if (first) {
+      const nm = aggregateCandles(first.completed, VWAP930_CANDLE_MINUTES);
+      if (nm.length) {
+        const vw = calcVWAP(nm);
+        picked = { strike: first.strike, premium: first.premium!, close: nm[nm.length - 1].close, vwap: vw[vw.length - 1] };
+      }
+    }
+    return reasonSide(inBand.map(r => ({ strike: r.strike, premium: r.premium! })), rows.length - inBand.length, picked);
+  }
+
+  const ce = side("CE"), pe = side("PE");
+  const dir = alert.direction as "CE" | "PE";
+  const chosenSide = dir === "CE" ? ce : pe;
+  if (!chosenSide.picked) return null;
+  const decided = legs.find(l => l.type === dir && l.strike === chosenSide.picked!.strike)!;
+  const nm = aggregateCandles((map[scripCode(decided.token, "NIFTY")] ?? []).filter(c => new Date(c.date).getTime() < minuteStart), VWAP930_CANDLE_MINUTES);
+  return {
+    candleTime: candleWindow(nm[nm.length - 1]), band: [VWAP930_MIN_PREMIUM, VWAP930_MAX_PREMIUM], atm,
+    ce, pe, chosen: dir, summary: buildSummary(dir, ce, pe), rebuilt: true,
   };
 }
 
@@ -262,6 +358,7 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
   type Cand = {
     strike: number; token: number; premium: number; vwap: number; confirmIdx3: number;
     candle3: Candle; entryCandle: Candle; entryIdx: number; candles: Candle[];
+    checked: { strike: number; premium: number }[]; outOfBand: number;
   };
 
   async function tryCheckpoint(entryMark: Date) {
@@ -276,6 +373,8 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
       // fixed ±50/100/150 offset list, which could never find (and so could
       // never enter) a real strike further from ATM than that.
       const strikes = [...strikesByType[type]].sort((a, b) => Math.abs(a - atm) - Math.abs(b - atm));
+      const checked: { strike: number; premium: number }[] = [];
+      let outOfBand = 0;
       for (const strike of strikes) {
         const series = await getSeries(strike, type);
         if (!series) continue;
@@ -287,10 +386,11 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
         if (idx3 < 0) continue;
         const candle3 = candlesNm[idx3];
         const premium = candle3.close;
-        if (premium < VWAP930_MIN_PREMIUM || premium > VWAP930_MAX_PREMIUM) continue;
+        if (premium < VWAP930_MIN_PREMIUM || premium > VWAP930_MAX_PREMIUM) { outOfBand++; continue; }
+        checked.push({ strike, premium });
         const entryIdx = candles.findIndex(c => new Date(c.date).getTime() > new Date(candle3.date).getTime());
         if (entryIdx === -1) continue;
-        return { strike, token, premium, vwap: vwapNm[idx3], confirmIdx3: idx3, candle3, entryCandle: candles[entryIdx], entryIdx, candles };
+        return { strike, token, premium, vwap: vwapNm[idx3], confirmIdx3: idx3, candle3, entryCandle: candles[entryIdx], entryIdx, candles, checked, outOfBand };
       }
       return null;
     }
@@ -308,7 +408,7 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
     } else if (ceQualifies) { chosen = ceCand!; dir = "CE"; }
     else { chosen = peCand!; dir = "PE"; }
 
-    return { chosen, dir, spot, ceCand, peCand, entryMark };
+    return { chosen, dir, spot, atm, ceCand, peCand, entryMark };
   }
 
   async function attemptEntry(afterMs: number | null) {
@@ -321,8 +421,15 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
   }
 
   function resolveOutcome(picked: NonNullable<Awaited<ReturnType<typeof tryCheckpoint>>>) {
-    const { chosen, dir, spot, ceCand, peCand, entryMark } = picked;
+    const { chosen, dir, spot, atm, ceCand, peCand, entryMark } = picked;
     const entry = chosen.premium;
+    const toSide = (c: Cand | null) =>
+      reasonSide(c?.checked ?? [], c?.outOfBand ?? 0, c ? { strike: c.strike, premium: c.premium, close: c.premium, vwap: c.vwap } : null);
+    const sideCE = toSide(ceCand), sidePE = toSide(peCand);
+    const entryReason: EntryReason = {
+      candleTime: candleWindow(chosen.candle3), band: [VWAP930_MIN_PREMIUM, VWAP930_MAX_PREMIUM], atm,
+      ce: sideCE, pe: sidePE, chosen: dir, summary: buildSummary(dir, sideCE, sidePE),
+    };
     const rr = buildRR(entry);
     const stagnantCutoffMs = entryMark.getTime() + VWAP930_STAGNANT_HOURS * 3_600_000;
 
@@ -367,7 +474,7 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
       id: `hist_VWAP930_${dir}_${chosen.strike}_${date}_${entryTimeStr.replace(":", "")}`,
       entryTime: entryTimeStr, exitTime: exitTimeStr, direction: dir, strike: chosen.strike,
       leg: { token: chosen.token, tradingsymbol: "", strike: chosen.strike, type: dir, ltp: exitPrice },
-      rr, vwap: chosen.vwap, vwapCE: ceCand?.vwap ?? undefined, vwapPE: peCand?.vwap ?? undefined,
+      rr, vwap: chosen.vwap, vwapCE: ceCand?.vwap ?? undefined, vwapPE: peCand?.vwap ?? undefined, entryReason,
       status, currentPnL: pnl, pnlPct: pct, peakMove,
       spot, expiry, createdAt: chosen.entryCandle.date as any, isHistorical: true, date,
     };
