@@ -13,7 +13,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 
 type AccountData = {
   wallet: { available: number; used: number; net: number; deposit: number; withdrawal: number };
@@ -230,23 +230,23 @@ export default function AccountPage() {
         <SCard title="Wallet" accent="#16a34a">
           <div className="px-4 pb-3">
             <div className="text-[28px] font-black leading-none" style={{ ...MONO, color: "#16a34a" }}>₹{fmt(data.wallet.available)}</div>
-            <div className="mt-0.5 text-[10px]" style={{ ...MONO, color: subtext }}>Available Balance</div>
+            <div className="mt-0.5 text-sm" style={{ ...MONO, color: subtext }}>Available Balance</div>
           </div>
           <div className="border-t" style={{ borderColor: border }}>
             <Row label="Used Margin" value={`₹${fmt(data.wallet.used)}`} color="#f59e0b" />
             <Row label="Net Balance" value={`₹${fmt(data.wallet.net)}`} color={muted} />
             <div className="flex border-b" style={{ borderColor: rowBorder }}>
               <div className="flex flex-1 items-center gap-1.5 border-r px-4 py-2" style={{ borderColor: rowBorder }}>
-                <span className="text-[9px]" style={{ ...MONO, color: subtext }}>↓ Deposit</span>
-                <span className="ml-auto text-[11px] font-bold" style={{ ...MONO, color: data.wallet.deposit > 0 ? "#16a34a" : muted }}>₹{fmt(data.wallet.deposit)}</span>
+                <span className="text-xs" style={{ ...MONO, color: subtext }}>↓ Deposit</span>
+                <span className="ml-auto text-sm font-bold" style={{ ...MONO, color: data.wallet.deposit > 0 ? "#16a34a" : muted }}>₹{fmt(data.wallet.deposit)}</span>
               </div>
               <div className="flex flex-1 items-center gap-1.5 px-4 py-2">
-                <span className="text-[9px]" style={{ ...MONO, color: subtext }}>↑ Withdrawal</span>
-                <span className="ml-auto text-[11px] font-bold" style={{ ...MONO, color: data.wallet.withdrawal > 0 ? "#e11d48" : muted }}>₹{fmt(data.wallet.withdrawal)}</span>
+                <span className="text-xs" style={{ ...MONO, color: subtext }}>↑ Withdrawal</span>
+                <span className="ml-auto text-sm font-bold" style={{ ...MONO, color: data.wallet.withdrawal > 0 ? "#e11d48" : muted }}>₹{fmt(data.wallet.withdrawal)}</span>
               </div>
             </div>
             <div className="flex flex-col gap-1.5 px-4 py-3">
-              <div className="flex justify-between text-[9px]" style={MONO}>
+              <div className="flex justify-between text-xs" style={MONO}>
                 <span style={{ color: subtext }}>Margin Utilisation</span>
                 <span style={{ color: barColor, fontWeight: 700 }}>{marginPct}%</span>
               </div>
@@ -260,22 +260,22 @@ export default function AccountPage() {
         <SCard title="Charges Today" accent="#f59e0b">
           <div className="px-4 pb-3">
             <div className="text-[28px] font-black leading-none" style={{ ...MONO, color: "#f59e0b" }}>₹{fmt(data.charges.total)}</div>
-            <div className="mt-0.5 text-[10px]" style={{ ...MONO, color: subtext }}>Total Charges</div>
+            <div className="mt-0.5 text-sm" style={{ ...MONO, color: subtext }}>Total Charges</div>
           </div>
           <div className="grid grid-cols-2 border-t" style={{ borderColor: border }}>
             <div className="flex flex-col border-r" style={{ borderColor: border }}>
               {[["Brokerage", data.charges.brokerage], ["STT", data.charges.stt], ["Exchange Turnover", data.charges.exchange], ["SEBI Turnover", data.charges.sebi]].map(([l, v], i, arr) => (
                 <div key={l as string} className="flex items-center justify-between px-3 py-2" style={i < arr.length - 1 ? { borderBottom: `1px solid ${rowBorder}` } : undefined}>
-                  <span className="text-[9px]" style={{ ...MONO, color: subtext }}>{l}</span>
-                  <span className="text-[10px] font-bold" style={{ ...MONO, color: muted }}>₹{fmt(v as number)}</span>
+                  <span className="text-xs" style={{ ...MONO, color: subtext }}>{l}</span>
+                  <span className="text-sm font-bold" style={{ ...MONO, color: muted }}>₹{fmt(v as number)}</span>
                 </div>
               ))}
             </div>
             <div className="flex flex-col">
               {[["GST", data.charges.gst], ["Stamp Duty", data.charges.stampDuty]].map(([l, v], i, arr) => (
                 <div key={l as string} className="flex items-center justify-between px-3 py-2" style={i < arr.length - 1 ? { borderBottom: `1px solid ${rowBorder}` } : undefined}>
-                  <span className="text-[9px]" style={{ ...MONO, color: subtext }}>{l}</span>
-                  <span className="text-[10px] font-bold" style={{ ...MONO, color: muted }}>₹{fmt(v as number)}</span>
+                  <span className="text-xs" style={{ ...MONO, color: subtext }}>{l}</span>
+                  <span className="text-sm font-bold" style={{ ...MONO, color: muted }}>₹{fmt(v as number)}</span>
                 </div>
               ))}
             </div>
@@ -285,15 +285,15 @@ export default function AccountPage() {
         <SCard title="Overall P&L" accent="#ea580c">
           <div className="px-4 pb-3">
             <div className="text-[28px] font-black leading-none" style={{ ...MONO, color: net >= 0 ? "#16a34a" : "#e11d48" }}>{net >= 0 ? "+" : ""}₹{fmt(net)}</div>
-            <div className="mt-0.5 text-[10px]" style={{ ...MONO, color: subtext }}>Gross P&amp;L (Today)</div>
+            <div className="mt-0.5 text-sm" style={{ ...MONO, color: subtext }}>Gross P&amp;L (Today)</div>
           </div>
           <div className="border-t" style={{ borderColor: border }}>
             <Row label="Realised" value={`${data.pnl.realised >= 0 ? "+" : ""}₹${fmt(Math.abs(data.pnl.realised))}`} color={data.pnl.realised >= 0 ? "#16a34a" : "#e11d48"} />
             <Row label="Unrealised" value={`${data.pnl.unrealised >= 0 ? "+" : ""}₹${fmt(Math.abs(data.pnl.unrealised))}`} color={data.pnl.unrealised >= 0 ? "#16a34a" : "#e11d48"} />
             <Row label="Charges" value={`-₹${fmt(data.charges.total)}`} color="#e11d48" />
             <div className="flex items-center justify-between px-4 py-3" style={{ background: net >= 0 ? "rgba(22,163,74,0.07)" : "rgba(225,29,72,0.07)" }}>
-              <span className="text-[10px] font-bold" style={{ ...MONO, color: net >= 0 ? "#16a34a" : "#e11d48" }}>Net (after charges)</span>
-              <span className="text-[13px] font-black" style={{ ...MONO, color: net >= 0 ? "#16a34a" : "#e11d48" }}>{net >= 0 ? "+" : ""}₹{fmt(net)}</span>
+              <span className="text-sm font-bold" style={{ ...MONO, color: net >= 0 ? "#16a34a" : "#e11d48" }}>Net (after charges)</span>
+              <span className="text-base font-black" style={{ ...MONO, color: net >= 0 ? "#16a34a" : "#e11d48" }}>{net >= 0 ? "+" : ""}₹{fmt(net)}</span>
             </div>
           </div>
         </SCard>
@@ -309,10 +309,10 @@ export default function AccountPage() {
           TOTP auto-refresh yet. ── */}
       <div className="mb-4 flex items-center justify-between rounded-2xl border px-3.5 py-3" style={{ borderColor: border, background: isDark ? "#0f172a" : "#f8f8ff" }}>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[11px] font-semibold" style={{ color: "var(--text)" }}>Copy Access Token</span>
-          <span className="text-[9px]" style={{ ...MONO, color: subtext }}>For manual use</span>
+          <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>Copy Access Token</span>
+          <span className="text-xs" style={{ ...MONO, color: subtext }}>For manual use</span>
         </div>
-        <button onClick={copyAccessToken} className="flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[10px] font-bold transition-all" style={{ borderColor: border, background: isDark ? "#1e293b" : "#f1f5f9", color: subtext }}>
+        <button onClick={copyAccessToken} className="flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-bold transition-all" style={{ borderColor: border, background: isDark ? "#1e293b" : "#f1f5f9", color: subtext }}>
           Copy Token
         </button>
       </div>
@@ -335,22 +335,22 @@ export default function AccountPage() {
 
       {/* ── Auto-trade account defaults (persisted to DB) ── */}
       <div className="mb-4 flex flex-col gap-3 rounded-2xl border px-3.5 py-3.5" style={{ borderColor: border, background: isDark ? "#0f172a" : "#f8f8ff" }}>
-        <span className="text-[9px] font-bold uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>⚙ Auto-Trade Defaults</span>
+        <span className="text-xs font-bold uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>⚙ Auto-Trade Defaults</span>
         <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-nowrap lg:items-center lg:gap-4 lg:overflow-x-auto">
           <div className="flex w-full flex-shrink-0 items-center justify-between gap-2 lg:w-auto lg:justify-start">
-            <span className="text-[10px] font-semibold" style={{ color: subtext }}>Qty</span>
+            <span className="text-sm font-semibold" style={{ color: subtext }}>Qty</span>
             <SegmentToggle options={[1, 2, 5, 10, 15, 20].map(q => ({ value: q, label: String(q) }))}
               value={accountDefaults?.quantity ?? 10} activeColor="#6366f1"
               onChange={v => updateAccountDefaults({ quantity: v as number }, `Quantity set to ${v} lots`)} />
           </div>
           <div className="flex w-full flex-shrink-0 items-center justify-between gap-2 lg:w-auto lg:justify-start">
-            <span className="text-[10px] font-semibold" style={{ color: subtext }}>Product</span>
+            <span className="text-sm font-semibold" style={{ color: subtext }}>Product</span>
             <SegmentToggle options={[{ value: "INTRADAY", label: "INTRADAY" }, { value: "MARGIN", label: "MARGIN" }]}
               value={accountDefaults?.productType ?? "INTRADAY"} activeColor="#0284c7"
               onChange={v => updateAccountDefaults({ productType: v as string }, `Product set to ${v}`)} />
           </div>
           <div className="flex w-full flex-shrink-0 items-center justify-between gap-2 lg:w-auto lg:justify-start">
-            <span className="text-[10px] font-semibold" style={{ color: subtext }}>Mode</span>
+            <span className="text-sm font-semibold" style={{ color: subtext }}>Mode</span>
             <SegmentToggle options={[{ value: "LIVE", label: "LIVE" }, { value: "PAPER", label: "PAPER" }]}
               value={accountDefaults?.tradingMode ?? "PAPER"} activeColor={accountDefaults?.tradingMode === "PAPER" ? "#f59e0b" : "#16a34a"}
               onChange={v => updateAccountDefaults({ tradingMode: v as "LIVE" | "PAPER" }, v === "PAPER" ? "PAPER mode enabled — orders will be simulated" : "LIVE mode enabled — real orders will be placed")} />
@@ -388,7 +388,7 @@ export default function AccountPage() {
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-faint">Order Book</div>
         <div className="overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
           <table className="w-full min-w-[600px] border-collapse text-sm">
-            <thead><tr className="text-[11px] uppercase tracking-wide text-faint"><Th>Symbol</Th><Th>Side</Th><Th>Qty</Th><Th>Price</Th><Th>Type</Th><Th>Status</Th></tr></thead>
+            <thead><tr className="text-sm uppercase tracking-wide text-faint"><Th>Symbol</Th><Th>Side</Th><Th>Qty</Th><Th>Price</Th><Th>Type</Th><Th>Status</Th></tr></thead>
             <tbody>
               {data.orderBook.map(o => (
                 <React.Fragment key={o.order_id}>
@@ -399,7 +399,7 @@ export default function AccountPage() {
                   </tr>
                   {o.status_message && (
                     <tr className="border-t-0">
-                      <td colSpan={6} className="px-2 pb-1.5 text-[10px]" style={{ color: "#e11d48" }}>⚠ {o.status_message}</td>
+                      <td colSpan={6} className="px-2 pb-1.5 text-sm" style={{ color: "#e11d48" }}>⚠ {o.status_message}</td>
                     </tr>
                   )}
                 </React.Fragment>
@@ -425,7 +425,7 @@ function SegmentToggle<T extends string | number>({ options, value, onChange, ac
         const active = opt.value === value;
         return (
           <button key={String(opt.value)} type="button" onClick={() => onChange(opt.value)}
-            className="rounded-md px-2.5 py-1 text-[10px] font-bold transition-all duration-150 active:scale-95"
+            className="rounded-md px-2.5 py-1 text-sm font-bold transition-all duration-150 active:scale-95"
             style={{ background: active ? activeColor : "transparent", color: active ? "#fff" : (isDark ? "#94a3b8" : "#64748b"), ...MONO }}>
             {opt.label}
           </button>
@@ -449,16 +449,16 @@ function ToggleField({ label, show, onToggle, value, input, setInput, onApply, a
         <div className="relative h-[22px] w-10 rounded-full transition-colors duration-200" style={{ background: show ? activeColor : (isDark ? "#334155" : "#cbd5e1") }}>
           <div className="absolute top-[3px] h-4 w-4 rounded-full bg-white shadow transition-transform duration-200" style={{ transform: show ? "translateX(20px)" : "translateX(3px)" }} />
         </div>
-        <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: show ? activeColor : text }}>{label}</span>
+        <span className="flex items-center gap-1 text-sm font-bold" style={{ color: show ? activeColor : text }}>{label}</span>
       </button>
       {show && (
         <>
           <input type="number" min="1" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && onApply()}
-            placeholder={`${unit} e.g. 10`} className="min-w-[90px] flex-1 rounded-lg px-2.5 py-1.5 text-[11px] font-bold outline-none"
+            placeholder={`${unit} e.g. 10`} className="min-w-[90px] flex-1 rounded-lg px-2.5 py-1.5 text-sm font-bold outline-none"
             style={{ background: isDark ? "#1e293b" : "#fff", color: text, border: `1px solid ${activeColor}40`, ...MONO }} />
-          <button onClick={onApply} className="flex-shrink-0 rounded-lg px-3 py-1.5 text-[10px] font-bold text-white transition-transform active:scale-95" style={{ background: activeColor }}>Set All</button>
+          <button onClick={onApply} className="flex-shrink-0 rounded-lg px-3 py-1.5 text-sm font-bold text-white transition-transform active:scale-95" style={{ background: activeColor }}>Set All</button>
           {value != null && (
-            <span className="flex-shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-[9px] font-bold" style={{ background: `${activeColor}15`, color: activeColor }}>+{value} {unit} active</span>
+            <span className="flex-shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-xs font-bold" style={{ background: `${activeColor}15`, color: activeColor }}>+{value} {unit} active</span>
           )}
         </>
       )}
@@ -471,7 +471,7 @@ function ToastStack({ toasts }: { toasts: ToastItem[] }) {
   return (
     <div className="fixed bottom-5 left-1/2 z-[999] flex flex-col items-center gap-2 px-4" style={{ transform: "translateX(-50%)" }}>
       {toasts.map(t => (
-        <div key={t.id} className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-[11px] font-bold"
+        <div key={t.id} className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold"
           style={{ background: t.kind === "success" ? "#16a34a" : "#e11d48", color: "#fff", ...MONO, boxShadow: "0 8px 24px rgba(0,0,0,0.28)", maxWidth: "min(90vw, 360px)" }}>
           <span>{t.kind === "success" ? "✓" : "✕"}</span>
           <span className="truncate">{t.text}</span>
@@ -490,7 +490,7 @@ function SCard({ title, accent, children }: { title: string; accent: string; chi
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border" style={{ background: bg, borderColor: border, borderTop: `2px solid ${accent}` }}>
       <div className="flex items-center gap-2.5 px-4 pb-3 pt-4">
-        <span className="text-[10px] font-bold uppercase tracking-[1.8px]" style={{ ...MONO, color: subtext }}>{title}</span>
+        <span className="text-sm font-bold uppercase tracking-[1.8px]" style={{ ...MONO, color: subtext }}>{title}</span>
       </div>
       {children}
     </div>
@@ -503,8 +503,8 @@ function Row({ label, value, color }: { label: string; value: string; color: str
   const subtext = isDark ? "#64748b" : "#94a3b8";
   return (
     <div className="flex items-center justify-between border-b px-4 py-2" style={{ borderColor: border }}>
-      <span className="text-[10px]" style={{ ...MONO, color: subtext }}>{label}</span>
-      <span className="text-[11px] font-bold" style={{ ...MONO, color }}>{value}</span>
+      <span className="text-sm" style={{ ...MONO, color: subtext }}>{label}</span>
+      <span className="text-sm font-bold" style={{ ...MONO, color }}>{value}</span>
     </div>
   );
 }
@@ -654,28 +654,28 @@ function PositionCard({ p, onExit, isExiting, defaultLockPts, accountDefaults }:
         <IndexLogo tradingsymbol={p.tradingsymbol} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <span className="min-w-0 flex-1 text-[12px] font-bold leading-snug" style={{ color: text }}>
+            <span className="min-w-0 flex-1 text-sm font-bold leading-snug" style={{ color: text }}>
               {p.strike ? `NIFTY ${p.strike} ${p.direction === "CE" ? "Call" : "Put"}` : p.tradingsymbol}
             </span>
             {isOpen ? (
-              <span className="flex flex-shrink-0 items-center gap-1 text-[10px] font-semibold" style={{ color: isDark ? "#64748b" : "#6b7a90" }}>
-                <span style={{ fontSize: 12 }}>🧳</span>{p.quantity} QTY
+              <span className="flex flex-shrink-0 items-center gap-1 text-sm font-semibold" style={{ color: isDark ? "#64748b" : "#6b7a90" }}>
+                <span style={{ fontSize: 14 }}>🧳</span>{p.quantity} QTY
               </span>
             ) : (
-              <span className="flex flex-shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ color: "#16a34a", background: "#16a34a15" }}>
-                <span style={{ fontSize: 10 }}>✓</span>{p.quantity} QTY Traded
+              <span className="flex flex-shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-sm font-bold" style={{ color: "#16a34a", background: "#16a34a15" }}>
+                <span style={{ fontSize: 14 }}>✓</span>{p.quantity} QTY Traded
               </span>
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px]" style={{ color: subtext }}>Price:</span>
-            <span className="text-[12px] font-bold" style={{ color: text }}>₹{fmt(p.currentPrice || p.buyPrice)}</span>
+            <span className="text-sm" style={{ color: subtext }}>Price:</span>
+            <span className="text-sm font-bold" style={{ color: text }}>₹{fmt(p.currentPrice || p.buyPrice)}</span>
             {p.buyPrice > 0 && (
-              <span className="flex items-center gap-0.5 text-[10px] font-bold" style={{ color: pctUp ? "#16a34a" : "#e11d48" }}>
+              <span className="flex items-center gap-0.5 text-sm font-bold" style={{ color: pctUp ? "#16a34a" : "#e11d48" }}>
                 {pctUp ? "▲" : "▼"} {Math.abs(pricePct).toFixed(2)}%
               </span>
             )}
-            <div className="ms-auto mt-0.5 text-[10px] font-semibold" style={{ ...MONO, color: pnlColor }}>{movePts >= 0 ? "+" : ""}{fmt(movePts)} × {p.quantity}</div>
+            <div className="ms-auto mt-0.5 text-sm font-semibold" style={{ ...MONO, color: pnlColor }}>{movePts >= 0 ? "+" : ""}{fmt(movePts)} × {p.quantity}</div>
           </div>
         </div>
       </div>
@@ -683,70 +683,70 @@ function PositionCard({ p, onExit, isExiting, defaultLockPts, accountDefaults }:
       <div style={{ height: 1, background: border, marginBottom: 2 }} />
 
       <div className="flex flex-wrap items-center gap-1.5 px-4 pb-1 pt-3">
-        <span style={{ color: subtext, fontSize: 12 }}>⏱</span>
-        <span className="text-[10px] font-bold" style={{ ...MONO, color: text }}>{fmtClock(p.entryTime)}</span>
+        <span style={{ color: subtext, fontSize: 14 }}>⏱</span>
+        <span className="text-sm font-bold" style={{ ...MONO, color: text }}>{fmtClock(p.entryTime)}</span>
         <span style={{ color: subtext }}>→</span>
-        <span className="text-[10px] font-bold" style={{ ...MONO, color: isOpen ? "#16a34a" : text }}>
+        <span className="text-sm font-bold" style={{ ...MONO, color: isOpen ? "#16a34a" : text }}>
           {isOpen ? "Live" : fmtClock(p.exitTime)}
         </span>
-        <span className="ml-auto flex-shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold" style={{ ...MONO, background: isDark ? "#1e293b" : "#f1f5f9", color: subtext }}>
+        <span className="ml-auto flex-shrink-0 rounded-md px-1.5 py-0.5 text-sm font-bold" style={{ ...MONO, background: isDark ? "#1e293b" : "#f1f5f9", color: subtext }}>
           {fmtDuration(p.durationSecs)}
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-2 px-4 pb-3 pt-3">
         <div>
-          <div className="mb-0.5 text-[10px]" style={{ color: subtext }}>Entry Price</div>
-          <div className="text-[12px] font-bold" style={{ color: text }}>₹{fmt(p.buyPrice)}</div>
+          <div className="mb-0.5 text-sm" style={{ color: subtext }}>Entry Price</div>
+          <div className="text-sm font-bold" style={{ color: text }}>₹{fmt(p.buyPrice)}</div>
         </div>
         <div>
-          <div className="mb-0.5 text-[10px]" style={{ color: subtext }}>Exit Price</div>
-          <div className="text-[12px] font-bold" style={{ color: text }}>{p.sellPrice > 0 ? `₹${fmt(p.sellPrice)}` : "—"}</div>
+          <div className="mb-0.5 text-sm" style={{ color: subtext }}>Exit Price</div>
+          <div className="text-sm font-bold" style={{ color: text }}>{p.sellPrice > 0 ? `₹${fmt(p.sellPrice)}` : "—"}</div>
         </div>
         <div className="text-end">
-          <div className="mb-0.5 text-[10px]" style={{ color: subtext }}>Gain/Loss</div>
-          <div className="text-[12px] font-bold" style={{ color: pnlColor }}>{pnlVal >= 0 ? "+" : ""}₹{fmt(pnlVal)}</div>
+          <div className="mb-0.5 text-sm" style={{ color: subtext }}>Gain/Loss</div>
+          <div className="text-sm font-bold" style={{ color: pnlColor }}>{pnlVal >= 0 ? "+" : ""}₹{fmt(pnlVal)}</div>
         </div>
       </div>
 
       {isOpen && (
         <div className="mx-3 mb-2 flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: isDark ? "#1a1f35" : "#f0f1ff", border: "1px solid #6366f130" }}>
-          <span className="flex-shrink-0 text-[10px] font-bold" style={{ color: "#6366f1" }}>🔒 Lock Pts</span>
+          <span className="flex-shrink-0 text-sm font-bold" style={{ color: "#6366f1" }}>🔒 Lock Pts</span>
           <input type="number" min="1" value={lockInput} onChange={e => setLockInput(e.target.value)} onKeyDown={e => e.key === "Enter" && applyLockPoints()}
-            placeholder="e.g. 10" className="min-w-0 flex-1 rounded-lg px-2 py-1 text-[10px] font-bold outline-none"
+            placeholder="e.g. 10" className="min-w-0 flex-1 rounded-lg px-2 py-1 text-sm font-bold outline-none"
             style={{ background: isDark ? "#0f172a" : "#fff", color: text, border: "1px solid #6366f140", ...MONO }} />
           {p.buyPrice > 0 && lockInput && !isNaN(parseFloat(lockInput)) && parseFloat(lockInput) > 0 && (
-            <span className="flex-shrink-0 whitespace-nowrap text-[10px] font-bold" style={{ color: "#6366f1" }}>→ ₹{fmt(p.buyPrice + parseFloat(lockInput))}</span>
+            <span className="flex-shrink-0 whitespace-nowrap text-sm font-bold" style={{ color: "#6366f1" }}>→ ₹{fmt(p.buyPrice + parseFloat(lockInput))}</span>
           )}
           <button onClick={applyLockPoints} disabled={!lockInput || isNaN(parseFloat(lockInput)) || parseFloat(lockInput) <= 0}
-            className="flex-shrink-0 rounded-lg px-2.5 py-1 text-[10px] font-bold text-white disabled:opacity-40" style={{ background: "#6366f1" }}>Set</button>
+            className="flex-shrink-0 rounded-lg px-2.5 py-1 text-sm font-bold text-white disabled:opacity-40" style={{ background: "#6366f1" }}>Set</button>
         </div>
       )}
 
       {(slSet !== null || tpSet !== null || lockTarget !== null) && (
         <div className="flex flex-wrap items-center gap-2 px-3 pb-3">
-          <span className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold" style={{ background: "#f59e0b18", color: "#f59e0b" }}>
+          <span className="flex items-center gap-1 rounded px-1.5 py-0.5 text-sm font-bold" style={{ background: "#f59e0b18", color: "#f59e0b" }}>
             <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: "#f59e0b" }} />MONITORING
           </span>
           {slSet !== null && (
-            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold" style={{ background: "#e11d4815", color: "#e11d48" }}>
+            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold" style={{ background: "#e11d4815", color: "#e11d48" }}>
               SL ₹{fmt(slSet)}
               <button onClick={() => { setSlSet(null); saveSLTP(p.tradingsymbol, { sl: null }); triggeredRef.current = false; }} className="ml-0.5 opacity-60 hover:opacity-100">×</button>
             </span>
           )}
           {tpSet !== null && (
-            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold" style={{ background: "#16a34a15", color: "#16a34a" }}>
+            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold" style={{ background: "#16a34a15", color: "#16a34a" }}>
               TP ₹{fmt(tpSet)}
               <button onClick={() => { setTpSet(null); saveSLTP(p.tradingsymbol, { tp: null }); triggeredRef.current = false; }} className="ml-0.5 opacity-60 hover:opacity-100">×</button>
             </span>
           )}
           {lockTarget !== null && (
-            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold" style={{ background: "#6366f115", color: "#6366f1" }}>
+            <span className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-bold" style={{ background: "#6366f115", color: "#6366f1" }}>
               🔒 +{lockSet}pts → ₹{fmt(lockTarget)}
               <button onClick={() => { setLockSet(null); setLockDir(null); setLockInput(""); saveSLTP(p.tradingsymbol, { lockPts: null, lockDir: null }); triggeredRef.current = false; }} className="ml-0.5 opacity-60 hover:opacity-100">×</button>
             </span>
           )}
-          <button onClick={() => setShowSLTP(true)} className="ml-auto text-[10px] font-bold underline" style={{ color: subtext }}>edit</button>
+          <button onClick={() => setShowSLTP(true)} className="ml-auto text-sm font-bold underline" style={{ color: subtext }}>edit</button>
         </div>
       )}
 
@@ -754,31 +754,31 @@ function PositionCard({ p, onExit, isExiting, defaultLockPts, accountDefaults }:
         <div className="mx-3 mb-3 flex flex-col gap-2 rounded-xl p-3" style={{ background: isDark ? "#1e293b" : "#f8fafc", border: `1px solid ${border}` }}>
           <div className="flex gap-2">
             <div className="flex-1">
-              <div className="mb-1 text-[10px] font-bold" style={{ color: subtext }}>Stop Loss ₹</div>
+              <div className="mb-1 text-sm font-bold" style={{ color: subtext }}>Stop Loss ₹</div>
               <input type="number" value={slInput} onChange={e => setSlInput(e.target.value)} placeholder={p.buyPrice > 0 ? fmt(p.buyPrice * 0.88) : "0.00"}
-                className="w-full rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none" style={{ background: isDark ? "#0f172a" : "#fff", color: text, border: `1px solid ${border}`, ...MONO }} />
+                className="w-full rounded-lg px-2 py-1.5 text-sm font-bold outline-none" style={{ background: isDark ? "#0f172a" : "#fff", color: text, border: `1px solid ${border}`, ...MONO }} />
             </div>
             <div className="flex-1">
-              <div className="mb-1 text-[10px] font-bold" style={{ color: subtext }}>Target ₹</div>
+              <div className="mb-1 text-sm font-bold" style={{ color: subtext }}>Target ₹</div>
               <input type="number" value={tpInput} onChange={e => setTpInput(e.target.value)} placeholder={p.buyPrice > 0 ? fmt(p.buyPrice * 1.24) : "0.00"}
-                className="w-full rounded-lg px-2 py-1.5 text-[10px] font-bold outline-none" style={{ background: isDark ? "#0f172a" : "#fff", color: text, border: `1px solid ${border}`, ...MONO }} />
+                className="w-full rounded-lg px-2 py-1.5 text-sm font-bold outline-none" style={{ background: isDark ? "#0f172a" : "#fff", color: text, border: `1px solid ${border}`, ...MONO }} />
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setShowSLTP(false)} className="flex-1 rounded-lg py-1.5 text-[10px] font-bold" style={{ background: isDark ? "#0f172a" : "#e2e8f0", color: subtext }}>Cancel</button>
-            <button onClick={confirmSLTP} className="flex-1 rounded-lg py-1.5 text-[10px] font-bold text-white" style={{ background: "#16a34a" }}>Set</button>
+            <button onClick={() => setShowSLTP(false)} className="flex-1 rounded-lg py-1.5 text-sm font-bold" style={{ background: isDark ? "#0f172a" : "#e2e8f0", color: subtext }}>Cancel</button>
+            <button onClick={confirmSLTP} className="flex-1 rounded-lg py-1.5 text-sm font-bold text-white" style={{ background: "#16a34a" }}>Set</button>
           </div>
         </div>
       )}
 
       {isOpen && (
         <div className="grid grid-cols-2 border-t" style={{ borderColor: border }}>
-          <button onClick={onExit} disabled={isExiting} className="flex items-center justify-center gap-2 border-r py-3.5 text-[12px] font-semibold disabled:opacity-50"
+          <button onClick={onExit} disabled={isExiting} className="flex items-center justify-center gap-2 border-r py-3.5 text-sm font-semibold disabled:opacity-50"
             style={{ color: "#1d6ff5", borderColor: border, background: isDark ? "#0a1628" : "#ebf3ff" }}>
             {isExiting && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#1d6ff5]/30 border-t-[#1d6ff5]" />}
             {isExiting ? "Exiting…" : "Instant Exit"}
           </button>
-          <button onClick={() => setShowSLTP(v => !v)} className="flex items-center justify-center gap-2 py-3.5 text-[12px] font-semibold" style={{ color: "#16a34a", background: isDark ? "#071a0e" : "#ecfdf5" }}>
+          <button onClick={() => setShowSLTP(v => !v)} className="flex items-center justify-center gap-2 py-3.5 text-sm font-semibold" style={{ color: "#16a34a", background: isDark ? "#071a0e" : "#ecfdf5" }}>
             {slSet || tpSet ? "Edit SL/Target" : "Add SL/Target"}
           </button>
         </div>
@@ -875,24 +875,24 @@ function ReportDownloader({ todayData }: { todayData: AccountData }) {
   }
 
   const pill = (label: string, active: boolean, onClick: () => void) => (
-    <button onClick={onClick} className="rounded-lg px-3 py-1 text-[10px] font-bold tracking-[0.5px]" style={{ ...MONO, background: active ? "#ea580c" : (isDark ? "#1e293b" : "#f1f5f9"), color: active ? "#fff" : muted }}>{label}</button>
+    <button onClick={onClick} className="rounded-lg px-3 py-1 text-sm font-bold tracking-[0.5px]" style={{ ...MONO, background: active ? "#ea580c" : (isDark ? "#1e293b" : "#f1f5f9"), color: active ? "#fff" : muted }}>{label}</button>
   );
 
   return (
     <div className="mb-4 flex flex-col gap-3 rounded-xl border p-4" style={{ background: isDark ? "#0f172a" : "#fff", borderColor: isDark ? "#1e293b" : "#e2e8f0" }}>
       <div className="flex items-center gap-1.5">
         <span style={{ color: "#ea580c" }}>⬇</span>
-        <span className="text-[9px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: subtext }}>Download P&amp;L Report</span>
+        <span className="text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: subtext }}>Download P&amp;L Report</span>
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-[9px] uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>Type</span>
+        <span className="text-xs uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>Type</span>
         <div className="flex gap-2">
           {pill("Trades", reportType === "trades", () => setReportType("trades"))}
           {pill("Daily Summary", reportType === "summary", () => setReportType("summary"))}
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <span className="text-[9px] uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>Period</span>
+        <span className="text-xs uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>Period</span>
         <div className="flex flex-wrap gap-2">
           {pill("Today", preset === "today", () => setPreset("today"))}
           {pill("This Month", preset === "month", () => setPreset("month"))}
@@ -904,15 +904,15 @@ function ReportDownloader({ todayData }: { todayData: AccountData }) {
         <div className="flex flex-wrap gap-3">
           {(["From", "To"] as const).map((label, i) => (
             <div key={label} className="flex flex-col gap-1">
-              <span className="text-[9px] uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>{label}</span>
+              <span className="text-xs uppercase tracking-[1px]" style={{ ...MONO, color: subtext }}>{label}</span>
               <input type="date" value={i === 0 ? from : to} onChange={e => i === 0 ? setFrom(e.target.value) : setTo(e.target.value)}
-                className="rounded-lg border px-2 py-1 text-[11px] outline-none" style={{ ...MONO, background: isDark ? "#1e293b" : "#f8fafc", borderColor: isDark ? "#334155" : "#e2e8f0", color: text }} />
+                className="rounded-lg border px-2 py-1 text-sm outline-none" style={{ ...MONO, background: isDark ? "#1e293b" : "#f8fafc", borderColor: isDark ? "#334155" : "#e2e8f0", color: text }} />
             </div>
           ))}
         </div>
       )}
-      {err && <span className="text-[10px]" style={{ ...MONO, color: "#e11d48" }}>{err}</span>}
-      <button onClick={handleDownload} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-[11px] font-bold uppercase tracking-[1px] disabled:opacity-50" style={{ ...MONO, background: "#ea580c", color: "#fff" }}>
+      {err && <span className="text-sm" style={{ ...MONO, color: "#e11d48" }}>{err}</span>}
+      <button onClick={handleDownload} disabled={busy} className="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold uppercase tracking-[1px] disabled:opacity-50" style={{ ...MONO, background: "#ea580c", color: "#fff" }}>
         <span>⬇</span>{busy ? "Downloading…" : "Download CSV"}
       </button>
     </div>

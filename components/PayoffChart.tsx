@@ -75,7 +75,7 @@ function drawPayoffChart(canvas: HTMLCanvasElement, strike: number, type: "CE" |
   }
 
   ctx.fillStyle = axisText;
-  ctx.font = "9px 'Space Mono', monospace";
+  ctx.font = "12px 'Inter', sans-serif";
   ctx.textAlign = "center";
   for (let i = 0; i <= 8; i++) {
     const p = minP + (i / 8) * (maxP - minP);
@@ -134,9 +134,9 @@ function drawPayoffChart(canvas: HTMLCanvasElement, strike: number, type: "CE" |
     ctx!.restore();
     ctx!.fillStyle = color;
     ctx!.textAlign = "center";
-    ctx!.font = "bold 7px 'Space Mono', monospace";
+    ctx!.font = "bold 12px 'Inter', sans-serif";
     ctx!.fillText(topTag, x, P.t - 22);
-    ctx!.font = "8px 'Space Mono', monospace";
+    ctx!.font = "12px 'Inter', sans-serif";
     ctx!.fillText(val, x, P.t - 11);
   }
   vline(strike, isDark ? "#475569" : "#94a3b8", [3, 3], 1, "STRIKE", strike.toLocaleString("en-IN"));
@@ -160,7 +160,7 @@ function drawPayoffChart(canvas: HTMLCanvasElement, strike: number, type: "CE" |
     ctx.stroke();
     const lbl = `${curPnL >= 0 ? "+" : ""}₹${Math.abs(Math.round(curPnL)).toLocaleString("en-IN")}`;
     ctx.fillStyle = curPnL >= 0 ? "#16a34a" : "#e11d48";
-    ctx.font = "bold 11px 'Space Mono', monospace";
+    ctx.font = "bold 14px 'Inter', sans-serif";
     ctx.textAlign = sX > W * 0.6 ? "right" : "left";
     ctx.fillText(lbl, sX + (sX > W * 0.6 ? -12 : 12), dotY - 10);
   }
@@ -173,12 +173,12 @@ function drawPayoffChart(canvas: HTMLCanvasElement, strike: number, type: "CE" |
   ctx.translate(13, P.t + ch / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.fillStyle = axisText;
-  ctx.font = "8px 'Space Mono', monospace";
+  ctx.font = "12px 'Inter', sans-serif";
   ctx.textAlign = "center";
   ctx.fillText("P&L AT EXPIRY  (₹)", 0, 0);
   ctx.restore();
   ctx.fillStyle = axisText;
-  ctx.font = "8px 'Space Mono', monospace";
+  ctx.font = "12px 'Inter', sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(`${indexLabel} AT EXPIRY`, P.l + cw / 2, H - 10);
 }
@@ -235,8 +235,8 @@ export function PayoffChart({ target, spot, indexLabel, onClose }: { target: Pay
       <div className="grid flex-shrink-0 grid-cols-3 divide-x border-t sm:grid-cols-6" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
         {stats.map(({ label, val, color }) => (
           <div key={label} className="px-3 py-2.5 text-center" style={{ borderColor: "var(--border)" }}>
-            <div className="mb-1 text-[7px] uppercase tracking-[1.5px]" style={{ fontFamily: "'Space Mono', monospace", color: "var(--text-faint)" }}>{label}</div>
-            <div className="text-[12px] font-bold leading-tight" style={{ fontFamily: "'Space Mono', monospace", color }}>{val}</div>
+            <div className="mb-1 text-xs uppercase tracking-[1.5px]" style={{ fontFamily: "'Inter', sans-serif", color: "var(--text-faint)" }}>{label}</div>
+            <div className="text-sm font-bold leading-tight" style={{ fontFamily: "'Inter', sans-serif", color }}>{val}</div>
           </div>
         ))}
       </div>
@@ -245,7 +245,7 @@ export function PayoffChart({ target, spot, indexLabel, onClose }: { target: Pay
         {legend.map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div className="h-[2px] w-5 rounded-full" style={{ background: color }} />
-            <span className="text-[8px]" style={{ fontFamily: "'Space Mono', monospace", color: "var(--text-faint)" }}>{label}</span>
+            <span className="text-xs" style={{ fontFamily: "'Inter', sans-serif", color: "var(--text-faint)" }}>{label}</span>
           </div>
         ))}
       </div>

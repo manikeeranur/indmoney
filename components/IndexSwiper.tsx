@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 
 const INDEX_META: Record<string, { label: string; exchange: "NSE" | "BSE" }> = {
   "NSE:NIFTY 50": { label: "NIFTY 50", exchange: "NSE" },
@@ -72,15 +72,15 @@ export default function IndexSwiper() {
         return (
           <div key={idx.key} className="flex flex-shrink-0 flex-col gap-0.5 rounded-xl px-3 py-2" style={{ background: bg, border: `1px solid ${border}`, minWidth: 110 }}>
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate text-[9px] font-black" style={{ ...MONO, color: txtPri }}>{meta.label}</span>
-              <span className="flex-shrink-0 rounded px-1 py-0.5 text-[7px] font-bold" style={{ background: isDark ? "#1e2a3a" : "#f1f5f9", color: txtMut }}>{meta.exchange}</span>
+              <span className="truncate text-xs font-black" style={{ ...MONO, color: txtPri }}>{meta.label}</span>
+              <span className="flex-shrink-0 rounded px-1 py-0.5 text-xs font-bold" style={{ background: isDark ? "#1e2a3a" : "#f1f5f9", color: txtMut }}>{meta.exchange}</span>
             </div>
-            <span className="tabular-nums text-start text-[13px] font-black leading-tight" style={{ ...MONO, color: txtPri }}>
+            <span className="tabular-nums text-start text-base font-black leading-tight" style={{ ...MONO, color: txtPri }}>
               {idx.ltp > 0 ? idx.ltp.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (idx.prevClose > 0 ? idx.prevClose.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—")}
             </span>
             <div className="flex items-center gap-1">
-              <span className="tabular-nums text-[9px] font-bold" style={{ ...MONO, color: clr }}>{up ? "▲" : "▼"} {Math.abs(idx.ltpChange).toFixed(2)}</span>
-              <span className="tabular-nums text-[8px] font-bold" style={{ ...MONO, color: clr }}>({Math.abs(pct).toFixed(2)}%)</span>
+              <span className="tabular-nums text-xs font-bold" style={{ ...MONO, color: clr }}>{up ? "▲" : "▼"} {Math.abs(idx.ltpChange).toFixed(2)}</span>
+              <span className="tabular-nums text-xs font-bold" style={{ ...MONO, color: clr }}>({Math.abs(pct).toFixed(2)}%)</span>
             </div>
           </div>
         );

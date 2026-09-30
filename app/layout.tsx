@@ -3,10 +3,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/theme";
 import FontLoader from "@/components/FontLoader";
 
-// ~30 places across the app set fontFamily: "'Space Mono', monospace" /
-// "'Bebas Neue', ..." directly (inline styles, SVG text, <canvas> ctx.font
+// ~30 places across the app set fontFamily: "'Inter', sans-serif" directly (inline styles, SVG text, <canvas> ctx.font
 // strings for the chart/payoff-diagram drawing) — those need the literal
-// Google font names registered globally, which next/font/google can't do (it
+// Google font name registered globally, which next/font/google can't do (it
 // always scopes to a generated local name), so the stylesheet link stays,
 // just loaded non-blocking via FontLoader instead of globals.css's old
 // @import (which forced the browser to download+parse the whole CSS file,

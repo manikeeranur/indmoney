@@ -12,8 +12,8 @@ import { LOT_SIZE, NUM_LOTS } from "@/lib/strategies/constants";
 import { useTheme } from "@/lib/theme";
 import { useAccountQty } from "@/lib/useAccountQty";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
-const BEBAS = { fontFamily: "'Bebas Neue', sans-serif" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
+const BEBAS = { fontFamily: "'Inter', sans-serif" } as const;
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_NAMES = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
 type Strategy = "smc" | "vwap930";
@@ -67,7 +67,7 @@ function calcCharges(entryPrice: number, exitPrice: number, qty: number): number
   return brokerage + stt + exchange + sebi + gst + stamp;
 }
 const STATUS_COLOR: Record<string, string> = { TARGET: "#22c55e", TIME_PROFIT: "#22c55e", SL: "#ef4444", TIME_EXIT: "#ef4444", EOD: "#94a3b8", ACTIVE: "#60a5fa" };
-const COLS_DESKTOP = "40px 120px 1fr 90px 70px 70px 72px 72px 90px 155px 90px 65px 130px";
+const COLS_DESKTOP = "40px 140px minmax(100px, 1fr) 100px 76px 76px 76px 76px 96px 150px 96px 70px 130px";
 
 function buildCalendar(year: number, month: number): (number | null)[] {
   const firstDay = new Date(year, month - 1, 1).getDay();
@@ -142,19 +142,19 @@ export default function ResultsPage() {
 
         {viewMode === "table" && winRate !== null && (
           <div className="flex flex-shrink-0 items-center gap-1.5 rounded-sm border px-2 py-1" style={{ background: Number(winRate) >= 70 ? (isDark ? "#052e16" : "#f0fdf4") : (isDark ? "#2d0505" : "#fef2f2"), borderColor: Number(winRate) >= 70 ? (isDark ? "#166534" : "#bbf7d0") : (isDark ? "#991b1b" : "#fecaca") }}>
-            <span className="whitespace-nowrap text-[9px] font-bold" style={{ ...MONO, color: Number(winRate) >= 70 ? "#16a34a" : "#e11d48" }}>{winRate}% · {wins}W/{losses}L{eod > 0 ? ` · ${eod}E` : ""}</span>
+            <span className="whitespace-nowrap text-xs font-bold" style={{ ...MONO, color: Number(winRate) >= 70 ? "#16a34a" : "#e11d48" }}>{winRate}% · {wins}W/{losses}L{eod > 0 ? ` · ${eod}E` : ""}</span>
           </div>
         )}
         {viewMode === "table" && rows.length > 0 && (
           <div className="hidden flex-shrink-0 items-center gap-1.5 sm:flex">
-            <span className="text-[7px] tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>LOT P&L</span>
-            <span className="text-[13px] font-bold" style={{ ...BEBAS, color: pnlColor(lotPnL) }}>{lotPnL >= 0 ? "+" : ""}₹{Math.abs(lotPnL).toFixed(0)}</span>
+            <span className="text-xs tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>LOT P&L</span>
+            <span className="text-base font-bold" style={{ ...BEBAS, color: pnlColor(lotPnL) }}>{lotPnL >= 0 ? "+" : ""}₹{Math.abs(lotPnL).toFixed(0)}</span>
           </div>
         )}
 
         <div className="ml-auto flex flex-shrink-0 items-center gap-2">
           {viewMode === "table" && (
-            <select value={selDate} onChange={e => setSelDate(e.target.value)} className="cursor-pointer rounded-sm border px-2 py-1 text-[10px] outline-none" style={{ ...MONO, borderColor: "var(--border)", background: "var(--card)", color: "var(--text)" }}>
+            <select value={selDate} onChange={e => setSelDate(e.target.value)} className="cursor-pointer rounded-sm border px-2 py-1 text-sm outline-none" style={{ ...MONO, borderColor: "var(--border)", background: "var(--card)", color: "var(--text)" }}>
               {(dates[tab] ?? []).map(d => <option key={d} value={d}>{d}</option>)}
               {!(dates[tab]?.length) && <option value="">— no data —</option>}
             </select>
@@ -172,14 +172,14 @@ export default function ResultsPage() {
           <div className="mb-4 flex flex-shrink-0 items-center justify-center gap-4">
             <button onClick={() => setCalMonth(m => { const d = new Date(m.year, m.month - 2, 1); return { year: d.getFullYear(), month: d.getMonth() + 1 }; })}
               className="flex h-7 w-7 items-center justify-center rounded text-base font-bold" style={{ background: "var(--card)", color: "var(--text)" }}>‹</button>
-            <span className="text-[12px] font-bold tracking-[2px]" style={{ ...MONO, color: "var(--text)", minWidth: 160, textAlign: "center" }}>{MONTH_NAMES[calMonth.month - 1].toUpperCase()} {calMonth.year}</span>
+            <span className="text-sm font-bold tracking-[2px]" style={{ ...MONO, color: "var(--text)", minWidth: 160, textAlign: "center" }}>{MONTH_NAMES[calMonth.month - 1].toUpperCase()} {calMonth.year}</span>
             <button onClick={() => setCalMonth(m => { const d = new Date(m.year, m.month, 1); return { year: d.getFullYear(), month: d.getMonth() + 1 }; })}
               className="flex h-7 w-7 items-center justify-center rounded text-base font-bold" style={{ background: "var(--card)", color: "var(--text)" }}>›</button>
           </div>
 
           <div className="rounded border p-1" style={{ borderColor: "var(--border)" }}>
             <div className="mb-1.5 grid grid-cols-7 gap-1">
-              {DAY_NAMES.map(d => <div key={d} className="rounded-sm py-1.5 text-center text-[8px] font-bold tracking-[1.5px] md:text-[12px]" style={{ ...MONO, color: "var(--text-muted)", background: isDark ? "#1a2332" : "#e2e8f0" }}>{d}</div>)}
+              {DAY_NAMES.map(d => <div key={d} className="rounded-sm py-1.5 text-center text-xs font-bold tracking-[1.5px] md:text-sm" style={{ ...MONO, color: "var(--text-muted)", background: isDark ? "#1a2332" : "#e2e8f0" }}>{d}</div>)}
             </div>
             <div className="grid grid-cols-7 gap-1">
               {buildCalendar(calMonth.year, calMonth.month).map((day, i) => {
@@ -197,13 +197,13 @@ export default function ResultsPage() {
                   <div key={i} onClick={() => { if (hasData) { setSelDate(dateStr); setViewMode("table"); } }}
                     className="flex min-h-[56px] flex-col rounded-lg p-1.5 transition-colors sm:min-h-[72px] sm:p-2"
                     style={{ background: bg, border: `${isToday ? "2px" : "1px"} solid ${borderColor}`, cursor: hasData ? "pointer" : "default" }}>
-                    <span className="text-[10px] font-bold md:text-[12px]" style={{ ...MONO, color: isToday ? tabAccent : "var(--text)" }}>{day}</span>
-                    {isHoliday && <span className="mt-0.5 break-words text-[9px] font-bold leading-tight" style={{ ...MONO, color: "#b45309" }}>{holiday}</span>}
+                    <span className="text-sm font-bold md:text-sm" style={{ ...MONO, color: isToday ? tabAccent : "var(--text)" }}>{day}</span>
+                    {isHoliday && <span className="mt-0.5 break-words text-xs font-bold leading-tight" style={{ ...MONO, color: "#b45309" }}>{holiday}</span>}
                     {hasData && lotPnl !== null && (
                       <>
-                        <span className="mt-auto text-[10px] font-bold leading-tight sm:hidden" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtLotPnl(lotPnl)}</span>
-                        <span className="mt-auto hidden text-[10px] font-bold leading-tight sm:block md:text-[12px]" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtLotPnlFull(lotPnl)}</span>
-                        <span className="mt-0.5 hidden text-[7px] sm:block" style={{ ...MONO, color: "var(--text-muted)" }}>{data.trades}T · {data.wins}W</span>
+                        <span className="mt-auto text-sm font-bold leading-tight sm:hidden" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtLotPnl(lotPnl)}</span>
+                        <span className="mt-auto hidden text-sm font-bold leading-tight sm:block md:text-sm" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtLotPnlFull(lotPnl)}</span>
+                        <span className="mt-0.5 hidden text-xs sm:block" style={{ ...MONO, color: "var(--text-muted)" }}>{data.trades}T · {data.wins}W</span>
                       </>
                     )}
                   </div>
@@ -222,14 +222,14 @@ export default function ResultsPage() {
                   ["MONTH LOT P&L", fmtLotPnl(monthStats.totalPnL * LOT_QTY), pnlColor(monthStats.totalPnL)],
                 ].map(([label, val, color]) => (
                   <div key={label} className="px-3 py-2.5" style={{ background: "var(--bg-elevated)" }}>
-                    <div className="mb-1 text-[7px] uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{label}</div>
-                    <div className="text-[14px] font-bold leading-tight" style={{ ...MONO, color }}>{val}</div>
+                    <div className="mb-1 text-xs uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{label}</div>
+                    <div className="text-base font-bold leading-tight" style={{ ...MONO, color }}>{val}</div>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="mt-6 text-center text-[10px]" style={{ ...MONO, color: "var(--text-faint)" }}>No {tab} data for {MONTH_NAMES[calMonth.month - 1]} {calMonth.year}</div>
+            <div className="mt-6 text-center text-sm" style={{ ...MONO, color: "var(--text-faint)" }}>No {tab} data for {MONTH_NAMES[calMonth.month - 1]} {calMonth.year}</div>
           )}
         </div>
       ) : (
@@ -258,45 +258,45 @@ export default function ResultsPage() {
                       <div className="flex items-start justify-between gap-2 px-3 py-3" style={{ background: isWin ? (isDark ? "rgba(34,197,94,0.04)" : "rgba(34,197,94,0.03)") : isLoss ? (isDark ? "rgba(239,68,68,0.04)" : "rgba(239,68,68,0.03)") : undefined }}>
                         <div className="flex flex-1 items-start gap-2.5 min-w-0">
                           <div className="flex h-10 w-10 flex-shrink-0 flex-col items-center justify-center rounded-xl" style={{ background: `${dc}18`, border: `1.5px solid ${dc}40` }}>
-                            <span className="text-[7px] font-bold" style={{ ...MONO, color: "var(--text-muted)" }}>NI</span>
-                            <span className="text-[12px] font-bold" style={{ ...BEBAS, color: dc }}>{r.Direction}</span>
+                            <span className="text-xs font-bold" style={{ ...MONO, color: "var(--text-muted)" }}>NI</span>
+                            <span className="text-sm font-bold" style={{ ...BEBAS, color: dc }}>{r.Direction}</span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-[15px] font-bold leading-tight" style={{ ...BEBAS, color: "var(--text)" }}>NIFTY {r.Strike} {r.Direction === "CE" ? "Call" : "Put"}</div>
-                            <div className="mt-0.5 text-[8px]" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtTime(r.EntryTime)}{r.ExitTime ? ` → ${fmtTime(r.ExitTime)}` : " → ACTIVE"}</div>
+                            <div className="text-base font-bold leading-tight" style={{ ...BEBAS, color: "var(--text)" }}>NIFTY {r.Strike} {r.Direction === "CE" ? "Call" : "Put"}</div>
+                            <div className="mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtTime(r.EntryTime)}{r.ExitTime ? ` → ${fmtTime(r.ExitTime)}` : " → ACTIVE"}</div>
                             {r.Concepts && (
                               <div className="mt-1 flex flex-wrap gap-1">
-                                {r.Concepts.split(",").map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: "var(--text-muted)" }}>{c.trim()}</span>)}
+                                {r.Concepts.split(",").map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-xs font-bold" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: "var(--text-muted)" }}>{c.trim()}</span>)}
                               </div>
                             )}
                           </div>
                         </div>
                         <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
-                          <span className="rounded-full px-2 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: `${sc}18`, color: sc, border: `1px solid ${sc}40` }}>{stIco} {stLbl}</span>
+                          <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ ...MONO, background: `${sc}18`, color: sc, border: `1px solid ${sc}40` }}>{stIco} {stLbl}</span>
                           <div className="flex gap-1">
-                            <span className="rounded-sm px-1.5 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : "var(--text-faint)" }}>T1{t1Hit ? "✓" : "✗"}</span>
-                            <span className="rounded-sm px-1.5 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : "var(--text-faint)" }}>T2{t2Hit ? "✓" : "✗"}</span>
+                            <span className="rounded-sm px-1.5 py-0.5 text-xs font-bold" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : "var(--text-faint)" }}>T1{t1Hit ? "✓" : "✗"}</span>
+                            <span className="rounded-sm px-1.5 py-0.5 text-xs font-bold" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : "var(--text-faint)" }}>T2{t2Hit ? "✓" : "✗"}</span>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 border-t px-3 py-1.5" style={{ background: isDark ? "#0d1420" : "#f8fafc", borderColor: isDark ? "#1e2a3a" : "#e2e8f0" }}>
-                        <span className="text-[9px] font-bold" style={{ ...MONO, color: "#b45309" }}>T1 ₹{r.Target1 ?? "—"}{t1Hit ? " ✓" : ""}</span>
-                        <span className="text-[9px] font-bold" style={{ ...MONO, color: "#16a34a" }}>T2 ₹{r.Target2 ?? "—"}{t2Hit ? " ✓" : ""}</span>
-                        {r.MaxPoints && <span className="text-[9px] font-bold" style={{ ...MONO, color: "#7c3aed" }}>MAX +{r.MaxPoints} (+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%)</span>}
+                        <span className="text-xs font-bold" style={{ ...MONO, color: "#b45309" }}>T1 ₹{r.Target1 ?? "—"}{t1Hit ? " ✓" : ""}</span>
+                        <span className="text-xs font-bold" style={{ ...MONO, color: "#16a34a" }}>T2 ₹{r.Target2 ?? "—"}{t2Hit ? " ✓" : ""}</span>
+                        {r.MaxPoints && <span className="text-xs font-bold" style={{ ...MONO, color: "#7c3aed" }}>MAX +{r.MaxPoints} (+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%)</span>}
                       </div>
                       <div className="grid grid-cols-3 border-t" style={{ gap: "1px", background: isDark ? "#1e2a3a" : "#e2e8f0" }}>
                         <div className="px-3 py-2" style={{ background: isDark ? "#0a0f16" : "#f8fafc" }}>
-                          <div className="mb-0.5 text-[7px] tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>ENTRY</div>
-                          <div className="tabular-nums text-[12px] font-bold" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>
+                          <div className="mb-0.5 text-xs tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>ENTRY</div>
+                          <div className="tabular-nums text-sm font-bold" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>
                         </div>
                         <div className="px-3 py-2" style={{ background: isDark ? "#0a0f16" : "#f8fafc" }}>
-                          <div className="mb-0.5 text-[7px] tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>STOP LOSS</div>
-                          <div className="tabular-nums text-[12px] font-bold" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>
+                          <div className="mb-0.5 text-xs tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>STOP LOSS</div>
+                          <div className="tabular-nums text-sm font-bold" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>
                         </div>
                         <div className="px-3 py-2" style={{ background: isDark ? "#0a0f16" : "#f8fafc" }}>
-                          <div className="mb-0.5 text-[7px] tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>LOT P&L</div>
-                          <div className="tabular-nums text-[13px] font-bold" style={{ ...MONO, color: pnlColor(lPnl) }}>{fmtLotPnl(lPnl)}</div>
-                          <div className="text-[8px]" style={{ ...MONO, color: pnlColor(pnlPct) }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%</div>
+                          <div className="mb-0.5 text-xs tracking-[1px]" style={{ ...MONO, color: "var(--text-muted)" }}>LOT P&L</div>
+                          <div className="tabular-nums text-base font-bold" style={{ ...MONO, color: pnlColor(lPnl) }}>{fmtLotPnl(lPnl)}</div>
+                          <div className="text-xs" style={{ ...MONO, color: pnlColor(pnlPct) }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%</div>
                         </div>
                       </div>
                     </div>
@@ -310,8 +310,8 @@ export default function ResultsPage() {
                       { label: "LOT P&L", val: fmtLotPnl(lotPnL), color: pnlColor(lotPnL) },
                     ].map(({ label, val, color }) => (
                       <div key={label} className="px-3 py-2.5 text-center" style={{ background: isDark ? "#0a0f16" : "#fff" }}>
-                        <div className="mb-1 text-[7px] tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)" }}>{label}</div>
-                        <div className="text-[15px] font-bold" style={{ ...MONO, color }}>{val}</div>
+                        <div className="mb-1 text-xs tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)" }}>{label}</div>
+                        <div className="text-base font-bold" style={{ ...MONO, color }}>{val}</div>
                       </div>
                     ))}
                   </div>
@@ -321,10 +321,10 @@ export default function ResultsPage() {
               {/* Desktop table */}
               <div className="hidden flex-1 flex-col overflow-hidden md:flex">
                 <div className="flex-1 overflow-auto">
-                  <div style={{ minWidth: 900 }}>
+                  <div style={{ minWidth: 1230 }}>
                     <div className="grid flex-shrink-0 border-b-2" style={{ gridTemplateColumns: COLS_DESKTOP, borderColor: isDark ? "#1e2a3a" : "#cbd5e1", background: isDark ? "#080d14" : "#f8fafc" }}>
                       {["#", "TIME", "CONCEPTS", "STRIKE", "ENTRY", "SL", "T1", "T2", "STATUS", `P&L · LOT (${acctQty}×${LOT_SIZE}=${LOT_QTY})`, "CHARGES", "MAX PTS", "MAX PROFITS"].map(h => (
-                        <div key={h} className="px-2 py-2 text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{h}</div>
+                        <div key={h} className="px-2 py-2 text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{h}</div>
                       ))}
                     </div>
                     <div>
@@ -347,38 +347,38 @@ export default function ResultsPage() {
                         const rowBg = isWin ? (isDark ? "#052e16" : "#f0fdf4") : isLoss ? (isDark ? "#2d0505" : "#fff5f5") : isEod ? (isDark ? "#1c1500" : "#fefce8") : i % 2 === 0 ? (isDark ? "#0a0f16" : "#fff") : (isDark ? "#0d1420" : "#fafafa");
                         return (
                           <div key={i} className="grid items-center border-b transition-colors" style={{ gridTemplateColumns: COLS_DESKTOP, background: rowBg, borderColor: isDark ? "#0f1923" : "#f1f5f9" }}>
-                            <div className="px-2 py-2.5 text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>{i + 1}</div>
+                            <div className="px-2 py-2.5 text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{i + 1}</div>
                             <div className="px-2 py-2.5">
-                              <div className="text-[10px] font-bold" style={{ ...MONO, color: "var(--text)" }}>{fmtTime(r.EntryTime)}</div>
-                              <div className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>→{fmtTime(r.ExitTime)}</div>
+                              <div className="text-sm font-bold" style={{ ...MONO, color: "var(--text)" }}>{fmtTime(r.EntryTime)}</div>
+                              <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>→{fmtTime(r.ExitTime)}</div>
                             </div>
                             <div className="flex flex-wrap gap-1 px-2 py-2.5">
-                              <span className="rounded-sm px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: `${dc}18`, color: dc, border: `1px solid ${dc}30` }}>{r.Direction}</span>
-                              {r.Concepts && r.Concepts.split(",").map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: "var(--text-muted)" }}>{c.trim()}</span>)}
+                              <span className="rounded-sm px-1.5 py-0.5 text-xs font-bold" style={{ ...MONO, background: `${dc}18`, color: dc, border: `1px solid ${dc}30` }}>{r.Direction}</span>
+                              {r.Concepts && r.Concepts.split(",").map(c => <span key={c} className="rounded-sm px-1 py-0.5 text-xs font-bold" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: "var(--text-muted)" }}>{c.trim()}</span>)}
                             </div>
                             <div className="px-2 py-2.5">
-                              <div className="text-[11px] font-bold" style={{ ...MONO, color: dc }}>{r.Strike} {r.Direction}</div>
+                              <div className="text-sm font-bold" style={{ ...MONO, color: dc }}>{r.Strike} {r.Direction}</div>
                             </div>
-                            <div className="tabular-nums px-2 py-2.5 text-[12px] font-bold" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>
-                            <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>
-                            <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#b45309" }}>₹{r.Target1}</div>
-                            <div className="tabular-nums px-2 py-2.5 text-[11px] font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{r.Target2}</div>
+                            <div className="tabular-nums px-2 py-2.5 text-sm font-bold" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>
+                            <div className="tabular-nums px-2 py-2.5 text-sm font-bold" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>
+                            <div className="tabular-nums px-2 py-2.5 text-sm font-bold" style={{ ...MONO, color: "#b45309" }}>₹{r.Target1}</div>
+                            <div className="tabular-nums px-2 py-2.5 text-sm font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{r.Target2}</div>
                             <div className="px-2 py-2.5">
                               <div className="mb-0.5 flex items-center gap-1">
-                                <span className="text-[9px]">{stIcon}</span>
-                                <span className="text-[8px] font-bold" style={{ ...MONO, color: stColor }}>{stLabel}</span>
+                                <span className="text-xs">{stIcon}</span>
+                                <span className="text-xs font-bold" style={{ ...MONO, color: stColor }}>{stLabel}</span>
                               </div>
                               <div className="mb-0.5 flex gap-1">
-                                <span className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : "var(--text-faint)" }}>T1{t1Hit ? "✓" : "✗"}</span>
-                                <span className="rounded-sm px-1 py-0.5 text-[7px] font-bold" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : "var(--text-faint)" }}>T2{t2Hit ? "✓" : "✗"}</span>
+                                <span className="rounded-sm px-1 py-0.5 text-xs font-bold" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : "var(--text-faint)" }}>T1{t1Hit ? "✓" : "✗"}</span>
+                                <span className="rounded-sm px-1 py-0.5 text-xs font-bold" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : "var(--text-faint)" }}>T2{t2Hit ? "✓" : "✗"}</span>
                               </div>
-                              <div className="text-[8px] font-bold" style={{ ...MONO, color: stColor }}>{fmtLotPnl(lPnL)}</div>
+                              <div className="text-xs font-bold" style={{ ...MONO, color: stColor }}>{fmtLotPnl(lPnL)}</div>
                             </div>
                             <div className="px-2 py-2.5">
-                              <div className="tabular-nums text-[12px] font-bold leading-tight" style={{ ...MONO, color: pnlClr }}>{pnl >= 0 ? "+" : "−"}₹{fmtFull(lPnL)}</div>
-                              <div className="tabular-nums mt-0.5 text-[8px] font-bold" style={{ ...MONO, color: pnlClr }}>₹{Math.abs(pnl).toFixed(2)} × {LOT_QTY}</div>
-                              <div className="text-[8px]" style={{ ...MONO, color: pnlClr }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%</div>
-                              {pnl !== 0 && <div className="tabular-nums mt-0.5 text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>exit ₹{(parseFloat(r.Entry) + pnl).toFixed(2)}</div>}
+                              <div className="tabular-nums text-sm font-bold leading-tight" style={{ ...MONO, color: pnlClr }}>{pnl >= 0 ? "+" : "−"}₹{fmtFull(lPnL)}</div>
+                              <div className="tabular-nums mt-0.5 text-xs font-bold" style={{ ...MONO, color: pnlClr }}>₹{Math.abs(pnl).toFixed(2)} × {LOT_QTY}</div>
+                              <div className="text-xs" style={{ ...MONO, color: pnlClr }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%</div>
+                              {pnl !== 0 && <div className="tabular-nums mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>exit ₹{(parseFloat(r.Entry) + pnl).toFixed(2)}</div>}
                             </div>
                             <div className="px-2 py-2.5">
                               {(() => {
@@ -387,8 +387,8 @@ export default function ResultsPage() {
                                 const charges = calcCharges(entry, exitP, LOT_QTY);
                                 return (
                                   <>
-                                    <div className="tabular-nums text-[11px] font-bold" style={{ ...MONO, color: "#b45309" }}>−₹{fmtFull(charges)}</div>
-                                    <div className="mt-0.5 text-[7px]" style={{ ...MONO, color: "var(--text-faint)" }}>incl. STT+GST</div>
+                                    <div className="tabular-nums text-sm font-bold" style={{ ...MONO, color: "#b45309" }}>−₹{fmtFull(charges)}</div>
+                                    <div className="mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>incl. STT+GST</div>
                                   </>
                                 );
                               })()}
@@ -396,22 +396,22 @@ export default function ResultsPage() {
                             <div className="px-2 py-2.5">
                               {r.MaxPoints && parseFloat(r.MaxPoints) > 0 ? (
                                 <>
-                                  <div className="tabular-nums text-[11px] font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{r.MaxPoints}</div>
-                                  <div className="tabular-nums text-[8px] font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%</div>
+                                  <div className="tabular-nums text-sm font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{r.MaxPoints}</div>
+                                  <div className="tabular-nums text-xs font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%</div>
                                 </>
-                              ) : <div className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>—</div>}
+                              ) : <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>—</div>}
                             </div>
                             <div className="px-2 py-2.5">
                               {r.MaxPoints && parseFloat(r.MaxPoints) > 0 ? (() => {
                                 const maxLot = parseFloat(r.MaxPoints) * LOT_QTY;
                                 return (
                                   <>
-                                    <div className="tabular-nums text-[12px] font-bold leading-tight" style={{ ...MONO, color: "#7c3aed" }}>+₹{fmtFull(maxLot)}</div>
-                                    <div className="tabular-nums mt-0.5 text-[8px] font-bold" style={{ ...MONO, color: "#7c3aed" }}>{r.MaxPoints} × {LOT_QTY}</div>
-                                    <div className="tabular-nums text-[8px] font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%</div>
+                                    <div className="tabular-nums text-sm font-bold leading-tight" style={{ ...MONO, color: "#7c3aed" }}>+₹{fmtFull(maxLot)}</div>
+                                    <div className="tabular-nums mt-0.5 text-xs font-bold" style={{ ...MONO, color: "#7c3aed" }}>{r.MaxPoints} × {LOT_QTY}</div>
+                                    <div className="tabular-nums text-xs font-bold" style={{ ...MONO, color: "#7c3aed" }}>+{((parseFloat(r.MaxPoints) / (parseFloat(r.Entry) || 1)) * 100).toFixed(1)}%</div>
                                   </>
                                 );
-                              })() : <div className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>—</div>}
+                              })() : <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>—</div>}
                             </div>
                           </div>
                         );
@@ -432,9 +432,9 @@ export default function ResultsPage() {
                       { label: `LOT P&L (${LOT_QTY}×)`, val: `${lotPnL >= 0 ? "+" : "−"}₹${fmtFull(lotPnL)}`, color: pnlColor(lotPnL) },
                     ].map(({ label, val, color, sub }: any) => (
                       <div key={label} className="px-3 py-2.5" style={{ background: "var(--bg-elevated)" }}>
-                        <div className="mb-1 text-[7px] uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{label}</div>
-                        <div className="text-[15px] font-bold leading-tight" style={{ ...MONO, color }}>{val}</div>
-                        {sub && <div className="mt-0.5 text-[7px]" style={{ ...MONO, color: "var(--text-faint)" }}>{sub}</div>}
+                        <div className="mb-1 text-xs uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)" }}>{label}</div>
+                        <div className="text-base font-bold leading-tight" style={{ ...MONO, color }}>{val}</div>
+                        {sub && <div className="mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{sub}</div>}
                       </div>
                     ))}
                   </div>
@@ -452,7 +452,7 @@ function SegButton<T extends string>({ value, onChange, options }: { value: T; o
   return (
     <div className="flex flex-shrink-0 overflow-hidden rounded-sm border" style={{ borderColor: "var(--border)" }}>
       {options.map(([v, label, color]) => (
-        <button key={v} onClick={() => onChange(v)} className="whitespace-nowrap px-2 py-1.5 text-[9px] font-bold tracking-[1px] transition-colors sm:px-3"
+        <button key={v} onClick={() => onChange(v)} className="whitespace-nowrap px-2 py-1.5 text-xs font-bold tracking-[1px] transition-colors sm:px-3"
           style={{ ...MONO, background: value === v ? color : "transparent", color: value === v ? "#fff" : "var(--text-muted)" }}>
           {label}
         </button>

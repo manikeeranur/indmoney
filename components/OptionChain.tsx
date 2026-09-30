@@ -17,7 +17,7 @@ import { useTheme } from "@/lib/theme";
 import { MIN_PREMIUM, MAX_PREMIUM } from "@/lib/strategies/constants";
 import type { ChainRow as ChainRowT, OptionChain as Chain, Leg } from "@/lib/broker/types";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 const index = "NIFTY";
 
 type WatchedItem = { token: number; tradingsymbol: string; strike: number; type: string; ltp: number };
@@ -132,20 +132,20 @@ export function OptionChainView() {
           <div className="hidden flex-shrink-0 border-b border-[var(--border)] md:block">
             <div className="chain-grid">
               <div className="py-2 border-r border-[var(--border)]" style={{ background: "var(--ce-tint)" }} />
-              <div className="chain-col-oi px-3 py-2 text-right text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--ce)", background: "var(--ce-tint)" }}>CE OI</div>
-              <div className="px-3 py-2 text-right text-[8px] font-bold uppercase tracking-[1.5px] border-r border-[var(--border)]" style={{ ...MONO, color: "var(--ce)", background: "var(--ce-tint)" }}>CE LTP</div>
-              <div className="px-2 py-2 text-center text-[8px] font-bold uppercase tracking-[1.5px] border-x border-[var(--border)]" style={{ ...MONO, color: "var(--text-muted)", background: "var(--card)" }}>STRIKE</div>
-              <div className="px-3 py-2 text-left text-[8px] font-bold uppercase tracking-[1.5px] border-l border-[var(--border)]" style={{ ...MONO, color: "var(--pe)", background: "var(--pe-tint)" }}>PE LTP</div>
-              <div className="chain-col-oi px-3 py-2 text-left text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--pe)", background: "var(--pe-tint)" }}>PE OI</div>
+              <div className="chain-col-oi px-3 py-2 text-right text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--ce)", background: "var(--ce-tint)" }}>CE OI</div>
+              <div className="px-3 py-2 text-right text-xs font-bold uppercase tracking-[1.5px] border-r border-[var(--border)]" style={{ ...MONO, color: "var(--ce)", background: "var(--ce-tint)" }}>CE LTP</div>
+              <div className="px-2 py-2 text-center text-xs font-bold uppercase tracking-[1.5px] border-x border-[var(--border)]" style={{ ...MONO, color: "var(--text-muted)", background: "var(--card)" }}>STRIKE</div>
+              <div className="px-3 py-2 text-left text-xs font-bold uppercase tracking-[1.5px] border-l border-[var(--border)]" style={{ ...MONO, color: "var(--pe)", background: "var(--pe-tint)" }}>PE LTP</div>
+              <div className="chain-col-oi px-3 py-2 text-left text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--pe)", background: "var(--pe-tint)" }}>PE OI</div>
               <div className="py-2 border-l border-[var(--border)]" style={{ background: "var(--pe-tint)" }} />
             </div>
           </div>
 
           {/* ── Mobile column headers ── */}
           <div className="flex-shrink-0 border-b border-[var(--border)] md:hidden">
-            <div className="grid grid-cols-[1fr_72px_1fr] text-[8px] font-bold tracking-[0.5px]" style={MONO}>
+            <div className="grid grid-cols-[1fr_88px_1fr] text-xs font-bold tracking-[0.5px]" style={MONO}>
               <div className="px-3 py-1.5 text-center" style={{ color: "var(--ce)", background: "var(--ce-tint)" }}>Call (₹)</div>
-              <div className="flex items-center justify-center py-1.5 text-center text-[7px]" style={{ color: "var(--text-muted)", background: "var(--card)" }}>
+              <div className="flex items-center justify-center py-1.5 text-center text-xs" style={{ color: "var(--text-muted)", background: "var(--card)" }}>
                 {chain.spot.toLocaleString("en-IN", { maximumFractionDigits: 0 })}
               </div>
               <div className="px-3 py-1.5 text-center" style={{ color: "var(--pe)", background: "var(--pe-tint)" }}>Put (₹)</div>
@@ -158,7 +158,7 @@ export function OptionChainView() {
                 {row.isATM && (
                   <div className="sticky top-0 z-10 flex items-center gap-2 px-3 py-1.5" style={{ background: isDark ? "#1e293b" : "#dbeafe", borderTop: "1px solid var(--accent)", borderBottom: "1px solid var(--accent)" }}>
                     <div className="h-px flex-1" style={{ background: "var(--accent-soft)" }} />
-                    <span className="whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ ...MONO, color: isDark ? "#fff" : "var(--accent)", background: isDark ? "#1e293b" : "#fff", border: "1px solid var(--accent)" }}>
+                    <span className="whitespace-nowrap rounded-full px-2 py-0.5 text-sm font-bold" style={{ ...MONO, color: isDark ? "#fff" : "var(--accent)", background: isDark ? "#1e293b" : "#fff", border: "1px solid var(--accent)" }}>
                       {index} {chain.spot.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                     <div className="h-px flex-1" style={{ background: "var(--accent-soft)" }} />
@@ -209,7 +209,7 @@ function Stats({ chain }: { chain: Chain }) {
     <div className="mb-1 grid grid-cols-3 gap-2 sm:grid-cols-6">
       {items.map(([label, value]) => (
         <div key={label} className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-card px-3 py-2">
-          <div className="text-[10px] uppercase tracking-wide text-faint">{label}</div>
+          <div className="text-sm uppercase tracking-wide text-faint">{label}</div>
           <div className="tabular text-sm font-medium">{value}</div>
         </div>
       ))}
@@ -243,7 +243,7 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
     <>
       {/* ── Mobile card ── */}
       <div className={`border-b md:hidden`} style={{ background: isATM ? "var(--accent-soft)" : undefined, borderColor: "var(--border)" }}>
-        <div className="grid grid-cols-[1fr_72px_1fr]">
+        <div className="grid grid-cols-[1fr_88px_1fr]">
           <div className="flex flex-col gap-1 px-1.5 py-2" style={{ background: isATM ? "var(--ce-tint)" : undefined }}>
             <div className="flex w-full flex-col gap-0.5">
               <div className="flex items-start justify-between">
@@ -251,12 +251,12 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
                   {ceWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
                 </button>
                 <div className="ml-0.5 flex flex-1 flex-col items-end">
-                  <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{ceLtp.toFixed(2)}</span>
-                  <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--ce)" }}>{strike} CE</span>
+                  <span className="tabular-nums text-base font-bold leading-tight" style={MONO}>{ceLtp.toFixed(2)}</span>
+                  <span className="text-xs font-bold" style={{ ...MONO, color: "var(--ce)" }}>{strike} CE</span>
                 </div>
               </div>
               <div className="mt-0.5 flex items-center justify-between">
-                <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(ce.oi)}</span>
+                <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(ce.oi)}</span>
                 <div className="flex items-center gap-1">
                   <button onClick={() => onOpenPayoff(ce, strike, "CE")} title={`Payoff ${strike} CE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartArea size={11} /></button>
                   <button onClick={() => onOpenChart(ce, strike, "CE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconChartCandle size={11} /></button>
@@ -267,8 +267,8 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
           </div>
 
           <div className="flex flex-col items-center justify-center gap-0.5 border-x py-2" style={{ borderColor: "var(--border)", background: isATM ? "var(--accent-soft)" : "var(--card)" }}>
-            <span className="tabular-nums text-[12px] font-bold leading-none" style={{ ...MONO, color: isATM ? "var(--accent)" : "var(--text)" }}>{strike}</span>
-            <span className="tabular-nums text-[8px] font-bold" style={{ ...MONO, color: rowPCR >= 1 ? "var(--up)" : "var(--down)" }}>PCR {rowPCR.toFixed(2)}</span>
+            <span className="tabular-nums text-sm font-bold leading-none" style={{ ...MONO, color: isATM ? "var(--accent)" : "var(--text)" }}>{strike}</span>
+            <span className="tabular-nums text-xs font-bold" style={{ ...MONO, color: rowPCR >= 1 ? "var(--up)" : "var(--down)" }}>PCR {rowPCR.toFixed(2)}</span>
             <button onClick={onOpenSplit} title={`CE + PE ${strike} split chart`} className="flex h-5 w-5 items-center justify-center rounded border" style={{ borderColor: "var(--accent)", background: "var(--accent-soft)", color: "var(--accent)" }}><IconColumns size={11} /></button>
           </div>
 
@@ -276,8 +276,8 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
             <div className="flex w-full flex-col gap-0.5">
               <div className="flex items-start justify-between">
                 <div className="mr-0.5 flex flex-1 flex-col items-start">
-                  <span className="tabular-nums text-[13px] font-bold leading-tight" style={MONO}>{peLtp.toFixed(2)}</span>
-                  <span className="text-[8px] font-bold" style={{ ...MONO, color: "var(--pe)" }}>{strike} PE</span>
+                  <span className="tabular-nums text-base font-bold leading-tight" style={MONO}>{peLtp.toFixed(2)}</span>
+                  <span className="text-xs font-bold" style={{ ...MONO, color: "var(--pe)" }}>{strike} PE</span>
                 </div>
                 <button onClick={() => onToggleWatch(pe, strike, "PE")} className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded" style={{ background: peWatched ? "#fbbf2420" : "transparent", color: peWatched ? "#f59e0b" : "var(--text-faint)" }}>
                   {peWatched ? <IconBookmarkFilled size={11} /> : <IconBookmark size={11} />}
@@ -288,7 +288,7 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
                   <button onClick={() => onOpenChart(pe, strike, "PE")} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartCandle size={11} /></button>
                   <button onClick={() => onOpenPayoff(pe, strike, "PE")} title={`Payoff ${strike} PE`} className="flex h-5 w-5 items-center justify-center rounded" style={{ background: "var(--pe-tint)", color: "var(--pe)" }}><IconChartArea size={11} /></button>
                 </div>
-                <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(pe.oi)}</span>
+                <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{fmtOI(pe.oi)}</span>
               </div>
             </div>
             <OIBar pct={row.peOIBar} color="var(--pe)" />
@@ -309,7 +309,7 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
 
           <div className="chain-col-oi relative overflow-hidden px-3 py-2 text-right" style={{ background: "var(--ce-tint)" }}>
             <div className="absolute bottom-0 right-0 top-0" style={{ width: `${row.ceOIBar}%`, background: "var(--accent-soft)" }} />
-            <span className="tabular-nums relative z-10 text-[11px]" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtOI(ce.oi)}</span>
+            <span className="tabular-nums relative z-10 text-sm" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtOI(ce.oi)}</span>
           </div>
 
           <div className="group border-r px-2 py-2 text-right" style={{ borderColor: "var(--border)" }}>
@@ -321,23 +321,23 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
                 <IconChartCandle size={14} color="var(--ce)" />
               </button>
               <div>
-                <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</div>
-                <div className="text-[8px]" style={{ ...MONO, color: ce.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{ce.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(ce.ltpChange).toFixed(2)}</div>
+                <div className="tabular-nums text-base font-bold leading-tight" style={{ ...MONO, color: ceInBand ? "var(--up)" : "var(--text)" }}>₹{ceLtp.toFixed(2)}</div>
+                <div className="text-xs" style={{ ...MONO, color: ce.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{ce.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(ce.ltpChange).toFixed(2)}</div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col items-center justify-center border-x py-2 text-center" style={{ borderColor: "var(--border)", background: isATM ? "var(--accent-soft)" : "var(--card)" }}>
-            <div className="tabular-nums text-[12px] font-bold leading-none" style={{ ...MONO, color: isATM ? "var(--accent)" : "var(--text)" }}>{strike}</div>
-            {isATM && <div className="mt-0.5 text-[6px] font-bold tracking-[1px]" style={{ ...MONO, color: "var(--accent)" }}>ATM</div>}
+            <div className="tabular-nums text-sm font-bold leading-none" style={{ ...MONO, color: isATM ? "var(--accent)" : "var(--text)" }}>{strike}</div>
+            {isATM && <div className="mt-0.5 text-xs font-bold tracking-[1px]" style={{ ...MONO, color: "var(--accent)" }}>ATM</div>}
             <button onClick={onOpenSplit} title={`CE + PE ${strike} split chart`} className="mt-1 flex h-5 w-5 items-center justify-center rounded border" style={{ borderColor: "var(--accent)", background: "var(--accent-soft)", color: "var(--accent)" }}><IconColumns size={11} /></button>
           </div>
 
           <div className="group border-l px-2 py-2 text-left" style={{ borderColor: "var(--border)" }}>
             <div className="flex items-center gap-1.5">
               <div>
-                <div className="tabular-nums text-[13px] font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</div>
-                <div className="text-[8px]" style={{ ...MONO, color: pe.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{pe.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(pe.ltpChange).toFixed(2)}</div>
+                <div className="tabular-nums text-base font-bold leading-tight" style={{ ...MONO, color: peInBand ? "var(--up)" : "var(--text)" }}>₹{peLtp.toFixed(2)}</div>
+                <div className="text-xs" style={{ ...MONO, color: pe.ltpChange >= 0 ? "var(--up)" : "var(--down)" }}>{pe.ltpChange >= 0 ? "▲" : "▼"}{Math.abs(pe.ltpChange).toFixed(2)}</div>
               </div>
               <button onClick={() => onOpenChart(pe, strike, "PE")} title={`Chart ${strike} PE`} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded opacity-30 transition-opacity group-hover:opacity-100">
                 <IconChartCandle size={14} color="var(--pe)" />
@@ -350,7 +350,7 @@ const Row = memo(function Row({ row, watchedTokens, onToggleWatch, onOpenChart, 
 
           <div className="chain-col-oi relative overflow-hidden px-3 py-2 text-left" style={{ background: "var(--pe-tint)" }}>
             <div className="absolute bottom-0 left-0 top-0" style={{ width: `${row.peOIBar}%`, background: "rgba(225,29,72,0.08)" }} />
-            <span className="tabular-nums relative z-10 text-[11px]" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtOI(pe.oi)}</span>
+            <span className="tabular-nums relative z-10 text-sm" style={{ ...MONO, color: "var(--text-muted)" }}>{fmtOI(pe.oi)}</span>
           </div>
 
           <div className="flex items-center justify-center" style={{ background: "var(--pe-tint)" }}>
@@ -393,7 +393,7 @@ function ChainSkeleton() {
         {/* Mobile rows — 3-col grid (CE | strike | PE), matches the real Row's mobile block. */}
         <div className="md:hidden">
           {rows.map((_, i) => (
-            <div key={i} className="grid animate-pulse grid-cols-[1fr_72px_1fr] border-b border-[var(--border)]" style={{ height: 60 }}>
+            <div key={i} className="grid animate-pulse grid-cols-[1fr_88px_1fr] border-b border-[var(--border)]" style={{ height: 60 }}>
               <div className="m-2 rounded" style={{ background: "var(--card-hover)" }} />
               <div className="m-2 rounded" style={{ background: "var(--card-hover)" }} />
               <div className="m-2 rounded" style={{ background: "var(--card-hover)" }} />

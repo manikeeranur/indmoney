@@ -52,18 +52,14 @@
   --radius-sm:     4px;
   --radius-lg:     12px;
 
-  /* typography — verified against frontend/app/options/page.tsx: MONO
-   * ('Space Mono') and BEBAS ('Bebas Neue') are applied explicitly and
-   * pervasively (prices, times, headers), but the base body font is NEVER
-   * set to DM Sans there — frontend has no font-family override on body or
-   * in its tailwind.config.js, so ordinary text renders in Tailwind's
-   * default sans stack. 'DM Sans' appears exactly once in the whole 8k-line
-   * file (one modal heading), not as the app-wide body font — matching that
-   * one spot is not worth diverging the entire app's base font over, so
-   * --font-sans here is Tailwind's actual default stack instead. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: 'Space Mono', ui-monospace, "SF Mono", Menlo, monospace;
-  --font-display: 'Bebas Neue', sans-serif;
+  /* typography — Inter everywhere. The inline MONO/BEBAS style constants
+   * and canvas/SVG font strings name 'Inter' directly too; --font-mono and
+   * --font-display are kept as aliases so existing font-mono / font-display
+   * / .tabular usages keep working. Numbers stay aligned via tabular-nums
+   * on body (globals.css). */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: var(--font-sans);
+  --font-display: var(--font-sans);
 }
 
 /* ─── Light theme ──────────────────────────────────────────────────────────────

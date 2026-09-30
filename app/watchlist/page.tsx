@@ -111,7 +111,7 @@ export default function WatchlistPage() {
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {groups.map(g => (
           <button key={g.id} onClick={() => setActiveId(g.id)}
-            className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold transition-all"
+            className="flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-bold transition-all"
             style={{ background: activeId === g.id ? "var(--accent)" : "var(--card)", color: activeId === g.id ? "#fff" : "var(--text-muted)", border: `1px solid ${activeId === g.id ? "var(--accent)" : "var(--border)"}` }}>
             {g.name} <span className="opacity-70">{g.items.length}</span>
           </button>
@@ -121,13 +121,13 @@ export default function WatchlistPage() {
         ) : (
           <div className="flex items-center gap-1">
             <input autoFocus value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === "Enter" && createGroup()} placeholder="Name…"
-              className="w-[120px] rounded-lg border px-2 py-1 text-[10px] outline-none" style={{ borderColor: "var(--accent)", background: "var(--bg)", color: "var(--text)" }} />
+              className="w-[120px] rounded-lg border px-2 py-1 text-sm outline-none" style={{ borderColor: "var(--accent)", background: "var(--bg)", color: "var(--text)" }} />
             <button onClick={createGroup} className="flex h-6 w-6 items-center justify-center rounded-full text-white" style={{ background: "var(--up)" }}>✓</button>
             <button onClick={() => setCreating(false)} className="flex h-6 w-6 items-center justify-center rounded-full text-muted" style={{ background: "var(--card)" }}>✕</button>
           </div>
         )}
         {activeId !== "wl_default" && !creating && (
-          <button onClick={() => deleteGroup(activeId)} className="text-[10px] text-faint hover:text-fg">Delete</button>
+          <button onClick={() => deleteGroup(activeId)} className="text-sm text-faint hover:text-fg">Delete</button>
         )}
       </div>
 
@@ -136,8 +136,8 @@ export default function WatchlistPage() {
       {active.items.length === 0 ? (
         <div className="flex h-[50vh] flex-col items-center justify-center gap-3">
           <div className="text-[40px]" style={{ color: "var(--border-strong)" }}>◈</div>
-          <p className="text-center text-[11px] tabular" style={{ color: "var(--text-muted)" }}>{active.name} is empty</p>
-          <p className="text-center text-[10px] tabular" style={{ color: "var(--text-faint)" }}>Search above or use + on chain rows</p>
+          <p className="text-center text-sm tabular" style={{ color: "var(--text-muted)" }}>{active.name} is empty</p>
+          <p className="text-center text-sm tabular" style={{ color: "var(--text-faint)" }}>Search above or use + on chain rows</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-2 pb-4 lg:grid-cols-4">
@@ -186,18 +186,18 @@ function OptionWatchRow({ item, expiry, isDragOver, onRemove, onDragStart, onDra
     <div draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop} onDragEnd={onDragEnd}
       className="flex select-none items-center gap-3 rounded-xl border px-4 py-3 transition-all"
       style={{ background: "var(--card)", borderColor: isDragOver ? "var(--accent)" : "var(--border)", opacity: isDragOver ? 0.6 : 1 }}>
-      <span className="flex-shrink-0 cursor-grab text-[14px] leading-none" style={{ color: "var(--text-faint)" }}>⠿</span>
+      <span className="flex-shrink-0 cursor-grab text-base leading-none" style={{ color: "var(--text-faint)" }}>⠿</span>
       <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full" style={{ border: `2px solid ${dirClr}`, background: "#111" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={logoSrc} alt={isSensex ? "SENSEX" : "NIFTY 50"} className="h-full w-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[12px] font-bold tabular" style={{ color: "var(--text)" }}>
+        <div className="truncate text-sm font-bold tabular" style={{ color: "var(--text)" }}>
           {underlying} {dateStr} ₹{item.strike} {isCE ? "Call" : "Put"}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5">
-          <span className="tabular text-[12px] font-bold" style={{ color: "var(--text)" }}>₹{ltp?.toFixed(2)}</span>
-          <span className="tabular text-[10px] font-bold" style={{ color: pctUp ? "var(--up)" : "var(--down)" }}>
+          <span className="tabular text-sm font-bold" style={{ color: "var(--text)" }}>₹{ltp?.toFixed(2)}</span>
+          <span className="tabular text-sm font-bold" style={{ color: pctUp ? "var(--up)" : "var(--down)" }}>
             {pctUp ? "▲" : "▼"}{Math.abs(pct).toFixed(2)}%
           </span>
         </div>
@@ -224,19 +224,19 @@ function EquityWatchRow({ item, isDragOver, liveEquityLtp, onRemove, onDragStart
     <div draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop} onDragEnd={onDragEnd}
       className="flex select-none items-center gap-3 rounded-xl border px-4 py-3 transition-all"
       style={{ background: "var(--card)", borderColor: isDragOver ? "var(--accent)" : "var(--border)", opacity: isDragOver ? 0.6 : 1 }}>
-      <span className="flex-shrink-0 cursor-grab text-[14px] leading-none" style={{ color: "var(--text-faint)" }}>⠿</span>
+      <span className="flex-shrink-0 cursor-grab text-base leading-none" style={{ color: "var(--text-faint)" }}>⠿</span>
       <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-full" style={{ border: "2px solid var(--border)", background: logoErr ? avatarColor : "#fff" }}>
-        {logoErr ? <span className="text-[13px] font-black text-white">{sym.slice(0, 2)}</span> : (
+        {logoErr ? <span className="text-base font-black text-white">{sym.slice(0, 2)}</span> : (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`https://images.smallcase.com/smallplug-v2/200/${sym}.png`} alt={sym} onError={() => setLogoErr(true)} className="h-full w-full object-contain p-1" />
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-[12px] font-bold tabular" style={{ color: "var(--text)" }}>{sym}</span>
-          <span className="flex-shrink-0 rounded px-1 py-0.5 text-[8px] font-bold" style={{ background: "var(--card-hover)", color: "var(--text-muted)" }}>{item.exchange ?? "NSE"}</span>
+          <span className="truncate text-sm font-bold tabular" style={{ color: "var(--text)" }}>{sym}</span>
+          <span className="flex-shrink-0 rounded px-1 py-0.5 text-xs font-bold" style={{ background: "var(--card-hover)", color: "var(--text-muted)" }}>{item.exchange ?? "NSE"}</span>
         </div>
-        <span className="tabular text-[12px] font-bold" style={{ color: "var(--text)" }}>{ltp > 0 ? `₹${ltp.toFixed(2)}` : "—"}</span>
+        <span className="tabular text-sm font-bold" style={{ color: "var(--text)" }}>{ltp > 0 ? `₹${ltp.toFixed(2)}` : "—"}</span>
       </div>
       <button onClick={e => { e.stopPropagation(); onRemove(); }}
         className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-colors hover:opacity-70"

@@ -11,6 +11,9 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+  font-size: 14px; /* app default; UI sizes use the standard 12/14/16/18 scale */
+  /* Space Mono gave every price fixed-width digits; keep that with Inter. */
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -29,9 +32,9 @@ html, body {
 .live-pulse { animation: live-pulse 1.5s ease-in-out infinite; }
 
 /* ── Option chain desktop grid — ported from frontend/app/globals.css ──── */
-.chain-grid { display: grid; grid-template-columns: 36px 1fr 70px 1fr 36px; }
+.chain-grid { display: grid; grid-template-columns: 44px 1fr 90px 1fr 44px; }
 .chain-col-oi { display: none !important; }
 @media (min-width: 768px) {
-  .chain-grid { grid-template-columns: 36px 1fr 1fr 70px 1fr 1fr 36px; }
+  .chain-grid { grid-template-columns: 44px 1fr 1fr 90px 1fr 1fr 44px; }
   .chain-col-oi { display: block !important; }
 }

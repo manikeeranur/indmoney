@@ -12,8 +12,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { MIN_PREMIUM, MAX_PREMIUM } from "@/lib/strategies/constants";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
-const BEBAS = { fontFamily: "'Bebas Neue', sans-serif" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
+const BEBAS = { fontFamily: "'Inter', sans-serif" } as const;
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DAYS = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
@@ -99,14 +99,14 @@ export default function OhlcPage() {
     finally { setBusy(false); }
   }
 
-  const GRID = "44px 1fr 68px 1fr 44px";
+  const GRID = "56px 1fr 90px 1fr 56px";
 
   function TimeCorner({ side }: { side: "CE" | "PE" }) {
     return (
       <div className="flex flex-col items-center justify-center gap-0.5 py-2" style={{ background: side === "CE" ? "var(--ce-tint)" : "var(--pe-tint)" }}>
-        <div className="text-[7px] font-bold tracking-[0.5px]" style={{ ...MONO, color: side === "CE" ? "#0284c7" : "#e11d48" }}>{side}</div>
-        <div className="text-[8px] font-bold" style={{ ...MONO, color: "var(--text-muted)" }}>9:15</div>
-        <div className="text-[6px]" style={{ ...MONO, color: "var(--text-faint)" }}>AM</div>
+        <div className="text-xs font-bold tracking-[0.5px]" style={{ ...MONO, color: side === "CE" ? "#0284c7" : "#e11d48" }}>{side}</div>
+        <div className="text-xs font-bold" style={{ ...MONO, color: "var(--text-muted)" }}>9:15</div>
+        <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>AM</div>
       </div>
     );
   }
@@ -120,28 +120,28 @@ export default function OhlcPage() {
             <div className="flex items-center justify-between gap-2">
               <div className="flex flex-shrink-0 items-center gap-1.5">
                 <div className="rounded border px-2 py-1.5" style={{ background: "rgba(22,163,74,0.1)", borderColor: "rgba(22,163,74,0.3)" }}>
-                  <div className="mb-0.5 text-[7px] uppercase leading-none tracking-[1px]" style={{ ...MONO, color: "rgba(22,163,74,0.7)" }}>OPEN</div>
-                  <div className="text-[12px] font-bold leading-none sm:text-[14px]" style={{ ...MONO, color: "#16a34a" }}>9:15 AM</div>
+                  <div className="mb-0.5 text-xs uppercase leading-none tracking-[1px]" style={{ ...MONO, color: "rgba(22,163,74,0.7)" }}>OPEN</div>
+                  <div className="text-sm font-bold leading-none sm:text-base" style={{ ...MONO, color: "#16a34a" }}>9:15 AM</div>
                 </div>
               </div>
               <div className="min-w-0 text-center">
-                <div className="text-[13px] tracking-[2px] sm:text-[15px]" style={{ ...BEBAS, color: "#0284c7" }}>OHLC CSV DOWNLOAD</div>
-                <div className="truncate text-[7px] sm:text-[8px]" style={{ ...MONO, color: "var(--text-muted)" }}>
+                <div className="text-base tracking-[2px] sm:text-base" style={{ ...BEBAS, color: "#0284c7" }}>OHLC CSV DOWNLOAD</div>
+                <div className="truncate text-xs sm:text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>
                   {histData ? `ATM ${histData.atm} · ${displayRows.length} strikes` : `${displayRows.length} strikes`} · OHLCV+OI+RSI
                 </div>
               </div>
               <div className="flex flex-shrink-0 items-center gap-1.5">
                 <div className="rounded border px-2 py-1.5" style={{ background: "rgba(225,29,72,0.1)", borderColor: "rgba(225,29,72,0.3)" }}>
-                  <div className="mb-0.5 text-[7px] uppercase leading-none tracking-[1px]" style={{ ...MONO, color: "rgba(225,29,72,0.7)" }}>CLOSE</div>
-                  <div className="text-[12px] font-bold leading-none sm:text-[14px]" style={{ ...MONO, color: "#e11d48" }}>3:30 PM</div>
+                  <div className="mb-0.5 text-xs uppercase leading-none tracking-[1px]" style={{ ...MONO, color: "rgba(225,29,72,0.7)" }}>CLOSE</div>
+                  <div className="text-sm font-bold leading-none sm:text-base" style={{ ...MONO, color: "#e11d48" }}>3:30 PM</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="px-5 py-3">
-            <div className="mb-2 text-[8px] uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)" }}>Select Date — Last 30 Trading Days</div>
-            <select value={ohlcDate} onChange={e => setOhlcDate(e.target.value)} className="h-9 w-full rounded border px-2 text-[11px]" style={{ ...MONO, borderColor: "var(--border)", background: "var(--bg)", color: "var(--text)" }}>
+            <div className="mb-2 text-xs uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)" }}>Select Date — Last 30 Trading Days</div>
+            <select value={ohlcDate} onChange={e => setOhlcDate(e.target.value)} className="h-9 w-full rounded border px-2 text-sm" style={{ ...MONO, borderColor: "var(--border)", background: "var(--bg)", color: "var(--text)" }}>
               {tradingDays.map(d => <option key={d} value={d}>{fmtTradingDay(d)}</option>)}
             </select>
           </div>
@@ -151,37 +151,37 @@ export default function OhlcPage() {
         {hasPrices && (
           <div className="overflow-hidden rounded-md border" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
             <div className="border-b px-4 py-2" style={{ borderColor: "var(--border)", background: "var(--card)" }}>
-              <div className="text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#475569" }}>
+              <div className="text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#475569" }}>
                 ★ TOP OPENING PRICE · {fmtTradingDay(ohlcDate)} · ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} SCAN RANGE
               </div>
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr]">
               <div className={`px-5 py-3 ${bestCERow ? "" : "opacity-40"}`}>
-                <div className="mb-1 text-[8px] uppercase tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>CE · Best Opening</div>
+                <div className="mb-1 text-xs uppercase tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>CE · Best Opening</div>
                 {bestCERow ? (
                   <>
-                    <div className="text-[17px] font-bold" style={{ ...MONO, color: "#0284c7" }}>{bestCERow.strike} CE</div>
+                    <div className="text-lg font-bold" style={{ ...MONO, color: "#0284c7" }}>{bestCERow.strike} CE</div>
                     <div className="mt-0.5 flex items-baseline gap-2">
-                      <span className="text-[9px]" style={{ ...MONO, color: "var(--text-muted)" }}>9:15 AM</span>
-                      <span className="text-[15px] font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{bestCERow.ce.open}</span>
-                      <span className="text-[8px] font-bold" style={{ ...MONO, color: "#16a34a" }}>★ BEST</span>
+                      <span className="text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>9:15 AM</span>
+                      <span className="text-base font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{bestCERow.ce.open}</span>
+                      <span className="text-xs font-bold" style={{ ...MONO, color: "#16a34a" }}>★ BEST</span>
                     </div>
                   </>
-                ) : <div className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>No CE in ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} range</div>}
+                ) : <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>No CE in ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} range</div>}
               </div>
               <div className="my-2 w-px" style={{ background: "var(--border)" }} />
               <div className={`px-5 py-3 text-right ${bestPERow ? "" : "opacity-40"}`}>
-                <div className="mb-1 text-[8px] uppercase tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>PE · Best Opening</div>
+                <div className="mb-1 text-xs uppercase tracking-[1px]" style={{ ...MONO, color: "var(--text-faint)" }}>PE · Best Opening</div>
                 {bestPERow ? (
                   <>
-                    <div className="text-[17px] font-bold" style={{ ...MONO, color: "#e11d48" }}>{bestPERow.strike} PE</div>
+                    <div className="text-lg font-bold" style={{ ...MONO, color: "#e11d48" }}>{bestPERow.strike} PE</div>
                     <div className="mt-0.5 flex items-baseline justify-end gap-2">
-                      <span className="text-[8px] font-bold" style={{ ...MONO, color: "#16a34a" }}>★ BEST</span>
-                      <span className="text-[15px] font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{bestPERow.pe.open}</span>
-                      <span className="text-[9px]" style={{ ...MONO, color: "var(--text-muted)" }}>9:15 AM</span>
+                      <span className="text-xs font-bold" style={{ ...MONO, color: "#16a34a" }}>★ BEST</span>
+                      <span className="text-base font-bold" style={{ ...MONO, color: "#16a34a" }}>₹{bestPERow.pe.open}</span>
+                      <span className="text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>9:15 AM</span>
                     </div>
                   </>
-                ) : <div className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>No PE in ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} range</div>}
+                ) : <div className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>No PE in ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} range</div>}
               </div>
             </div>
           </div>
@@ -190,17 +190,17 @@ export default function OhlcPage() {
         {/* Strike table */}
         <div className="overflow-hidden rounded-md border" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
           <div className="grid border-b" style={{ gridTemplateColumns: GRID, borderColor: "var(--border)", background: "var(--card)" }}>
-            <div className="border-r py-2 text-center text-[7px] font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#0284c7", borderColor: "var(--border)", background: "var(--ce-tint)" }}>TIME</div>
-            <div className="px-3 py-2 text-right text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#0284c7" }}>CE · 9:15 AM OPENING</div>
-            <div className="border-x py-2 text-center text-[8px] uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)", borderColor: "var(--border)", background: "var(--card-hover)" }}>STRIKE</div>
-            <div className="px-3 py-2 text-left text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#e11d48" }}>PE · 9:15 AM OPENING</div>
-            <div className="border-l py-2 text-center text-[7px] font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#e11d48", borderColor: "var(--border)", background: "var(--pe-tint)" }}>TIME</div>
+            <div className="border-r py-2 text-center text-xs font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#0284c7", borderColor: "var(--border)", background: "var(--ce-tint)" }}>TIME</div>
+            <div className="px-3 py-2 text-right text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#0284c7" }}>CE · 9:15 AM OPENING</div>
+            <div className="border-x py-2 text-center text-xs uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-muted)", borderColor: "var(--border)", background: "var(--card-hover)" }}>STRIKE</div>
+            <div className="px-3 py-2 text-left text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "#e11d48" }}>PE · 9:15 AM OPENING</div>
+            <div className="border-l py-2 text-center text-xs font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#e11d48", borderColor: "var(--border)", background: "var(--pe-tint)" }}>TIME</div>
           </div>
 
           {loadingHist && (
             <div className="flex items-center justify-center gap-2 border-b py-6" style={{ borderColor: "var(--border)" }}>
               <div className="h-4 w-4 animate-spin rounded-full border-2" style={{ borderColor: "rgba(2,132,199,0.2)", borderTopColor: "#0284c7" }} />
-              <span className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>Loading {fmtTradingDay(ohlcDate)} historical strikes…</span>
+              <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>Loading {fmtTradingDay(ohlcDate)} historical strikes…</span>
             </div>
           )}
 
@@ -221,16 +221,16 @@ export default function OhlcPage() {
                   >
                     {ceP != null ? (
                       <div>
-                        <div className="text-[13px] font-bold tabular-nums leading-tight" style={{ ...MONO, color: ceSel ? "#0284c7" : ceOk ? "#16a34a" : "var(--text-faint)" }}>{ceSel ? "✓ " : ""}₹{ceP}</div>
-                        <div className="mt-0.5 text-[7px] font-semibold" style={MONO}>
+                        <div className="text-base font-bold tabular-nums leading-tight" style={{ ...MONO, color: ceSel ? "#0284c7" : ceOk ? "#16a34a" : "var(--text-faint)" }}>{ceSel ? "✓ " : ""}₹{ceP}</div>
+                        <div className="mt-0.5 text-xs font-semibold" style={MONO}>
                           {ceSel ? <span style={{ color: "#0284c7" }}>SELECTED</span> : isBestCE ? <span style={{ color: "#16a34a" }}>★ BEST</span> : ceOk ? <span style={{ color: "#16a34a" }}>✓ IN RANGE</span> : <span style={{ color: "#4a6080" }}>{r.strike} CE</span>}
                         </div>
                       </div>
-                    ) : <span className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>{loadingHist ? "…" : "—"}</span>}
+                    ) : <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{loadingHist ? "…" : "—"}</span>}
                   </button>
                   <div className="flex flex-col items-center justify-center border-x py-3" style={{ borderColor: "var(--border)", background: r.isATM ? "var(--card-hover)" : "var(--card)" }}>
-                    <div className="text-[12px] font-bold tabular-nums leading-none" style={{ ...MONO, color: r.isATM ? "#0284c7" : "var(--text)" }}>{r.strike}</div>
-                    {r.isATM && <div className="mt-0.5 text-[6px] font-bold tracking-[1px]" style={{ ...MONO, color: "rgba(2,132,199,0.6)" }}>ATM</div>}
+                    <div className="text-sm font-bold tabular-nums leading-none" style={{ ...MONO, color: r.isATM ? "#0284c7" : "var(--text)" }}>{r.strike}</div>
+                    {r.isATM && <div className="mt-0.5 text-xs font-bold tracking-[1px]" style={{ ...MONO, color: "rgba(2,132,199,0.6)" }}>ATM</div>}
                   </div>
                   <button
                     onClick={() => r.pe.token && setOhlcPE(peSel ? null : { token: r.pe.token, strike: r.strike })}
@@ -240,12 +240,12 @@ export default function OhlcPage() {
                   >
                     {peP != null ? (
                       <div>
-                        <div className="text-[13px] font-bold tabular-nums leading-tight" style={{ ...MONO, color: peSel ? "#e11d48" : peOk ? "#16a34a" : "var(--text-faint)" }}>{peSel ? "✓ " : ""}₹{peP}</div>
-                        <div className="mt-0.5 text-[7px] font-semibold" style={MONO}>
+                        <div className="text-base font-bold tabular-nums leading-tight" style={{ ...MONO, color: peSel ? "#e11d48" : peOk ? "#16a34a" : "var(--text-faint)" }}>{peSel ? "✓ " : ""}₹{peP}</div>
+                        <div className="mt-0.5 text-xs font-semibold" style={MONO}>
                           {peSel ? <span style={{ color: "#e11d48" }}>SELECTED</span> : isBestPE ? <span style={{ color: "#16a34a" }}>★ BEST</span> : peOk ? <span style={{ color: "#16a34a" }}>✓ IN RANGE</span> : <span style={{ color: "#4a6080" }}>{r.strike} PE</span>}
                         </div>
                       </div>
-                    ) : <span className="text-[9px]" style={{ ...MONO, color: "var(--text-faint)" }}>{loadingHist ? "…" : "—"}</span>}
+                    ) : <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{loadingHist ? "…" : "—"}</span>}
                   </button>
                   <TimeCorner side="PE" />
                 </div>
@@ -254,11 +254,11 @@ export default function OhlcPage() {
           </div>
 
           <div className="flex items-center justify-between border-t px-4 py-2" style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}>
-            <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>{displayRows.length} strikes · Green = ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} · ★ = best opening price · Click to select/deselect</span>
+            <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>{displayRows.length} strikes · Green = ₹{MIN_PREMIUM}–₹{MAX_PREMIUM} · ★ = best opening price · Click to select/deselect</span>
             {loadingHist && (
               <div className="flex items-center gap-1">
                 <div className="h-2.5 w-2.5 animate-spin rounded-full border" style={{ borderColor: "rgba(2,132,199,0.3)", borderTopColor: "#0284c7" }} />
-                <span className="text-[7px]" style={{ ...MONO, color: "var(--text-faint)" }}>fetching historical prices…</span>
+                <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>fetching historical prices…</span>
               </div>
             )}
           </div>
@@ -270,21 +270,21 @@ export default function OhlcPage() {
             {ohlcCE ? (
               <div className="rounded-md border px-4 py-2.5" style={{ borderColor: "rgba(2,132,199,0.3)", background: "rgba(2,132,199,0.05)" }}>
                 <div className="mb-1 flex items-center gap-1.5">
-                  <span className="text-[7px] font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#0284c7" }}>CE FILE</span>
-                  <span className="text-[7px]" style={{ ...MONO, color: "var(--text-faint)" }}>9:15 AM → 3:30 PM</span>
+                  <span className="text-xs font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#0284c7" }}>CE FILE</span>
+                  <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>9:15 AM → 3:30 PM</span>
                 </div>
-                <div className="truncate text-[9px] font-bold" style={{ ...MONO, color: "#0284c7" }}>{ohlcDate}_{symbol(ohlcCE.strike, "CE")}.csv</div>
-                <div className="mt-0.5 text-[8px]" style={{ ...MONO, color: "var(--text-muted)" }}>Open ₹{displayRows.find(r => r.ce.token === ohlcCE.token)?.ce.open ?? "—"} · Minute candles</div>
+                <div className="truncate text-xs font-bold" style={{ ...MONO, color: "#0284c7" }}>{ohlcDate}_{symbol(ohlcCE.strike, "CE")}.csv</div>
+                <div className="mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>Open ₹{displayRows.find(r => r.ce.token === ohlcCE.token)?.ce.open ?? "—"} · Minute candles</div>
               </div>
             ) : <div />}
             {ohlcPE ? (
               <div className="rounded-md border px-4 py-2.5" style={{ borderColor: "rgba(225,29,72,0.3)", background: "rgba(225,29,72,0.05)" }}>
                 <div className="mb-1 flex items-center gap-1.5">
-                  <span className="text-[7px] font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#e11d48" }}>PE FILE</span>
-                  <span className="text-[7px]" style={{ ...MONO, color: "var(--text-faint)" }}>9:15 AM → 3:30 PM</span>
+                  <span className="text-xs font-bold uppercase tracking-[1px]" style={{ ...MONO, color: "#e11d48" }}>PE FILE</span>
+                  <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>9:15 AM → 3:30 PM</span>
                 </div>
-                <div className="truncate text-[9px] font-bold" style={{ ...MONO, color: "#e11d48" }}>{ohlcDate}_{symbol(ohlcPE.strike, "PE")}.csv</div>
-                <div className="mt-0.5 text-[8px]" style={{ ...MONO, color: "var(--text-muted)" }}>Open ₹{displayRows.find(r => r.pe.token === ohlcPE.token)?.pe.open ?? "—"} · Minute candles</div>
+                <div className="truncate text-xs font-bold" style={{ ...MONO, color: "#e11d48" }}>{ohlcDate}_{symbol(ohlcPE.strike, "PE")}.csv</div>
+                <div className="mt-0.5 text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>Open ₹{displayRows.find(r => r.pe.token === ohlcPE.token)?.pe.open ?? "—"} · Minute candles</div>
               </div>
             ) : <div />}
           </div>
@@ -294,13 +294,13 @@ export default function OhlcPage() {
         <button
           onClick={handleDownload}
           disabled={busy || (!ohlcCE && !ohlcPE)}
-          className="w-full cursor-pointer rounded-md py-3.5 text-[12px] font-bold tracking-[3px] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+          className="w-full cursor-pointer rounded-md py-3.5 text-sm font-bold tracking-[3px] transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           style={{ ...MONO, background: busy ? "rgba(2,132,199,0.15)" : "rgba(2,132,199,0.1)", border: "1.5px solid #0284c7", color: "#0284c7" }}
         >
           {busy ? "DOWNLOADING…" : "↓  DOWNLOAD CSV  (9:15 AM – 3:30 PM)"}
         </button>
 
-        <div className="text-center text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>
+        <div className="text-center text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>
           Each selected leg → 1 CSV file · Full day minute candles · OHLCV + OI + RSI(14)
         </div>
       </div>

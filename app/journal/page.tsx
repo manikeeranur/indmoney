@@ -15,8 +15,8 @@ import { useHolidaysMap } from "@/lib/holidays";
 import { useAccountQty } from "@/lib/useAccountQty";
 import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
-const BEBAS = { fontFamily: "'Bebas Neue', sans-serif" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
+const BEBAS = { fontFamily: "'Inter', sans-serif" } as const;
 const ACCENT = "#7c3aed";
 
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -83,7 +83,7 @@ function DonutChart({ profit, loss, isDark, label = "Total P&L" }: { profit: num
   if (total < 0.01) {
     return (
       <div className="flex items-center justify-center" style={{ height: 200 }}>
-        <span style={{ ...MONO, color: muted, fontSize: 10 }}>No trades</span>
+        <span style={{ ...MONO, color: muted, fontSize: 14 }}>No trades</span>
       </div>
     );
   }
@@ -103,16 +103,16 @@ function DonutChart({ profit, loss, isDark, label = "Total P&L" }: { profit: num
           {profit > 0 && <path d={arcPath(cx, cy, R, ri, GAP / 2, profitFrac * 2 * Math.PI - GAP / 2)} fill="#16a34a" />}
           {Math.abs(loss) > 0 && <path d={arcPath(cx, cy, R, ri, profitFrac * 2 * Math.PI + GAP / 2, 2 * Math.PI - GAP / 2)} fill="#e11d48" />}
         </>}
-        <text x={cx} y={cy - 11} textAnchor="middle" fontSize="8" fontWeight="700" fontFamily="'Space Mono',monospace" fill={muted} letterSpacing="1.5">{label.toUpperCase()}</text>
-        <text x={cx} y={cy + 11} textAnchor="middle" fontSize="16" fontWeight="bold" fontFamily="'Bebas Neue',sans-serif" fill={pnlColor(net)}>{fmtIndianFull(net)}</text>
+        <text x={cx} y={cy - 11} textAnchor="middle" fontSize="12" fontWeight="700" fontFamily="'Inter', sans-serif" fill={muted} letterSpacing="1.5">{label.toUpperCase()}</text>
+        <text x={cx} y={cy + 11} textAnchor="middle" fontSize="18" fontWeight="bold" fontFamily="'Inter', sans-serif" fill={pnlColor(net)}>{fmtIndianFull(net)}</text>
       </svg>
       <div className="flex gap-5 justify-center w-full flex-wrap">
         {profit > 0 && (
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#16a34a" }} />
             <div>
-              <div className="text-[7px] font-bold tracking-[1px]" style={{ ...MONO, color: muted }}>PROFIT · {pPct}%</div>
-              <div className="text-[10px] font-bold" style={{ ...MONO, color: "#16a34a" }}>{fmtIndianFull(profit)}</div>
+              <div className="text-xs font-bold tracking-[1px]" style={{ ...MONO, color: muted }}>PROFIT · {pPct}%</div>
+              <div className="text-sm font-bold" style={{ ...MONO, color: "#16a34a" }}>{fmtIndianFull(profit)}</div>
             </div>
           </div>
         )}
@@ -120,8 +120,8 @@ function DonutChart({ profit, loss, isDark, label = "Total P&L" }: { profit: num
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: "#e11d48" }} />
             <div>
-              <div className="text-[7px] font-bold tracking-[1px]" style={{ ...MONO, color: muted }}>LOSS · {lPct}%</div>
-              <div className="text-[10px] font-bold" style={{ ...MONO, color: "#e11d48" }}>{fmtIndianFull(loss)}</div>
+              <div className="text-xs font-bold tracking-[1px]" style={{ ...MONO, color: muted }}>LOSS · {lPct}%</div>
+              <div className="text-sm font-bold" style={{ ...MONO, color: "#e11d48" }}>{fmtIndianFull(loss)}</div>
             </div>
           </div>
         )}
@@ -139,7 +139,7 @@ function BarChart({ data, isDark }: { data: BarEntry[]; isDark: boolean }) {
   if (!data.length) {
     return (
       <div className="flex items-center justify-center w-full" style={{ height: 240 }}>
-        <span style={{ ...MONO, color: muted, fontSize: 10 }}>No trades</span>
+        <span style={{ ...MONO, color: muted, fontSize: 14 }}>No trades</span>
       </div>
     );
   }
@@ -169,9 +169,9 @@ function BarChart({ data, isDark }: { data: BarEntry[]; isDark: boolean }) {
             <g key={d.key} onMouseEnter={() => setHoveredIdx(i)} onMouseLeave={() => setHoveredIdx(null)} style={{ cursor: "default" }}>
               {isHov && <rect x={x - 3} y={PAD_TOP - 4} width={BAR_W + 6} height={HALF_H * 2 + 8} rx={4} fill={clr} opacity={0.07} />}
               <rect x={x} y={barY} width={BAR_W} height={barH} fill={clr} rx={3} opacity={isHov ? 1 : 0.85} />
-              <text x={x + BAR_W / 2} y={lblY} textAnchor="middle" fontSize="9" fontWeight="bold" fontFamily="'Space Mono',monospace" fill={clr}>{lbl}</text>
-              <text x={x + BAR_W / 2} y={ZERO_Y + HALF_H + 17} textAnchor="middle" fontSize="9" fontWeight="600" fontFamily="'Space Mono',monospace" fill={muted}>{d.label}</text>
-              <text x={x + BAR_W / 2} y={ZERO_Y + HALF_H + 31} textAnchor="middle" fontSize="7" fontFamily="'Space Mono',monospace" fill={isDark ? "#4a6080" : "#b0bec5"}>{d.trades}T</text>
+              <text x={x + BAR_W / 2} y={lblY} textAnchor="middle" fontSize="12" fontWeight="bold" fontFamily="'Inter', sans-serif" fill={clr}>{lbl}</text>
+              <text x={x + BAR_W / 2} y={ZERO_Y + HALF_H + 17} textAnchor="middle" fontSize="12" fontWeight="600" fontFamily="'Inter', sans-serif" fill={muted}>{d.label}</text>
+              <text x={x + BAR_W / 2} y={ZERO_Y + HALF_H + 31} textAnchor="middle" fontSize="12" fontFamily="'Inter', sans-serif" fill={isDark ? "#4a6080" : "#b0bec5"}>{d.trades}T</text>
             </g>
           );
         })}
@@ -188,9 +188,9 @@ function BarChart({ data, isDark }: { data: BarEntry[]; isDark: boolean }) {
           return (
             <g pointerEvents="none">
               <rect x={tx} y={ty} width={TIP_W} height={TIP_H} rx={5} fill={isDark ? "#0f1923" : "#fff"} stroke={clr} strokeWidth="1.2" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }} />
-              <text x={tx + TIP_W / 2} y={ty + 13} textAnchor="middle" fontSize="10" fontWeight="bold" fontFamily="'Space Mono',monospace" fill={clr}>{fmtIndianFull(d.lot)}</text>
-              {d.tipLine2 && <text x={tx + TIP_W / 2} y={ty + 26} textAnchor="middle" fontSize="8" fontFamily="'Space Mono',monospace" fill={isDark ? "#64748b" : "#94a3b8"}>{d.tipLine2}</text>}
-              <text x={tx + TIP_W / 2} y={ty + (d.tipLine2 ? 39 : 30)} textAnchor="middle" fontSize="8" fontFamily="'Space Mono',monospace" fill={isDark ? "#4a6080" : "#94a3b8"}>{d.trades}T · {d.wins}W · {losses}L</text>
+              <text x={tx + TIP_W / 2} y={ty + 13} textAnchor="middle" fontSize="14" fontWeight="bold" fontFamily="'Inter', sans-serif" fill={clr}>{fmtIndianFull(d.lot)}</text>
+              {d.tipLine2 && <text x={tx + TIP_W / 2} y={ty + 26} textAnchor="middle" fontSize="12" fontFamily="'Inter', sans-serif" fill={isDark ? "#64748b" : "#94a3b8"}>{d.tipLine2}</text>}
+              <text x={tx + TIP_W / 2} y={ty + (d.tipLine2 ? 39 : 30)} textAnchor="middle" fontSize="12" fontFamily="'Inter', sans-serif" fill={isDark ? "#4a6080" : "#94a3b8"}>{d.trades}T · {d.wins}W · {losses}L</text>
             </g>
           );
         })()}
@@ -204,8 +204,8 @@ function StatsRow({ cols, isDark, border }: { cols: { label: string; val: string
     <div className="grid border-t" style={{ gridTemplateColumns: `repeat(${cols.length}, 1fr)`, gap: "1px", background: border }}>
       {cols.map(({ label, val, color: c }) => (
         <div key={label} className="px-3 py-2.5" style={{ background: isDark ? "#0a0f16" : "#fff" }}>
-          <div className="text-[7px] tracking-[1.5px] uppercase mb-1" style={{ ...MONO, color: isDark ? "#4a6080" : "#64748b" }}>{label}</div>
-          <div className="text-[14px] font-bold leading-tight" style={{ ...MONO, color: c }}>{val}</div>
+          <div className="text-xs tracking-[1.5px] uppercase mb-1" style={{ ...MONO, color: isDark ? "#4a6080" : "#64748b" }}>{label}</div>
+          <div className="text-base font-bold leading-tight" style={{ ...MONO, color: c }}>{val}</div>
         </div>
       ))}
     </div>
@@ -223,14 +223,14 @@ function ChartsPanel({ profit, loss, barData, donutLabel, donutFooter, barFooter
     <div className="flex flex-col lg:flex-row gap-4">
       <div className="flex-1 min-w-0 rounded-xl border flex flex-col overflow-hidden" style={{ borderColor: border, background: cardBg }}>
         <div className="px-4 py-2.5 border-b" style={{ borderColor: border }}>
-          <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: isDark ? "#94a3b8" : "#64748b" }}>PROFIT vs LOSS</span>
+          <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: isDark ? "#94a3b8" : "#64748b" }}>PROFIT vs LOSS</span>
         </div>
         <div className="flex-1 flex items-center justify-center p-4"><DonutChart profit={profit} loss={loss} isDark={isDark} label={donutLabel} /></div>
         {donutFooter.length > 0 && <StatsRow cols={donutFooter} isDark={isDark} border={border} />}
       </div>
       <div className="flex-1 min-w-0 rounded-xl border flex flex-col overflow-hidden" style={{ borderColor: border, background: cardBg }}>
         <div className="px-4 py-2.5 border-b flex items-center justify-between" style={{ borderColor: border }}>
-          <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: isDark ? "#94a3b8" : "#64748b" }}>{barHeader ?? "DATE-WISE P&L"}</span>
+          <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: isDark ? "#94a3b8" : "#64748b" }}>{barHeader ?? "DATE-WISE P&L"}</span>
         </div>
         <div className="flex-1 p-3 overflow-x-auto flex items-center"><BarChart data={barData} isDark={isDark} /></div>
         {barFooter.length > 0 && <StatsRow cols={barFooter} isDark={isDark} border={border} />}
@@ -273,18 +273,18 @@ type MaxPtsFilter = "ALL" | "5" | "10" | "15" | "20" | "25" | "30";
 const MAX_PTS_OPTIONS: MaxPtsFilter[] = ["ALL", "5", "10", "15", "20", "25", "30"];
 
 const COL_DEFS = [
-  { key: "date", label: "DATE", w: "70px" },
-  { key: "time", label: "TIME", w: "120px" },
+  { key: "date", label: "DATE", w: "84px" },
+  { key: "time", label: "TIME", w: "140px" },
   { key: "concepts", label: "CONCEPTS", w: "1fr" },
-  { key: "strike", label: "STRIKE", w: "78px" },
-  { key: "entry", label: "ENTRY", w: "60px" },
-  { key: "sl", label: "SL", w: "58px" },
-  { key: "t1", label: "T1", w: "68px" },
-  { key: "t2", label: "T2", w: "68px" },
-  { key: "result", label: "RESULT", w: "128px" },
-  { key: "maxpts", label: "MAX PTS", w: "72px" },
-  { key: "charges", label: "CHARGES", w: "76px" },
-  { key: "pnl", label: "P&L", w: "128px" },
+  { key: "strike", label: "STRIKE", w: "90px" },
+  { key: "entry", label: "ENTRY", w: "70px" },
+  { key: "sl", label: "SL", w: "66px" },
+  { key: "t1", label: "T1", w: "76px" },
+  { key: "t2", label: "T2", w: "76px" },
+  { key: "result", label: "RESULT", w: "140px" },
+  { key: "maxpts", label: "MAX PTS", w: "80px" },
+  { key: "charges", label: "CHARGES", w: "86px" },
+  { key: "pnl", label: "P&L", w: "140px" },
 ] as const;
 type ColKey = typeof COL_DEFS[number]["key"];
 
@@ -387,8 +387,8 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-[9px] font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
-        <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>
+        <span className="text-xs font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
+        <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>
           ALL TRADES {!loading && allRows.length > 0 && `· ${allRows.length} total`}
         </span>
       </div>
@@ -406,7 +406,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
             className="flex items-center gap-1 px-2 py-1.5 rounded-lg border cursor-pointer transition-colors"
             style={{ ...MONO, background: openDrop === id ? `${ACCENT}15` : (isDark ? "#0f1923" : "#f1f5f9"), borderColor: active ? ACCENT : border, color: active ? ACCENT : muted }}>
             <IconAdjustmentsHorizontal size={12} color={active ? ACCENT : muted} />
-            <span className="text-[7px] font-bold">{label}{active ? " ●" : ""}</span>
+            <span className="text-xs font-bold">{label}{active ? " ●" : ""}</span>
           </button>
         );
 
@@ -423,11 +423,11 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
               {mkBtn("month", monthActive ? `MONTH: ${monthFilter}` : "MONTH", monthActive)}
               {openDrop === "month" && (
                 <div style={dropBase}>
-                  <div className="text-[7px] font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>SELECT MONTH</div>
+                  <div className="text-xs font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>SELECT MONTH</div>
                   <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
                     {months.map(m => (
                       <button key={m} onClick={() => { setMonthF(m); setOpenDrop(null); }}
-                        className="text-left px-2 py-1.5 rounded-sm text-[8px] font-bold cursor-pointer transition-colors"
+                        className="text-left px-2 py-1.5 rounded-sm text-xs font-bold cursor-pointer transition-colors"
                         style={{ ...MONO, background: monthFilter === m ? `${ACCENT}18` : "transparent", color: monthFilter === m ? ACCENT : color, borderLeft: monthFilter === m ? `2px solid ${ACCENT}` : "2px solid transparent" }}>
                         {m === "ALL" ? "All months" : m}
                       </button>
@@ -441,11 +441,11 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
               {mkBtn("type", typeActive ? `TYPE: ${dirFilter}` : "TYPE", typeActive)}
               {openDrop === "type" && (
                 <div style={dropBase}>
-                  <div className="text-[7px] font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>OPTION TYPE</div>
+                  <div className="text-xs font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>OPTION TYPE</div>
                   <div className="flex rounded-sm overflow-hidden border" style={{ borderColor: border }}>
                     {(["ALL", "CE", "PE"] as DirFilter[]).map(f => (
                       <button key={f} onClick={() => { setDirF(f); setOpenDrop(null); }}
-                        className="flex-1 py-1.5 text-[8px] font-bold cursor-pointer transition-colors"
+                        className="flex-1 py-1.5 text-xs font-bold cursor-pointer transition-colors"
                         style={{ ...MONO, background: dirFilter === f ? (f === "CE" ? "#0284c7" : f === "PE" ? "#e11d48" : ACCENT) : "transparent", color: dirFilter === f ? "#fff" : muted }}>
                         {f === "ALL" ? "All" : f}
                       </button>
@@ -459,14 +459,14 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
               {mkBtn("result", resActive ? `RESULT: ${resFilter === "T1" ? "T1 HIT" : resFilter === "T2" ? "T2 HIT" : resFilter}` : "RESULT", resActive)}
               {openDrop === "result" && (
                 <div style={dropBase}>
-                  <div className="text-[7px] font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>RESULT FILTER</div>
+                  <div className="text-xs font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>RESULT FILTER</div>
                   <div className="flex flex-wrap gap-1">
                     {(["ALL", "T1", "T2", "PROFIT", "LOSS"] as ResultFilter[]).map(f => {
                       const fc = f === "PROFIT" ? "#16a34a" : f === "LOSS" ? "#e11d48" : f === "T1" ? "#d97706" : f === "T2" ? "#15803d" : ACCENT;
                       const active = resFilter === f;
                       return (
                         <button key={f} onClick={() => { setResF(f); setOpenDrop(null); }}
-                          className="px-2.5 py-1 text-[8px] font-bold rounded-sm cursor-pointer border transition-colors"
+                          className="px-2.5 py-1 text-xs font-bold rounded-sm cursor-pointer border transition-colors"
                           style={{ ...MONO, background: active ? `${fc}18` : "transparent", borderColor: active ? fc : border, color: active ? fc : muted }}>
                           {f === "T1" ? "T1 HIT" : f === "T2" ? "T2 HIT" : f}
                         </button>
@@ -481,13 +481,13 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
               {mkBtn("maxpts", maxPtsActive ? `MAX PTS ≥${maxPtsFilter}` : "MAX PTS", maxPtsActive)}
               {openDrop === "maxpts" && (
                 <div style={dropBase}>
-                  <div className="text-[7px] font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>MIN MAX POINTS</div>
+                  <div className="text-xs font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>MIN MAX POINTS</div>
                   <div className="flex flex-wrap gap-1">
                     {MAX_PTS_OPTIONS.map(f => {
                       const active = maxPtsFilter === f;
                       return (
                         <button key={f} onClick={() => { setMaxPtsF(f); setOpenDrop(null); }}
-                          className="px-2.5 py-1 text-[8px] font-bold rounded-sm cursor-pointer border transition-colors"
+                          className="px-2.5 py-1 text-xs font-bold rounded-sm cursor-pointer border transition-colors"
                           style={{ ...MONO, background: active ? `${ACCENT}18` : "transparent", borderColor: active ? ACCENT : border, color: active ? ACCENT : muted }}>
                           {f === "ALL" ? "All" : `≥ ${f}`}
                         </button>
@@ -502,7 +502,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
               {mkBtn("cols", colsActive ? `COLS (${visCols.size}/${COL_DEFS.length})` : "COLUMNS", colsActive)}
               {openDrop === "cols" && (
                 <div style={{ ...dropBase, minWidth: 260 }}>
-                  <div className="text-[7px] font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>VISIBLE COLUMNS</div>
+                  <div className="text-xs font-bold tracking-[1.5px] mb-2" style={{ ...MONO, color: muted }}>VISIBLE COLUMNS</div>
                   <div className="flex flex-wrap gap-1">
                     {COL_DEFS.map(col => {
                       const vis = visCols.has(col.key);
@@ -513,7 +513,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                             if (vis && next.size > 1) next.delete(col.key); else next.add(col.key);
                             return next;
                           })}
-                          className="px-2 py-1 text-[7px] font-bold rounded-sm cursor-pointer border transition-colors"
+                          className="px-2 py-1 text-xs font-bold rounded-sm cursor-pointer border transition-colors"
                           style={{ ...MONO, background: vis ? `${ACCENT}18` : "transparent", borderColor: vis ? ACCENT : border, color: vis ? ACCENT : muted }}>
                           {vis ? "✓ " : ""}{col.label}
                         </button>
@@ -522,7 +522,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                   </div>
                   {colsActive && (
                     <button onClick={() => setVisCols(new Set(COL_DEFS.map(c => c.key)))}
-                      className="mt-2 w-full text-[7px] font-bold py-1 rounded-sm border cursor-pointer"
+                      className="mt-2 w-full text-xs font-bold py-1 rounded-sm border cursor-pointer"
                       style={{ ...MONO, borderColor: ACCENT, color: ACCENT, background: `${ACCENT}10` }}>
                       Show all columns
                     </button>
@@ -532,11 +532,11 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
             </div>
 
             <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg border" style={{ background: isDark ? "#0f1923" : "#f1f5f9", borderColor: border }}>
-              <span className="text-[7px] font-bold" style={{ ...MONO, color: muted }}>ROWS</span>
+              <span className="text-xs font-bold" style={{ ...MONO, color: muted }}>ROWS</span>
               <div className="flex gap-0.5">
                 {[5, 10, 15, 20].map(n => (
                   <button key={n} onClick={() => { setPageSz(n); setPage(1); }}
-                    className="w-6 h-5 text-[7px] font-bold rounded-sm cursor-pointer transition-colors"
+                    className="w-6 h-5 text-xs font-bold rounded-sm cursor-pointer transition-colors"
                     style={{ ...MONO, background: pageSize === n ? ACCENT : "transparent", color: pageSize === n ? "#fff" : muted }}>
                     {n}
                   </button>
@@ -546,7 +546,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
 
             {anyActive && (
               <button onClick={() => { setMonthF("ALL"); setDirF("ALL"); setResF("ALL"); setMaxPtsF("ALL"); setVisCols(new Set(COL_DEFS.map(c => c.key))); setOpenDrop(null); }}
-                className="text-[7px] font-bold px-2 py-1.5 rounded-lg border cursor-pointer"
+                className="text-xs font-bold px-2 py-1.5 rounded-lg border cursor-pointer"
                 style={{ ...MONO, borderColor: "#e11d48", color: "#e11d48", background: isDark ? "#2d0505" : "#fff5f5" }}>
                 ✕ Clear all
               </button>
@@ -554,11 +554,11 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
 
             {wr !== null && (
               <div className="ml-auto flex items-center gap-3 flex-shrink-0">
-                <span className="text-[8px] font-bold px-2 py-1 rounded-sm border"
+                <span className="text-xs font-bold px-2 py-1 rounded-sm border"
                   style={{ ...MONO, background: isDark ? (Number(wr) >= 70 ? "#052e16" : "#2d0505") : (Number(wr) >= 70 ? "#f0fdf4" : "#fff5f5"), borderColor: Number(wr) >= 70 ? "#166534" : "#991b1b", color: wrClr }}>
                   {wr}% · <span style={{ color: "#16a34a" }}>{wins}W</span> / <span style={{ color: "#e11d48" }}>{losses}L</span>{eod > 0 ? ` · ${eod}E` : ""}
                 </span>
-                <span className="text-[15px] font-bold" style={{ ...BEBAS, color: pnlColor(lotPnL) }}>{fmtIndianFull(lotPnL)}</span>
+                <span className="text-base font-bold" style={{ ...BEBAS, color: pnlColor(lotPnL) }}>{fmtIndianFull(lotPnL)}</span>
               </div>
             )}
           </div>
@@ -567,7 +567,7 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
 
       {loading && (
         <div className="py-10 flex flex-col items-center gap-2">
-          <div className="text-[10px]" style={{ ...MONO, color: muted }}>Loading trades… {progress.total > 0 ? `${progress.done} / ${progress.total} dates` : ""}</div>
+          <div className="text-sm" style={{ ...MONO, color: muted }}>Loading trades… {progress.total > 0 ? `${progress.done} / ${progress.total} dates` : ""}</div>
           {progress.total > 0 && (
             <div className="w-48 h-1 rounded-full overflow-hidden" style={{ background: isDark ? "#1e2a3a" : "#e2e8f0" }}>
               <div className="h-full rounded-full transition-all" style={{ width: `${(progress.done / progress.total) * 100}%`, background: ACCENT }} />
@@ -576,8 +576,8 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
         </div>
       )}
 
-      {!loading && allRows.length === 0 && <div className="py-10 text-center text-[10px]" style={{ ...MONO, color: muted }}>No live trades found</div>}
-      {!loading && allRows.length > 0 && filtered.length === 0 && <div className="py-8 text-center text-[10px]" style={{ ...MONO, color: muted }}>No trades match the selected filters</div>}
+      {!loading && allRows.length === 0 && <div className="py-10 text-center text-sm" style={{ ...MONO, color: muted }}>No live trades found</div>}
+      {!loading && allRows.length > 0 && filtered.length === 0 && <div className="py-8 text-center text-sm" style={{ ...MONO, color: muted }}>No trades match the selected filters</div>}
 
       {!loading && filtered.length > 0 && (
         <div className="md:hidden space-y-3">
@@ -601,24 +601,24 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                 <div className="px-3 py-3 flex items-start justify-between gap-2">
                   <div className="flex items-start gap-2.5 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0" style={{ background: `${dc}18`, border: `1.5px solid ${dc}40` }}>
-                      <span className="text-[7px] font-bold" style={{ ...MONO, color: muted }}>NI</span>
-                      <span className="text-[12px] font-bold" style={{ ...BEBAS, color: dc }}>{r.Direction}</span>
+                      <span className="text-xs font-bold" style={{ ...MONO, color: muted }}>NI</span>
+                      <span className="text-sm font-bold" style={{ ...BEBAS, color: dc }}>{r.Direction}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[15px] font-bold" style={{ ...BEBAS, color }}>NIFTY {r.Strike} {r.Direction === "CE" ? "Call" : "Put"}</div>
-                      <div className="text-[8px] mt-0.5" style={{ ...MONO, color: muted }}>{fmtTime(r.EntryTime)}{r.ExitTime ? ` → ${fmtTime(r.ExitTime)}` : " → ACTIVE"}</div>
-                      <div className="text-[8px] font-bold mt-0.5" style={{ ...MONO, color: ACCENT }}>{dateLbl}</div>
+                      <div className="text-base font-bold" style={{ ...BEBAS, color }}>NIFTY {r.Strike} {r.Direction === "CE" ? "Call" : "Put"}</div>
+                      <div className="text-xs mt-0.5" style={{ ...MONO, color: muted }}>{fmtTime(r.EntryTime)}{r.ExitTime ? ` → ${fmtTime(r.ExitTime)}` : " → ACTIVE"}</div>
+                      <div className="text-xs font-bold mt-0.5" style={{ ...MONO, color: ACCENT }}>{dateLbl}</div>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className="text-[7px] font-bold px-2 py-0.5 rounded-sm"
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-sm"
                       style={{ ...MONO, background: isWin ? (isDark ? "#052e16" : "#dcfce7") : isLoss ? (isDark ? "#2d0505" : "#fee2e2") : (isDark ? "#1c1500" : "#fef9c3"), color: isWin ? "#16a34a" : isLoss ? "#e11d48" : "#b45309", border: `1px solid ${isWin ? "#16a34a55" : isLoss ? "#e11d4855" : "#b4530955"}` }}>
                       {isWin ? "● WIN" : isLoss ? "● LOSS" : isEod ? "● EOD" : "● OPEN"}
                     </span>
-                    <span className="text-[8px] font-bold px-2 py-0.5 rounded-full" style={{ ...MONO, background: `${sc}18`, color: sc, border: `1px solid ${sc}40` }}>{stIcon} {stLbl}</span>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ ...MONO, background: `${sc}18`, color: sc, border: `1px solid ${sc}40` }}>{stIcon} {stLbl}</span>
                     <div className="flex gap-1">
                       {([["T1", t1Hit, "#d97706"], ["T2", t2Hit, "#15803d"]] as [string, boolean, string][]).map(([lbl, hit, clr]) => (
-                        <span key={lbl} className="text-[7px] px-1.5 py-0.5 rounded-sm font-bold"
+                        <span key={lbl} className="text-xs px-1.5 py-0.5 rounded-sm font-bold"
                           style={{ ...MONO, background: hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: hit ? clr : muted }}>
                           {lbl}{hit ? "✓" : "✗"}
                         </span>
@@ -627,9 +627,9 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                   </div>
                 </div>
                 <div className="px-3 py-1.5 flex items-center gap-3 border-t" style={{ background: isDark ? "#080b0f" : "#fff", borderColor: border }}>
-                  <span className="text-[9px] font-bold" style={{ ...MONO, color: "#d97706" }}>T1 ₹{r.Target1 ?? "—"}{t1Hit ? " ✓" : ""}</span>
-                  <span className="text-[9px] font-bold" style={{ ...MONO, color: "#16a34a" }}>T2 ₹{r.Target2 ?? "—"}{t2Hit ? " ✓" : ""}</span>
-                  {r.MaxPoints && parseFloat(r.MaxPoints) > 0 && <span className="text-[9px] font-bold" style={{ ...MONO, color: ACCENT }}>MAX +{r.MaxPoints}</span>}
+                  <span className="text-xs font-bold" style={{ ...MONO, color: "#d97706" }}>T1 ₹{r.Target1 ?? "—"}{t1Hit ? " ✓" : ""}</span>
+                  <span className="text-xs font-bold" style={{ ...MONO, color: "#16a34a" }}>T2 ₹{r.Target2 ?? "—"}{t2Hit ? " ✓" : ""}</span>
+                  {r.MaxPoints && parseFloat(r.MaxPoints) > 0 && <span className="text-xs font-bold" style={{ ...MONO, color: ACCENT }}>MAX +{r.MaxPoints}</span>}
                 </div>
                 <div className="grid grid-cols-3 border-t" style={{ gap: "1px", background: border }}>
                   {[
@@ -638,8 +638,8 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                     { label: "LOT P&L", val: fmtIndianFull(lPnl), color: pnlColor(lPnl) },
                   ].map(({ label, val, color: c }) => (
                     <div key={label} className="px-3 py-2" style={{ background: cardBg }}>
-                      <div className="text-[7px] mb-0.5" style={{ ...MONO, color: muted }}>{label}</div>
-                      <div className="text-[11px] font-bold tabular-nums" style={{ ...MONO, color: c }}>{val}</div>
+                      <div className="text-xs mb-0.5" style={{ ...MONO, color: muted }}>{label}</div>
+                      <div className="text-sm font-bold tabular-nums" style={{ ...MONO, color: c }}>{val}</div>
                     </div>
                   ))}
                 </div>
@@ -652,11 +652,11 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
       {!loading && filtered.length > 0 && (
         <div className="hidden md:block rounded-xl border overflow-hidden" style={{ borderColor: border }}>
           <div className="overflow-auto" style={{ maxHeight: 540 }}>
-            <div style={{ minWidth: 960 }}>
+            <div style={{ minWidth: 1180 }}>
               <div className="grid border-b-2 sticky top-0 z-10" style={{ gridTemplateColumns: dynTCOLS, borderColor: isDark ? "#1e2a3a" : "#cbd5e1", background: isDark ? "#080d14" : "#f0f4f8" }}>
-                <div className="px-2 py-2 text-[8px] font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>#</div>
+                <div className="px-2 py-2 text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>#</div>
                 {COL_DEFS.filter(c => visCols.has(c.key)).map(col => (
-                  <div key={col.key} className="px-2 py-2 text-[8px] font-bold tracking-[1.5px] whitespace-nowrap" style={{ ...MONO, color: muted }}>
+                  <div key={col.key} className="px-2 py-2 text-xs font-bold tracking-[1.5px] whitespace-nowrap" style={{ ...MONO, color: muted }}>
                     {col.key === "pnl" ? `P&L (${LOT_QTY}×)` : col.label}
                   </div>
                 ))}
@@ -682,61 +682,61 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
 
                 return (
                   <div key={i} className="grid border-b items-center" style={{ gridTemplateColumns: dynTCOLS, background: rowBg, borderColor: isDark ? "#0f1923" : "#f1f5f9", minHeight: 36 }}>
-                    <div className="px-2 text-[9px] tabular-nums" style={{ ...MONO, color: muted }}>{absIdx}</div>
+                    <div className="px-2 text-xs tabular-nums" style={{ ...MONO, color: muted }}>{absIdx}</div>
                     {visCols.has("date") && (
-                      <div className="px-2 text-[9px] font-bold whitespace-nowrap" style={{ ...MONO, color }}>{dc2 ? `${dc2.top} '${dc2.bot.slice(2)}` : "—"}</div>
+                      <div className="px-2 text-xs font-bold whitespace-nowrap" style={{ ...MONO, color }}>{dc2 ? `${dc2.top} '${dc2.bot.slice(2)}` : "—"}</div>
                     )}
                     {visCols.has("time") && (
-                      <div className="px-2 text-[9px] whitespace-nowrap" style={{ ...MONO, color }}>
+                      <div className="px-2 text-xs whitespace-nowrap" style={{ ...MONO, color }}>
                         <span className="font-bold">{fmtTime(r.EntryTime)}</span>
                         <span style={{ color: muted }}> → {fmtTime(r.ExitTime)}</span>
                       </div>
                     )}
                     {visCols.has("concepts") && (
                       <div className="px-2 flex items-center gap-1 overflow-hidden">
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: `${dc}18`, color: dc, border: `1px solid ${dc}30` }}>{r.Direction}</span>
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: `${dc}18`, color: dc, border: `1px solid ${dc}30` }}>{r.Direction}</span>
                         {r.Concepts && r.Concepts.split(",").slice(0, 2).map((c: string) => (
-                          <span key={c} className="text-[7px] px-1 py-0.5 rounded-sm font-bold truncate flex-shrink-0" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: muted }}>{c.trim()}</span>
+                          <span key={c} className="text-xs px-1 py-0.5 rounded-sm font-bold truncate flex-shrink-0" style={{ ...MONO, background: isDark ? "#1e2a3a" : "#f1f5f9", color: muted }}>{c.trim()}</span>
                         ))}
                       </div>
                     )}
                     {visCols.has("strike") && (
-                      <div className="px-2 text-[9px] font-bold whitespace-nowrap tabular-nums" style={{ ...MONO, color: dc }}>{r.Strike} {r.Direction}</div>
+                      <div className="px-2 text-xs font-bold whitespace-nowrap tabular-nums" style={{ ...MONO, color: dc }}>{r.Strike} {r.Direction}</div>
                     )}
-                    {visCols.has("entry") && <div className="px-2 text-[10px] font-bold tabular-nums" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>}
-                    {visCols.has("sl") && <div className="px-2 text-[10px] font-bold tabular-nums" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>}
+                    {visCols.has("entry") && <div className="px-2 text-sm font-bold tabular-nums" style={{ ...MONO, color: dc }}>₹{r.Entry}</div>}
+                    {visCols.has("sl") && <div className="px-2 text-sm font-bold tabular-nums" style={{ ...MONO, color: "#e11d48" }}>₹{r.SL}</div>}
                     {visCols.has("t1") && (
                       <div className="px-2 flex items-center gap-1">
-                        <span className="text-[10px] font-bold tabular-nums" style={{ ...MONO, color: "#d97706" }}>₹{r.Target1}</span>
-                        <span className="text-[7px] font-bold px-1 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : muted }}>{t1Hit ? "✓" : "✗"}</span>
+                        <span className="text-sm font-bold tabular-nums" style={{ ...MONO, color: "#d97706" }}>₹{r.Target1}</span>
+                        <span className="text-xs font-bold px-1 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: t1Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t1Hit ? "#15803d" : muted }}>{t1Hit ? "✓" : "✗"}</span>
                       </div>
                     )}
                     {visCols.has("t2") && (
                       <div className="px-2 flex items-center gap-1">
-                        <span className="text-[10px] font-bold tabular-nums" style={{ ...MONO, color: "#16a34a" }}>₹{r.Target2}</span>
-                        <span className="text-[7px] font-bold px-1 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : muted }}>{t2Hit ? "✓" : "✗"}</span>
+                        <span className="text-sm font-bold tabular-nums" style={{ ...MONO, color: "#16a34a" }}>₹{r.Target2}</span>
+                        <span className="text-xs font-bold px-1 py-0.5 rounded-sm flex-shrink-0" style={{ ...MONO, background: t2Hit ? (isDark ? "#052e16" : "#dcfce7") : (isDark ? "#0f1923" : "#f1f5f9"), color: t2Hit ? "#15803d" : muted }}>{t2Hit ? "✓" : "✗"}</span>
                       </div>
                     )}
                     {visCols.has("result") && (
                       <div className="px-2 flex items-center gap-1 overflow-hidden">
-                        <span className="text-[7px] font-bold px-1.5 py-0.5 rounded-sm flex-shrink-0"
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded-sm flex-shrink-0"
                           style={{ ...MONO, background: isWin ? (isDark ? "#052e16" : "#dcfce7") : isLoss ? (isDark ? "#2d0505" : "#fee2e2") : (isDark ? "#1c1500" : "#fef9c3"), color: isWin ? "#16a34a" : isLoss ? "#e11d48" : "#b45309", border: `1px solid ${isWin ? "#16a34a44" : isLoss ? "#e11d4844" : "#b4530944"}` }}>
                           {isWin ? "WIN" : isLoss ? "LOSS" : isEod ? "EOD" : "OPEN"}
                         </span>
-                        <span className="text-[9px] flex-shrink-0">{r.Status === "TARGET" ? "🎯" : r.Status === "SL" ? "🛑" : isEod ? "🕐" : r.Status === "TIME_PROFIT" || r.Status === "TIME_EXIT" ? "⏱" : "⏳"}</span>
-                        <span className="text-[8px] font-bold truncate" style={{ ...MONO, color: stClr }}>{r.Status === "TIME_PROFIT" ? "60M PROFIT" : r.Status === "TIME_EXIT" ? "75M EXIT" : r.Status}</span>
+                        <span className="text-xs flex-shrink-0">{r.Status === "TARGET" ? "🎯" : r.Status === "SL" ? "🛑" : isEod ? "🕐" : r.Status === "TIME_PROFIT" || r.Status === "TIME_EXIT" ? "⏱" : "⏳"}</span>
+                        <span className="text-xs font-bold truncate" style={{ ...MONO, color: stClr }}>{r.Status === "TIME_PROFIT" ? "60M PROFIT" : r.Status === "TIME_EXIT" ? "75M EXIT" : r.Status}</span>
                       </div>
                     )}
                     {visCols.has("maxpts") && (
-                      <div className="px-2 text-[10px] font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: ACCENT }}>{r.MaxPoints && parseFloat(r.MaxPoints) > 0 ? `+${r.MaxPoints}` : "—"}</div>
+                      <div className="px-2 text-sm font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: ACCENT }}>{r.MaxPoints && parseFloat(r.MaxPoints) > 0 ? `+${r.MaxPoints}` : "—"}</div>
                     )}
                     {visCols.has("charges") && (
-                      <div className="px-2 text-[10px] font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: "#b45309" }}>{fmtIndianFull(-chg)}</div>
+                      <div className="px-2 text-sm font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: "#b45309" }}>{fmtIndianFull(-chg)}</div>
                     )}
                     {visCols.has("pnl") && (
                       <div className="px-2 flex items-baseline gap-1 overflow-hidden">
-                        <span className="text-[10px] font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: pnlColor(lPnl) }}>{fmtIndianFull(lPnl)}</span>
-                        <span className="text-[8px] tabular-nums" style={{ ...MONO, color: pnlColor(lPnl) }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%</span>
+                        <span className="text-sm font-bold tabular-nums whitespace-nowrap" style={{ ...MONO, color: pnlColor(lPnl) }}>{fmtIndianFull(lPnl)}</span>
+                        <span className="text-xs tabular-nums" style={{ ...MONO, color: pnlColor(lPnl) }}>{pnlPct >= 0 ? "+" : ""}{pnlPct.toFixed(1)}%</span>
                       </div>
                     )}
                   </div>
@@ -746,12 +746,12 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
           </div>
 
           <div className="flex items-center justify-between px-4 py-2.5 border-t" style={{ borderColor: border, background: isDark ? "#080b0f" : "#fff" }}>
-            <span className="text-[8px]" style={{ ...MONO, color: muted }}>
+            <span className="text-xs" style={{ ...MONO, color: muted }}>
               {filtered.length === 0 ? "0 trades" : `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, filtered.length)} of ${filtered.length} trades`}
             </span>
             <div className="flex items-center gap-1">
-              <button onClick={() => setPage(1)} disabled={page === 1} className="w-6 h-6 flex items-center justify-center rounded text-[10px] font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>«</button>
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="w-6 h-6 flex items-center justify-center rounded text-[11px] font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>‹</button>
+              <button onClick={() => setPage(1)} disabled={page === 1} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>«</button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>‹</button>
               {Array.from({ length: totalPages }, (_, idx) => idx + 1)
                 .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                 .reduce<(number | "…")[]>((acc, p, i, arr) => {
@@ -760,13 +760,13 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                   return acc;
                 }, [])
                 .map((p, i) => p === "…"
-                  ? <span key={`e${i}`} className="text-[9px] px-1" style={{ ...MONO, color: muted }}>…</span>
-                  : <button key={p} onClick={() => setPage(p as number)} className="w-6 h-6 flex items-center justify-center rounded text-[9px] font-bold cursor-pointer" style={{ ...MONO, background: page === p ? ACCENT : (isDark ? "#0f1923" : "#f1f5f9"), color: page === p ? "#fff" : color }}>{p}</button>
+                  ? <span key={`e${i}`} className="text-xs px-1" style={{ ...MONO, color: muted }}>…</span>
+                  : <button key={p} onClick={() => setPage(p as number)} className="w-6 h-6 flex items-center justify-center rounded text-xs font-bold cursor-pointer" style={{ ...MONO, background: page === p ? ACCENT : (isDark ? "#0f1923" : "#f1f5f9"), color: page === p ? "#fff" : color }}>{p}</button>
                 )}
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="w-6 h-6 flex items-center justify-center rounded text-[11px] font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>›</button>
-              <button onClick={() => setPage(totalPages)} disabled={page === totalPages} className="w-6 h-6 flex items-center justify-center rounded text-[10px] font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>»</button>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>›</button>
+              <button onClick={() => setPage(totalPages)} disabled={page === totalPages} className="w-6 h-6 flex items-center justify-center rounded text-sm font-bold cursor-pointer disabled:opacity-30" style={{ ...MONO, background: isDark ? "#0f1923" : "#f1f5f9", color }}>»</button>
             </div>
-            <span className="text-[8px]" style={{ ...MONO, color: muted }}>Page {page} / {totalPages}</span>
+            <span className="text-xs" style={{ ...MONO, color: muted }}>Page {page} / {totalPages}</span>
           </div>
 
           <div className="border-t" style={{ borderColor: border }}>
@@ -781,8 +781,8 @@ function JournalTradesSection({ isDark, border, color, muted, strategy }: {
                 { label: "TOTAL CHARGES", val: fmtIndianFull(-totCharges), color: "#b45309" },
               ].map(({ label, val, color: c }) => (
                 <div key={label} className="px-3 py-2.5" style={{ background: isDark ? "#0a0f16" : "#fff" }}>
-                  <div className="text-[7px] tracking-[1.5px] mb-1" style={{ ...MONO, color: muted }}>{label}</div>
-                  <div className="text-[13px] font-bold leading-tight" style={{ ...MONO, color: c }}>{val}</div>
+                  <div className="text-xs tracking-[1.5px] mb-1" style={{ ...MONO, color: muted }}>{label}</div>
+                  <div className="text-base font-bold leading-tight" style={{ ...MONO, color: c }}>{val}</div>
                 </div>
               ))}
             </div>
@@ -901,7 +901,7 @@ export default function JournalPage() {
         <div className="flex items-center gap-2 pt-4">
           {(["month", "year", "overall"] as ViewType[]).map(v => (
             <button key={v} onClick={() => setViewType(v)}
-              className="px-3 py-1.5 text-[9px] font-bold tracking-[1.5px] rounded-sm border cursor-pointer transition-colors uppercase"
+              className="px-3 py-1.5 text-xs font-bold tracking-[1.5px] rounded-sm border cursor-pointer transition-colors uppercase"
               style={{ ...MONO, background: viewType === v ? ACCENT : (isDark ? "#0f1923" : "#f8fafc"), borderColor: viewType === v ? ACCENT : (isDark ? "#2a3a4a" : "#cbd5e1"), color: viewType === v ? "#fff" : (isDark ? "#4a6080" : "#64748b") }}>
               {v === "overall" ? "ALL TIME" : v}
             </button>
@@ -910,7 +910,7 @@ export default function JournalPage() {
           <div className="flex border rounded-sm overflow-hidden flex-shrink-0" style={{ borderColor: isDark ? "#2a3a4a" : "#cbd5e1" }}>
             {(["smc", "vwap930"] as const).map(s => (
               <button key={s} onClick={() => setStrategy(s)}
-                className="px-2 sm:px-3 py-1.5 text-[9px] font-bold tracking-[1px] cursor-pointer transition-colors whitespace-nowrap"
+                className="px-2 sm:px-3 py-1.5 text-xs font-bold tracking-[1px] cursor-pointer transition-colors whitespace-nowrap"
                 style={{ ...MONO, background: strategy === s ? "#0d9488" : "transparent", color: strategy === s ? "#fff" : (isDark ? "#4a6080" : "#64748b") }}>
                 {s === "smc" ? "SMC" : "VWAP 9:30"}
               </button>
@@ -921,17 +921,17 @@ export default function JournalPage() {
             {viewType === "month" && <>
               <button onClick={() => setCalMonth(m => { const d = new Date(m.year, m.month - 2, 1); return { year: d.getFullYear(), month: d.getMonth() + 1 }; })}
                 className="w-7 h-7 flex items-center justify-center rounded cursor-pointer font-bold" style={{ background: isDark ? "#0f1923" : "#f1f5f9", color }}>‹</button>
-              <span className="text-[11px] font-bold tracking-[1.5px]" style={{ ...MONO, color, minWidth: 120, textAlign: "center" }}>{MONTH_SHORT[calMonth.month - 1]} {calMonth.year}</span>
+              <span className="text-sm font-bold tracking-[1.5px]" style={{ ...MONO, color, minWidth: 120, textAlign: "center" }}>{MONTH_SHORT[calMonth.month - 1]} {calMonth.year}</span>
               <button onClick={() => setCalMonth(m => { const d = new Date(m.year, m.month, 1); return { year: d.getFullYear(), month: d.getMonth() + 1 }; })}
                 className="w-7 h-7 flex items-center justify-center rounded cursor-pointer font-bold" style={{ background: isDark ? "#0f1923" : "#f1f5f9", color }}>›</button>
             </>}
             {viewType === "year" && <>
               <button onClick={() => setCalYear(y => y - 1)} className="w-7 h-7 flex items-center justify-center rounded cursor-pointer font-bold" style={{ background: isDark ? "#0f1923" : "#f1f5f9", color }}>‹</button>
-              <span className="text-[11px] font-bold tracking-[1.5px]" style={{ ...MONO, color, minWidth: 60, textAlign: "center" }}>{calYear}</span>
+              <span className="text-sm font-bold tracking-[1.5px]" style={{ ...MONO, color, minWidth: 60, textAlign: "center" }}>{calYear}</span>
               <button onClick={() => setCalYear(y => y + 1)} className="w-7 h-7 flex items-center justify-center rounded cursor-pointer font-bold" style={{ background: isDark ? "#0f1923" : "#f1f5f9", color }}>›</button>
             </>}
             {viewType === "overall" && (
-              <span className="text-[9px] font-bold tracking-[2px] px-2 py-1 rounded-sm" style={{ ...MONO, color: ACCENT, background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}>▶ LIVE · ALL TIME</span>
+              <span className="text-xs font-bold tracking-[2px] px-2 py-1 rounded-sm" style={{ ...MONO, color: ACCENT, background: `${ACCENT}18`, border: `1px solid ${ACCENT}40` }}>▶ LIVE · ALL TIME</span>
             )}
           </div>
         </div>
@@ -952,13 +952,13 @@ export default function JournalPage() {
 
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
-              <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>CALENDAR</span>
+              <span className="text-xs font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
+              <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>CALENDAR</span>
             </div>
             <div className="rounded-lg border overflow-hidden" style={{ borderColor: border }}>
               <div className="grid grid-cols-7 gap-px p-1" style={{ background: isDark ? "#1a2332" : "#e2e8f0" }}>
                 {DAY_NAMES.map(d => (
-                  <div key={d} className="text-center text-[8px] md:text-[11px] font-bold tracking-[1.5px] py-1.5" style={{ ...MONO, color: isDark ? "#94a3b8" : "#475569", background: isDark ? "#1a2332" : "#e2e8f0" }}>{d}</div>
+                  <div key={d} className="text-center text-xs md:text-sm font-bold tracking-[1.5px] py-1.5" style={{ ...MONO, color: isDark ? "#94a3b8" : "#475569", background: isDark ? "#1a2332" : "#e2e8f0" }}>{d}</div>
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1 p-1" style={{ background: isDark ? "#080b0f" : "#fff" }}>
@@ -975,11 +975,11 @@ export default function JournalPage() {
                   const cellBc = isToday ? ACCENT : hasData ? (lotPnl! >= 0 ? "rgba(22,163,74,0.6)" : "rgba(225,29,72,0.6)") : isHoliday ? "rgba(251,191,36,0.6)" : "rgba(100,116,139,0.2)";
                   return (
                     <div key={i} className="rounded-lg p-1.5 sm:p-2 min-h-[56px] sm:min-h-[72px] flex flex-col" style={{ background: cellBg, border: `${isToday ? "2px" : "1px"} solid ${cellBc}` }}>
-                      <span className="text-[10px] md:text-[12px] font-bold" style={{ ...MONO, color: isToday ? ACCENT : (isDark ? "#cbd5e1" : "#334155") }}>{day}</span>
-                      {isHoliday && <span className="text-[9px] font-bold leading-tight mt-0.5 break-words" style={{ ...MONO, color: "#b45309" }}>{holiday}</span>}
+                      <span className="text-sm md:text-sm font-bold" style={{ ...MONO, color: isToday ? ACCENT : (isDark ? "#cbd5e1" : "#334155") }}>{day}</span>
+                      {isHoliday && <span className="text-xs font-bold leading-tight mt-0.5 break-words" style={{ ...MONO, color: "#b45309" }}>{holiday}</span>}
                       {hasData && lotPnl !== null && <>
-                        <span className="text-[8px] md:text-[9px] font-bold mt-auto leading-tight break-all" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtIndianFull(lotPnl)}</span>
-                        <span className="text-[7px] font-bold mt-0.5 flex gap-1 flex-wrap" style={MONO}>
+                        <span className="text-xs md:text-xs font-bold mt-auto leading-tight break-all" style={{ ...MONO, color: lotPnl >= 0 ? "#16a34a" : "#e11d48" }}>{fmtIndianFull(lotPnl)}</span>
+                        <span className="text-xs font-bold mt-0.5 flex gap-1 flex-wrap" style={MONO}>
                           <span style={{ color: isDark ? "#94a3b8" : "#475569" }}>{data.trades}T</span>
                           <span style={{ color: "#16a34a" }}>{data.wins}W</span>
                           <span style={{ color: "#e11d48" }}>{data.trades - data.wins}L</span>
@@ -1000,7 +1000,7 @@ export default function JournalPage() {
                 ]} />
               </div>
             ) : (
-              <div className="mt-4 text-center text-[10px]" style={{ ...MONO, color: muted }}>No live data for {MONTH_NAMES[calMonth.month - 1]} {calMonth.year}</div>
+              <div className="mt-4 text-center text-sm" style={{ ...MONO, color: muted }}>No live data for {MONTH_NAMES[calMonth.month - 1]} {calMonth.year}</div>
             )}
           </div>
         </>}
@@ -1021,8 +1021,8 @@ export default function JournalPage() {
 
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
-              <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>MONTHLY BREAKDOWN · {calYear}</span>
+              <span className="text-xs font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
+              <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>MONTHLY BREAKDOWN · {calYear}</span>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {yearMonthGrid.map(({ monthIdx, lot, trades, wins, hasData }) => {
@@ -1030,17 +1030,17 @@ export default function JournalPage() {
                 const cellBc = hasData ? (lot >= 0 ? "rgba(22,163,74,0.5)" : "rgba(225,29,72,0.5)") : "rgba(100,116,139,0.2)";
                 return (
                   <div key={monthIdx} className="rounded-lg p-3 flex flex-col gap-0.5" style={{ background: cellBg, border: `1px solid ${cellBc}` }}>
-                    <span className="text-[13px] font-bold" style={{ ...BEBAS, color: isDark ? "#cbd5e1" : "#334155" }}>{MONTH_NAMES[monthIdx]}</span>
+                    <span className="text-base font-bold" style={{ ...BEBAS, color: isDark ? "#cbd5e1" : "#334155" }}>{MONTH_NAMES[monthIdx]}</span>
                     {hasData ? <>
-                      <span className="text-[9px] font-bold leading-tight break-all" style={{ ...MONO, color: lot >= 0 ? "#16a34a" : "#e11d48" }}>{fmtIndianFull(lot)}</span>
-                      <span className="text-[7px] font-bold mt-0.5 flex gap-1 flex-wrap" style={MONO}>
+                      <span className="text-xs font-bold leading-tight break-all" style={{ ...MONO, color: lot >= 0 ? "#16a34a" : "#e11d48" }}>{fmtIndianFull(lot)}</span>
+                      <span className="text-xs font-bold mt-0.5 flex gap-1 flex-wrap" style={MONO}>
                         <span style={{ color: isDark ? "#94a3b8" : "#475569" }}>{trades}T</span>
                         <span style={{ color: "#16a34a" }}>{wins}W</span>
                         <span style={{ color: "#e11d48" }}>{trades - wins}L</span>
                         <span style={{ color: winRateColor(wins, trades) }}>{((wins / trades) * 100).toFixed(0)}%</span>
                       </span>
                     </> : (
-                      <span className="text-[9px] mt-1" style={{ ...MONO, color: muted }}>— no data</span>
+                      <span className="text-xs mt-1" style={{ ...MONO, color: muted }}>— no data</span>
                     )}
                   </div>
                 );
@@ -1056,7 +1056,7 @@ export default function JournalPage() {
                 ]} />
               </div>
             )}
-            {yearStats.months === 0 && <div className="mt-4 text-center text-[10px]" style={{ ...MONO, color: muted }}>No live data for {calYear}</div>}
+            {yearStats.months === 0 && <div className="mt-4 text-center text-sm" style={{ ...MONO, color: muted }}>No live data for {calYear}</div>}
           </div>
         </>}
 
@@ -1076,8 +1076,8 @@ export default function JournalPage() {
 
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-[9px] font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
-              <span className="text-[9px] font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>YEARLY BREAKDOWN</span>
+              <span className="text-xs font-bold tracking-[2px]" style={{ ...MONO, color: ACCENT }}>▶ LIVE</span>
+              <span className="text-xs font-bold tracking-[1.5px]" style={{ ...MONO, color: muted }}>YEARLY BREAKDOWN</span>
             </div>
             {overallYearData.length > 0 ? <>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1088,7 +1088,7 @@ export default function JournalPage() {
                   return (
                     <div key={d.key} className="rounded-xl p-4 flex flex-col gap-1" style={{ background: cellBg, border: `1px solid ${cellBc}` }}>
                       <span className="text-[28px] font-bold leading-none" style={{ ...BEBAS, color: isDark ? "#e2e8f0" : "#1e293b" }}>{d.label}</span>
-                      <span className="text-[11px] font-bold mt-1" style={{ ...MONO, color: pnlColor(d.lot) }}>{fmtIndianFull(d.lot)}</span>
+                      <span className="text-sm font-bold mt-1" style={{ ...MONO, color: pnlColor(d.lot) }}>{fmtIndianFull(d.lot)}</span>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {[
                           { label: "TRADES", val: `${d.trades}`, color: isDark ? "#94a3b8" : "#475569" },
@@ -1097,8 +1097,8 @@ export default function JournalPage() {
                           { label: "WR", val: winRateFmt(d.wins, d.trades), color: winRateColor(d.wins, d.trades) },
                         ].map(({ label, val, color: c }) => (
                           <div key={label} className="flex flex-col">
-                            <span className="text-[6px] tracking-[1px]" style={{ ...MONO, color: muted }}>{label}</span>
-                            <span className="text-[12px] font-bold" style={{ ...MONO, color: c }}>{val}</span>
+                            <span className="text-xs tracking-[1px]" style={{ ...MONO, color: muted }}>{label}</span>
+                            <span className="text-sm font-bold" style={{ ...MONO, color: c }}>{val}</span>
                           </div>
                         ))}
                       </div>
@@ -1115,7 +1115,7 @@ export default function JournalPage() {
                 ]} />
               </div>
             </> : (
-              <div className="mt-4 text-center text-[10px]" style={{ ...MONO, color: muted }}>No live data found</div>
+              <div className="mt-4 text-center text-sm" style={{ ...MONO, color: muted }}>No live data found</div>
             )}
           </div>
         </>}

@@ -457,7 +457,7 @@ export async function runHistoricalSMCScan(date: string, expiry: string): Promis
       leg: { token: neededTokens.get(chosenKey)!.token, tradingsymbol: "", strike: sig.strike, type: sig.direction, ltp: exitPrice },
       rr, score: sig.score, effScore: sig.effScore, strength: sig.strength, trendOk: sig.trendOk, concepts: sig.concepts,
       status, t1Hit, t1HitTime, currentPnL: pnl, pnlPct: pct, peakMove,
-      spot: sig.spot, expiry, createdAt: sig.signalTime, isHistorical: true, date,
+      spot: sig.spot, expiry, createdAt: sig.signalTime, exitedAt: exitTime ? new Date(exitTime).toISOString() : null, isHistorical: true, date,
     });
   }
 

@@ -331,7 +331,13 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
 
   const checkpoints: Date[] = [];
   {
-    const start = new Date(`${date}T${String(VWAP930_ENTRY_START_HOUR).padStart(2,"0")}:${String(VWAP930_ENTRY_START_MINUTE).padStart(2,"0")}:00+05:30`);
+    // Checkpoints sit on real 5-min candle closes (09:40, 09:45, …) — the
+    // entry start rounded UP to the next boundary — exactly the minutes the
+    // live scan is allowed to decide in. A start like 09:36 used as-is would
+    // step 09:36, 09:41, … and judge candles live never would.
+    const rawStart = new Date(`${date}T${String(VWAP930_ENTRY_START_HOUR).padStart(2,"0")}:${String(VWAP930_ENTRY_START_MINUTE).padStart(2,"0")}:00+05:30`);
+    const step = VWAP930_CANDLE_MINUTES * 60_000;
+    const start = new Date(Math.ceil(rawStart.getTime() / step) * step);
     const end   = new Date(`${date}T15:30:00+05:30`);
     for (let t = start.getTime(); t <= end.getTime(); t += VWAP930_CANDLE_MINUTES * 60_000) {
       checkpoints.push(new Date(t));
@@ -489,7 +495,7 @@ export async function runHistoricalVWAP930Scan(date: string, expiry: string): Pr
       leg: { token: chosen.token, tradingsymbol: "", strike: chosen.strike, type: dir, ltp: exitPrice },
       rr, vwap: chosen.vwap, vwapCE: ceCand?.vwap ?? undefined, vwapPE: peCand?.vwap ?? undefined, entryReason,
       status, currentPnL: pnl, pnlPct: pct, peakMove,
-      spot, expiry, createdAt: chosen.entryCandle.date as any, isHistorical: true, date,
+      spot, expiry, createdAt: chosen.entryCandle.date as any, exitedAt: exitTime ? new Date(exitTime).toISOString() : null, isHistorical: true, date,
     };
     return { result, exitTimeMs: exitTime ? new Date(exitTime).getTime() : entryMark.getTime() };
   }

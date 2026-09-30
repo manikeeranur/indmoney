@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { IconPlus, IconSearch, IconLoader2, IconX } from "@tabler/icons-react";
 import type { Index, OptionChain } from "@/lib/broker/types";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 
 export type SearchResult = {
   token: number; tradingsymbol: string; name: string; exchange: string;
@@ -132,7 +132,7 @@ export default function WatchlistCombobox({ chain, chainIndex, expiry, watchedTo
   return (
     <div className="relative mb-4" ref={panelRef}>
       <button onClick={() => setOpen(v => !v)}
-        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-bold transition-colors lg:w-[25vw]"
+        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition-colors lg:w-[25vw]"
         style={{ ...MONO, border: "1px solid var(--accent)", background: open ? "var(--accent)" : "var(--accent-soft)", color: open ? "#fff" : "var(--accent)" }}>
         <IconSearch size={13} /><span className="flex-1 text-left">Search stocks &amp; options…</span>
       </button>
@@ -143,7 +143,7 @@ export default function WatchlistCombobox({ chain, chainIndex, expiry, watchedTo
           <div className="flex items-center gap-2 border-b px-3 py-2.5" style={{ borderColor: "var(--border)" }}>
             <IconSearch size={14} color="var(--text-faint)" />
             <input ref={inputRef} value={query} onChange={e => handleQueryChange(e.target.value)} placeholder="BHEL, RVNL, NIFTY22300, CE…"
-              className="flex-1 bg-transparent text-[12px] outline-none" style={{ ...MONO, color: "var(--text)" }}
+              className="flex-1 bg-transparent text-sm outline-none" style={{ ...MONO, color: "var(--text)" }}
               onKeyDown={e => e.key === "Escape" && setOpen(false)} />
             {query && (
               <button onClick={() => { setQuery(""); setApiResults([]); inputRef.current?.focus(); }} className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full" style={{ background: "var(--card)", color: "var(--text-muted)" }}>
@@ -155,7 +155,7 @@ export default function WatchlistCombobox({ chain, chainIndex, expiry, watchedTo
           <div style={{ overflowY: "auto", flex: 1 }}>
             {visibleChainAll.length > 0 && (
               <div>
-                <div className="border-b px-3 py-1.5 text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)", borderColor: "var(--border)" }}>{chainIndex} Options · {expiry}</div>
+                <div className="border-b px-3 py-1.5 text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)", borderColor: "var(--border)" }}>{chainIndex} Options · {expiry}</div>
                 {filteredChain.map(r => {
                   const dirClr = r.type === "CE" ? "var(--ce)" : "var(--pe)";
                   return (
@@ -163,49 +163,49 @@ export default function WatchlistCombobox({ chain, chainIndex, expiry, watchedTo
                       <OptionLogo index={r.index!} type={r.type as "CE" | "PE"} />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[11px] font-bold" style={{ ...MONO, color: "var(--text)" }}>{r.index} {r.strike}</span>
-                          <span className="rounded px-1.5 py-0.5 text-[9px] font-bold" style={{ background: `${dirClr}22`, color: dirClr }}>{r.type === "CE" ? "Call" : "Put"}</span>
+                          <span className="text-sm font-bold" style={{ ...MONO, color: "var(--text)" }}>{r.index} {r.strike}</span>
+                          <span className="rounded px-1.5 py-0.5 text-xs font-bold" style={{ background: `${dirClr}22`, color: dirClr }}>{r.type === "CE" ? "Call" : "Put"}</span>
                         </div>
                         <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                          <span className="tabular-nums text-[12px] font-bold" style={{ ...MONO, color: "var(--text)" }}>₹{r.ltp.toFixed(2)}</span>
-                          {r.pct !== undefined && <span className="text-[9px] font-bold" style={{ ...MONO, color: (r.pct ?? 0) >= 0 ? "var(--up)" : "var(--down)" }}>{(r.pct ?? 0) >= 0 ? "+" : ""}{r.pct?.toFixed(2)}%</span>}
-                          {r.oi !== undefined && <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>OI {r.oi >= 100000 ? `${(r.oi / 100000).toFixed(1)}L` : r.oi >= 1000 ? `${(r.oi / 1000).toFixed(0)}K` : r.oi}</span>}
-                          {r.iv !== undefined && <span className="text-[8px]" style={{ ...MONO, color: "var(--text-faint)" }}>IV {r.iv?.toFixed(1)}%</span>}
+                          <span className="tabular-nums text-sm font-bold" style={{ ...MONO, color: "var(--text)" }}>₹{r.ltp.toFixed(2)}</span>
+                          {r.pct !== undefined && <span className="text-xs font-bold" style={{ ...MONO, color: (r.pct ?? 0) >= 0 ? "var(--up)" : "var(--down)" }}>{(r.pct ?? 0) >= 0 ? "+" : ""}{r.pct?.toFixed(2)}%</span>}
+                          {r.oi !== undefined && <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>OI {r.oi >= 100000 ? `${(r.oi / 100000).toFixed(1)}L` : r.oi >= 1000 ? `${(r.oi / 1000).toFixed(0)}K` : r.oi}</span>}
+                          {r.iv !== undefined && <span className="text-xs" style={{ ...MONO, color: "var(--text-faint)" }}>IV {r.iv?.toFixed(1)}%</span>}
                         </div>
                       </div>
                       <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full" style={{ background: "var(--ce-tint)", color: "var(--ce)" }}><IconPlus size={13} /></div>
                     </button>
                   );
                 })}
-                {chainHasMore && <button onClick={() => setShowAllChain(true)} className="w-full border-t px-3 py-2 text-center text-[10px] font-bold" style={{ ...MONO, color: "var(--accent)", borderColor: "var(--border)" }}>Show {visibleChainAll.length - INITIAL_SHOW} more options →</button>}
+                {chainHasMore && <button onClick={() => setShowAllChain(true)} className="w-full border-t px-3 py-2 text-center text-sm font-bold" style={{ ...MONO, color: "var(--accent)", borderColor: "var(--border)" }}>Show {visibleChainAll.length - INITIAL_SHOW} more options →</button>}
               </div>
             )}
 
             {(loading || visibleApiAll.length > 0) && (
               <div>
                 {visibleChainAll.length > 0 && <div style={{ height: 1, background: "var(--border)" }} />}
-                <div className="border-b px-3 py-1.5 text-[8px] font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)", borderColor: "var(--border)" }}>Stocks</div>
-                {loading && <div className="flex items-center gap-2 px-3 py-4 text-[11px]" style={{ ...MONO, color: "var(--text-faint)" }}><IconLoader2 size={14} className="animate-spin" />Searching…</div>}
+                <div className="border-b px-3 py-1.5 text-xs font-bold uppercase tracking-[1.5px]" style={{ ...MONO, color: "var(--text-faint)", borderColor: "var(--border)" }}>Stocks</div>
+                {loading && <div className="flex items-center gap-2 px-3 py-4 text-sm" style={{ ...MONO, color: "var(--text-faint)" }}><IconLoader2 size={14} className="animate-spin" />Searching…</div>}
                 {!loading && filteredApi.map(r => (
                   <button key={`eq-${r.token}`} onClick={e => handleClick(r, e)} className="flex w-full items-center gap-3 border-b px-3 py-2.5 text-left transition-colors hover:bg-[var(--card-hover)]" style={{ borderColor: "var(--border)" }}>
                     <StockLogo symbol={r.tradingsymbol} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-bold" style={{ ...MONO, color: "var(--text)" }}>{r.tradingsymbol}</span>
-                        <span className="rounded px-1 py-0.5 text-[8px] font-bold" style={{ background: "var(--card)", color: "var(--text-muted)" }}>{r.exchange}</span>
+                        <span className="text-sm font-bold" style={{ ...MONO, color: "var(--text)" }}>{r.tradingsymbol}</span>
+                        <span className="rounded px-1 py-0.5 text-xs font-bold" style={{ background: "var(--card)", color: "var(--text-muted)" }}>{r.exchange}</span>
                       </div>
-                      <div className="truncate text-[9px]" style={{ ...MONO, color: "var(--text-muted)" }}>{r.name}</div>
-                      {r.ltp > 0 && <span className="tabular-nums text-[11px] font-bold" style={{ ...MONO, color: "var(--text)" }}>₹{r.ltp.toFixed(2)}</span>}
+                      <div className="truncate text-xs" style={{ ...MONO, color: "var(--text-muted)" }}>{r.name}</div>
+                      {r.ltp > 0 && <span className="tabular-nums text-sm font-bold" style={{ ...MONO, color: "var(--text)" }}>₹{r.ltp.toFixed(2)}</span>}
                     </div>
                     <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full" style={{ background: "var(--up-soft)", color: "var(--up)" }}><IconPlus size={13} /></div>
                   </button>
                 ))}
-                {!loading && apiHasMore && <button onClick={() => setShowAllApi(true)} className="w-full border-t px-3 py-2 text-center text-[10px] font-bold" style={{ ...MONO, color: "var(--up)", borderColor: "var(--border)" }}>Show {visibleApiAll.length - INITIAL_SHOW} more stocks →</button>}
+                {!loading && apiHasMore && <button onClick={() => setShowAllApi(true)} className="w-full border-t px-3 py-2 text-center text-sm font-bold" style={{ ...MONO, color: "var(--up)", borderColor: "var(--border)" }}>Show {visibleApiAll.length - INITIAL_SHOW} more stocks →</button>}
               </div>
             )}
 
-            {!loading && query.length > 0 && !hasResults && <div className="px-3 py-8 text-center text-[11px]" style={{ ...MONO, color: "var(--text-faint)" }}>No results for &quot;{query}&quot;</div>}
-            {!query && !hasResults && <div className="px-3 py-6 text-center text-[10px]" style={{ ...MONO, color: "var(--text-faint)" }}>Type stock name or option strike</div>}
+            {!loading && query.length > 0 && !hasResults && <div className="px-3 py-8 text-center text-sm" style={{ ...MONO, color: "var(--text-faint)" }}>No results for &quot;{query}&quot;</div>}
+            {!query && !hasResults && <div className="px-3 py-6 text-center text-sm" style={{ ...MONO, color: "var(--text-faint)" }}>Type stock name or option strike</div>}
           </div>
         </div>
       )}

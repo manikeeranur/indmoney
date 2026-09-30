@@ -20,7 +20,7 @@ import { useChainStore } from "@/lib/store/chainStore";
 import { useLiveSocket } from "@/lib/useLiveSocket";
 import { useTheme, ThemeToggle } from "@/lib/theme";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 const ACCENT = "#ea580c";
 
 const NAV = [
@@ -146,10 +146,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </span>
         {profile?.user_name ? (
           <div className="hidden min-w-0 flex-col items-start leading-tight sm:flex">
-            <span className="max-w-[160px] truncate text-[12px] font-bold" style={{ ...MONO, color: text1 }}>
+            <span className="max-w-[160px] truncate text-sm font-bold" style={{ ...MONO, color: text1 }}>
               {profile.user_name}
             </span>
-            {profile.user_id && <span className="text-[9px]" style={{ ...MONO, color: text2 }}>{profile.user_id}</span>}
+            {profile.user_id && <span className="text-xs" style={{ ...MONO, color: text2 }}>{profile.user_id}</span>}
           </div>
         ) : (
           <span className="hidden text-sm font-bold tracking-tight sm:inline" style={{ color: text1 }}>INDMONEY</span>
@@ -158,7 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex-1" />
 
         <button
-          className="flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-sm border px-2 py-1.5 text-[10px] transition-colors md:px-3"
+          className="flex flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-sm border px-2 py-1.5 text-sm transition-colors md:px-3"
           style={{
             ...MONO,
             background: connected ? "rgba(22,163,74,0.1)" : "transparent",
@@ -174,8 +174,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex flex-shrink-0 flex-col items-end gap-0.5 leading-none">
           <div className="flex items-baseline gap-1">
-            <span className="text-[11px] font-black" style={{ ...MONO, color: text1 }}>{DAY_NAMES[dayIdx]}</span>
-            <span className="text-[10px] font-bold" style={{ ...MONO, color: text2 }}>{dd} {MONTHS[Number(mm)]}</span>
+            <span className="text-sm font-black" style={{ ...MONO, color: text1 }}>{DAY_NAMES[dayIdx]}</span>
+            <span className="text-sm font-bold" style={{ ...MONO, color: text2 }}>{dd} {MONTHS[Number(mm)]}</span>
           </div>
           <span className="text-[7.5px] font-bold tracking-[0.8px]" style={{ ...MONO, color: statusClr }}>
             {holiday ? holiday.name.toUpperCase().slice(0, 14) : status}
@@ -203,7 +203,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Icon size={20} />
                 {!!badge && (
                   <span
-                    className="absolute right-1 top-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[8px] font-bold text-white"
+                    className="absolute right-1 top-1 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-xs font-bold text-white"
                     style={{ background: ACCENT, ...MONO }}
                   >
                     {badge}
@@ -253,9 +253,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               style={{ color: active ? ACCENT : inactive }}
             >
               <IconEl size={20} />
-              <span className="text-[8px]" style={MONO}>{label === "VWAP 9:30" ? "9:30" : label}</span>
+              <span className="text-xs" style={MONO}>{label === "VWAP 9:30" ? "9:30" : label}</span>
               {!!badge && (
-                <span className="absolute right-[calc(50%-18px)] top-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[8px] font-bold text-white" style={{ background: ACCENT }}>
+                <span className="absolute right-[calc(50%-18px)] top-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-xs font-bold text-white" style={{ background: ACCENT }}>
                   {badge}
                 </span>
               )}

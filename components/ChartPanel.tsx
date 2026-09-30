@@ -27,7 +27,7 @@ import { useTheme } from "@/lib/theme";
 import { useAccountQty } from "@/lib/useAccountQty";
 import { NUM_LOTS, LOT_SIZE, SENSEX_LOT_SIZE } from "@/lib/strategies/constants";
 
-const MONO = { fontFamily: "'Space Mono', monospace" } as const;
+const MONO = { fontFamily: "'Inter', sans-serif" } as const;
 
 type TfLabel = "1m" | "3m" | "5m" | "10m" | "15m" | "1h" | "4h" | "1D" | "1W";
 type ChartType = "candle" | "ha" | "line" | "area";
@@ -368,7 +368,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
     if (chartRef.current) { chartRef.current.remove(); chartRef.current = null; seriesRef.current = {}; tlSeriesRef.current = null; }
 
     const chart = createChart(chartDivRef.current, {
-      layout: { background: { color: chartBg }, textColor: chartText, fontFamily: "'Space Mono', monospace", fontSize: 10, attributionLogo: false },
+      layout: { background: { color: chartBg }, textColor: chartText, fontFamily: "'Inter', sans-serif", fontSize: 14, attributionLogo: false },
       grid: { vertLines: { color: chartGrid, visible: !simpleMode }, horzLines: { color: chartGrid, visible: !simpleMode } },
       crosshair: { mode: 1 },
       localization: {
@@ -759,46 +759,46 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
       {!simpleMode && (
         <div className="flex flex-shrink-0 flex-wrap items-center gap-2 px-3 py-2" style={{ borderBottom: `1px solid ${border}`, background: isDark ? "#0d1424" : "#f8fafc" }}>
           <button onClick={onClose} className="flex h-7 flex-shrink-0 items-center gap-1 rounded px-2 transition-colors hover:opacity-80" style={{ background: btnBg, color: txtMuted }}>
-            <IconChevronLeft size={13} /><span className="hidden text-[9px] font-bold sm:inline" style={MONO}>Back</span>
+            <IconChevronLeft size={13} /><span className="hidden text-xs font-bold sm:inline" style={MONO}>Back</span>
           </button>
           <div className="hidden flex-shrink-0 items-center gap-1.5 lg:flex">
-            <span className="flex h-7 items-center rounded px-2.5 text-[9px] font-black" style={{ ...MONO, color: isCE ? "#38bdf8" : "#f472b6", background: isCE ? "#38bdf815" : "#f472b615", border: `1px solid ${isCE ? "#38bdf840" : "#f472b640"}` }}>{chartLabel}</span>
-            <button onClick={() => setTO(v => !v)} className="h-7 cursor-pointer rounded px-2.5 text-[9px] font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#e11d48" : "#e11d4820", color: tradeOpen ? "#fff" : "#e11d48", border: "1px solid #e11d4840" }}>Sell</button>
-            <button onClick={() => setTO(v => !v)} className="h-7 cursor-pointer rounded px-2.5 text-[9px] font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#16a34a" : "#16a34a20", color: tradeOpen ? "#fff" : "#16a34a", border: "1px solid #16a34a40" }}>Buy</button>
+            <span className="flex h-7 items-center rounded px-2.5 text-xs font-black" style={{ ...MONO, color: isCE ? "#38bdf8" : "#f472b6", background: isCE ? "#38bdf815" : "#f472b615", border: `1px solid ${isCE ? "#38bdf840" : "#f472b640"}` }}>{chartLabel}</span>
+            <button onClick={() => setTO(v => !v)} className="h-7 cursor-pointer rounded px-2.5 text-xs font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#e11d48" : "#e11d4820", color: tradeOpen ? "#fff" : "#e11d48", border: "1px solid #e11d4840" }}>Sell</button>
+            <button onClick={() => setTO(v => !v)} className="h-7 cursor-pointer rounded px-2.5 text-xs font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#16a34a" : "#16a34a20", color: tradeOpen ? "#fff" : "#16a34a", border: "1px solid #16a34a40" }}>Buy</button>
           </div>
           <div className="flex-1" />
           <div className="relative flex-shrink-0" ref={tfDropRef}>
-            <button onClick={() => setTfOpen(v => !v)} className="h-7 w-[68px] cursor-pointer rounded px-2 text-[9px] font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>{tf}</button>
+            <button onClick={() => setTfOpen(v => !v)} className="h-7 w-[68px] cursor-pointer rounded px-2 text-xs font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>{tf}</button>
             {tfOpen && (
               <div className="absolute right-0 top-8 z-[200] max-h-64 overflow-y-auto rounded-lg shadow-xl" style={{ background: panelBg, border: `1px solid ${border}` }}>
                 {TF_LIST.map(({ label }) => (
-                  <button key={label} onClick={() => { setTf(label); setTfOpen(false); }} className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-[9px] font-bold" style={{ ...MONO, color: tf === label ? "var(--accent)" : txtPrimary, background: tf === label ? "var(--accent-soft)" : "transparent" }}>{label}</button>
+                  <button key={label} onClick={() => { setTf(label); setTfOpen(false); }} className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs font-bold" style={{ ...MONO, color: tf === label ? "var(--accent)" : txtPrimary, background: tf === label ? "var(--accent-soft)" : "transparent" }}>{label}</button>
                 ))}
               </div>
             )}
           </div>
           <div className="relative flex-shrink-0" ref={ctDropRef}>
-            <button onClick={() => setCtOpen(v => !v)} className="h-7 w-[90px] cursor-pointer rounded px-2 text-[9px] font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>
+            <button onClick={() => setCtOpen(v => !v)} className="h-7 w-[90px] cursor-pointer rounded px-2 text-xs font-bold" style={{ ...MONO, background: btnBg, color: txtPrimary, border: `1px solid ${border}` }}>
               {chartType === "candle" ? "Candle" : chartType === "ha" ? "Heikin Ashi" : chartType === "line" ? "Line" : "Area"}
             </button>
             {ctOpen && (
               <div className="absolute right-0 top-8 z-[200] overflow-hidden rounded-lg shadow-xl" style={{ background: panelBg, border: `1px solid ${border}` }}>
                 {([["candle", "Candle"], ["ha", "Heikin Ashi"], ["line", "Line"], ["area", "Area"]] as [ChartType, string][]).map(([v, label]) => (
-                  <button key={v} onClick={() => { setCT(v); setCtOpen(false); }} className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-[9px] font-bold" style={{ ...MONO, color: chartType === v ? "var(--accent)" : txtPrimary, background: chartType === v ? "var(--accent-soft)" : "transparent" }}>{label}</button>
+                  <button key={v} onClick={() => { setCT(v); setCtOpen(false); }} className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs font-bold" style={{ ...MONO, color: chartType === v ? "var(--accent)" : txtPrimary, background: chartType === v ? "var(--accent-soft)" : "transparent" }}>{label}</button>
                 ))}
               </div>
             )}
           </div>
           <div className="relative flex-shrink-0" ref={indDropRef}>
-            <button onClick={() => setIndOpen(v => !v)} className="flex h-7 cursor-pointer items-center gap-1 rounded px-2 text-[9px] font-bold transition-all"
+            <button onClick={() => setIndOpen(v => !v)} className="flex h-7 cursor-pointer items-center gap-1 rounded px-2 text-xs font-bold transition-all"
               style={{ ...MONO, background: indicators.size > 0 ? (isDark ? "#1e3a5f" : "#dbeafe") : btnBg, color: indicators.size > 0 ? (isDark ? "#60a5fa" : "#1d4ed8") : txtMuted, border: `1px solid ${indicators.size > 0 ? (isDark ? "#3b82f660" : "#93c5fd") : border}` }}>
               Indicators
-              {indicators.size > 0 && <span className="rounded-full px-1 text-[8px] font-black" style={{ background: isDark ? "#3b82f6" : "#2563eb", color: "#fff" }}>{indicators.size}</span>}
+              {indicators.size > 0 && <span className="rounded-full px-1 text-xs font-black" style={{ background: isDark ? "#3b82f6" : "#2563eb", color: "#fff" }}>{indicators.size}</span>}
             </button>
             {indOpen && (
               <div className="absolute right-0 top-8 z-[200] min-w-[110px] overflow-hidden rounded-lg shadow-xl" style={{ background: panelBg, border: `1px solid ${border}` }}>
                 {(["RSI", "BB", "VOL", "VWAP"] as Indicator[]).map((ind, i) => (
-                  <button key={ind} onClick={() => toggleInd(ind)} className="flex w-full items-center gap-2 px-3 py-2 text-[9px] font-bold transition-colors hover:opacity-80"
+                  <button key={ind} onClick={() => toggleInd(ind)} className="flex w-full items-center gap-2 px-3 py-2 text-xs font-bold transition-colors hover:opacity-80"
                     style={{ ...MONO, borderTop: i > 0 ? `1px solid ${border}` : "none", background: indicators.has(ind) ? (isDark ? "#1e3a5f40" : "#dbeafe80") : "transparent", color: indicators.has(ind) ? (isDark ? "#60a5fa" : "#1d4ed8") : txtMuted }}>
                     <span className="flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded" style={{ background: indicators.has(ind) ? (isDark ? "#3b82f6" : "#2563eb") : "transparent", border: `1.5px solid ${indicators.has(ind) ? (isDark ? "#3b82f6" : "#2563eb") : border}` }}>
                       {indicators.has(ind) && <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><polyline points="1.5,4 3,5.5 6.5,2" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
@@ -822,23 +822,23 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
           <div className="absolute left-0 right-0 top-0 z-20 px-4 pb-2 pt-3">
             <div className="mb-1.5 flex items-center gap-2">
               <button onClick={onClose} className="flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1 transition-all hover:opacity-90 active:scale-95" style={{ background: isDark ? "#1e2a3a" : "#e2e8f0", color: txtPrimary, border: `1px solid ${border}` }}>
-                <IconChevronLeft size={13} /><span className="text-[9px] font-bold" style={MONO}>Back</span>
+                <IconChevronLeft size={13} /><span className="text-xs font-bold" style={MONO}>Back</span>
               </button>
             </div>
             <div className="mb-0.5 flex items-center gap-2">
-              <span className="truncate text-[20px] font-black leading-tight" style={{ ...MONO, color: txtPrimary }}>{chartLabel}</span>
-              <span className="flex-shrink-0 rounded px-2 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: simpleBadgeBg, color: simpleBadgeClr }}>{type}</span>
+              <span className="truncate text-xl font-black leading-tight" style={{ ...MONO, color: txtPrimary }}>{chartLabel}</span>
+              <span className="flex-shrink-0 rounded px-2 py-0.5 text-xs font-bold" style={{ ...MONO, background: simpleBadgeBg, color: simpleBadgeClr }}>{type}</span>
             </div>
             <div className="flex items-end gap-2">
-              <span className="text-[16px] font-black leading-none" style={{ ...MONO, color: txtPrimary }}>{currentPrice > 0 ? fmtPrice(currentPrice) : "—"}</span>
-              <span className="pb-0.5 text-[11px] font-bold" style={{ ...MONO, color: simpleChgClr }}>{simpleIsUp ? "▲" : "▼"} {changeAbs.toFixed(2)} ({simpleIsUp ? "+" : ""}{changePct.toFixed(2)}%)</span>
+              <span className="text-lg font-black leading-none" style={{ ...MONO, color: txtPrimary }}>{currentPrice > 0 ? fmtPrice(currentPrice) : "—"}</span>
+              <span className="pb-0.5 text-sm font-bold" style={{ ...MONO, color: simpleChgClr }}>{simpleIsUp ? "▲" : "▼"} {changeAbs.toFixed(2)} ({simpleIsUp ? "+" : ""}{changePct.toFixed(2)}%)</span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {([["Strike", strike > 0 ? strike.toLocaleString("en-IN") : "—", simpleBadgeClr], ["Low", todayStats?.low != null ? fmtPrice(todayStats.low) : "—", "#e11d48"], ["High", todayStats?.high != null ? fmtPrice(todayStats.high) : "—", "#16a34a"], ["Expiry", expiry || "—", txtMuted]] as [string, string, string][]).map(([label, val, c], i) => (
                 <div key={label} className="flex items-center gap-1">
-                  {i > 0 && <span style={{ color: txtMuted, opacity: 0.3, fontSize: 8 }}>|</span>}
-                  <span className="text-[8px]" style={{ ...MONO, color: txtMuted }}>{label}</span>
-                  <span className="text-[9px] font-black" style={{ ...MONO, color: c }}>{val}</span>
+                  {i > 0 && <span style={{ color: txtMuted, opacity: 0.3, fontSize: 12 }}>|</span>}
+                  <span className="text-xs" style={{ ...MONO, color: txtMuted }}>{label}</span>
+                  <span className="text-xs font-black" style={{ ...MONO, color: c }}>{val}</span>
                 </div>
               ))}
             </div>
@@ -854,7 +854,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
         )}
 
         {!simpleMode && !loading && !error && ohlc && (
-          <div className="absolute left-2 top-2 z-20 flex items-center gap-2 rounded px-1.5 py-0.5 text-[9px] font-bold" style={{ ...MONO, background: isDark ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.8)", backdropFilter: "blur(4px)" }}>
+          <div className="absolute left-2 top-2 z-20 flex items-center gap-2 rounded px-1.5 py-0.5 text-xs font-bold" style={{ ...MONO, background: isDark ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.8)", backdropFilter: "blur(4px)" }}>
             <span style={{ color: txtMuted }}>O<span style={{ color: txtPrimary }}> {ohlc.o.toFixed(2)}</span></span>
             <span style={{ color: txtMuted }}>H<span style={{ color: "#16a34a" }}> {ohlc.h.toFixed(2)}</span></span>
             <span style={{ color: txtMuted }}>L<span style={{ color: "#dc2626" }}> {ohlc.l.toFixed(2)}</span></span>
@@ -874,28 +874,28 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
           return (
             <div className="absolute right-2 top-2 z-40 overflow-hidden rounded-xl" style={{ background: isDark ? "rgba(8,11,15,0.92)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)", border: `1px solid ${border}`, minWidth: 176 }}>
               <div className="flex items-center justify-between px-2.5 py-1.5" style={{ background: isDark ? "#0f172a" : "#f1f5f9", borderBottom: `1px solid ${border}` }}>
-                <span className="text-[8px] font-black tracking-widest" style={{ ...MONO, color: "#38bdf8" }}>LIVE POSITION</span>
-                <span className="rounded-full px-1.5 py-0.5 text-[7px] font-bold" style={{ background: "#16a34a20", color: "#16a34a", border: "1px solid #16a34a40" }}>{acctLivePos.status}</span>
+                <span className="text-xs font-black tracking-widest" style={{ ...MONO, color: "#38bdf8" }}>LIVE POSITION</span>
+                <span className="rounded-full px-1.5 py-0.5 text-xs font-bold" style={{ background: "#16a34a20", color: "#16a34a", border: "1px solid #16a34a40" }}>{acctLivePos.status}</span>
               </div>
               <div className="flex flex-col items-center px-2.5 py-1.5" style={{ borderBottom: `1px solid ${border}` }}>
-                <span className="mb-0.5 text-[7px] font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>UNREALISED P&L</span>
-                <span className="text-[15px] font-black leading-none" style={{ ...MONO, color: pnlClr }}>{fmtPnl(pnlVal)}</span>
-                <span className="mt-0.5 text-[8px]" style={{ ...MONO, color: pnlClr }}>{pnlPts >= 0 ? "+" : ""}{pnlPts.toFixed(2)} pts · {acctLivePos.quantity} qty</span>
+                <span className="mb-0.5 text-xs font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>UNREALISED P&L</span>
+                <span className="text-base font-black leading-none" style={{ ...MONO, color: pnlClr }}>{fmtPnl(pnlVal)}</span>
+                <span className="mt-0.5 text-xs" style={{ ...MONO, color: pnlClr }}>{pnlPts >= 0 ? "+" : ""}{pnlPts.toFixed(2)} pts · {acctLivePos.quantity} qty</span>
               </div>
               <div className="grid grid-cols-2 gap-px p-px" style={{ background: border }}>
                 {([["ENTRY", acctLivePos.buyPrice.toFixed(2), "#38bdf8"], ["T1", rr.target1.toFixed(2), "#22c55e"], ["T2", rr.target2.toFixed(2), "#15803d"], ["SL", rr.sl.toFixed(2), "#e11d48"]] as [string, string, string][]).map(([label, val, c]) => (
                   <div key={label} className="flex flex-col items-center py-1.5" style={{ background: isDark ? "#080b0f" : "#f8fafc" }}>
-                    <span className="text-[7px] font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>{label}</span>
-                    <span className="text-[9px] font-black" style={{ ...MONO, color: c }}>₹{val}</span>
+                    <span className="text-xs font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>{label}</span>
+                    <span className="text-xs font-black" style={{ ...MONO, color: c }}>₹{val}</span>
                   </div>
                 ))}
               </div>
               <div className="flex items-center justify-between px-2.5 py-1.5" style={{ borderTop: `1px solid ${border}` }}>
-                <span className="text-[7px] font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>LOCKED PTS</span>
-                <span className="text-[8px] font-black" style={{ ...MONO, color: lockedPts > 0 ? "#22c55e" : txtMuted }}>{lockedPts >= 0 ? "+" : ""}{lockedPts.toFixed(2)}</span>
+                <span className="text-xs font-bold tracking-widest" style={{ ...MONO, color: txtMuted }}>LOCKED PTS</span>
+                <span className="text-xs font-black" style={{ ...MONO, color: lockedPts > 0 ? "#22c55e" : txtMuted }}>{lockedPts >= 0 ? "+" : ""}{lockedPts.toFixed(2)}</span>
               </div>
               <div className="px-2 pb-2">
-                <button disabled={exitState === "loading" || exitState === "done"} onClick={handleImmediateExit} className="w-full cursor-pointer rounded-lg py-1.5 text-[8px] font-black tracking-wide transition-all active:scale-95"
+                <button disabled={exitState === "loading" || exitState === "done"} onClick={handleImmediateExit} className="w-full cursor-pointer rounded-lg py-1.5 text-xs font-black tracking-wide transition-all active:scale-95"
                   style={{ ...MONO, background: exitState === "done" ? "#16a34a" : "#e11d48", color: "#fff", opacity: exitState === "loading" || exitState === "done" ? 0.7 : 1 }}>{exitLbl}</button>
               </div>
             </div>
@@ -904,10 +904,10 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
 
         {!simpleMode && !loading && !error && (
           <div className="absolute left-2 z-20 flex flex-col items-start gap-1 lg:hidden" style={{ bottom: "100px" }}>
-            <span className="flex h-7 items-center rounded px-2.5 text-[9px] font-black" style={{ ...MONO, color: isCE ? "#38bdf8" : "#f472b6", background: isCE ? "#38bdf815" : "#f472b615", border: `1px solid ${isCE ? "#38bdf840" : "#f472b640"}` }}>{chartLabel}</span>
+            <span className="flex h-7 items-center rounded px-2.5 text-xs font-black" style={{ ...MONO, color: isCE ? "#38bdf8" : "#f472b6", background: isCE ? "#38bdf815" : "#f472b615", border: `1px solid ${isCE ? "#38bdf840" : "#f472b640"}` }}>{chartLabel}</span>
             <div className="flex gap-1.5">
-              <button onClick={() => setTO(v => !v)} className="cursor-pointer rounded px-2.5 py-1 text-[9px] font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#e11d48" : "#e11d4820", color: tradeOpen ? "#fff" : "#e11d48", border: "1px solid #e11d4840" }}>Sell</button>
-              <button onClick={() => setTO(v => !v)} className="cursor-pointer rounded px-2.5 py-1 text-[9px] font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#16a34a" : "#16a34a20", color: tradeOpen ? "#fff" : "#16a34a", border: "1px solid #16a34a40" }}>Buy</button>
+              <button onClick={() => setTO(v => !v)} className="cursor-pointer rounded px-2.5 py-1 text-xs font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#e11d48" : "#e11d4820", color: tradeOpen ? "#fff" : "#e11d48", border: "1px solid #e11d4840" }}>Sell</button>
+              <button onClick={() => setTO(v => !v)} className="cursor-pointer rounded px-2.5 py-1 text-xs font-black transition-all" style={{ ...MONO, background: tradeOpen ? "#16a34a" : "#16a34a20", color: tradeOpen ? "#fff" : "#16a34a", border: "1px solid #16a34a40" }}>Buy</button>
             </div>
           </div>
         )}
@@ -915,19 +915,19 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
         {loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ background: panelBg }}>
             <div className="h-7 w-7 animate-spin rounded-full border-2" style={{ borderColor: border, borderTopColor: clr }} />
-            <span className="text-[10px]" style={{ ...MONO, color: txtMuted }}>Loading {chartLabel} chart…</span>
+            <span className="text-sm" style={{ ...MONO, color: txtMuted }}>Loading {chartLabel} chart…</span>
           </div>
         )}
         {error && !loading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ background: panelBg }}>
-            <p className="text-[11px]" style={{ ...MONO, color: "#e11d48" }}>{error}</p>
-            <button onClick={() => { setError(null); setLoading(true); }} className="cursor-pointer rounded px-3 py-1 text-[9px] font-bold" style={{ ...MONO, background: btnBg, color: txtMuted }}>Retry</button>
+            <p className="text-sm" style={{ ...MONO, color: "#e11d48" }}>{error}</p>
+            <button onClick={() => { setError(null); setLoading(true); }} className="cursor-pointer rounded px-3 py-1 text-xs font-bold" style={{ ...MONO, background: btnBg, color: txtMuted }}>Retry</button>
           </div>
         )}
 
         {!simpleMode && replayPicking && (
           <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center">
-            <div className="rounded-lg px-4 py-2 text-center text-[11px] font-bold" style={{ ...MONO, background: "rgba(245,158,11,0.92)", color: "#000", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>Click any candle to start replay from that point</div>
+            <div className="rounded-lg px-4 py-2 text-center text-sm font-bold" style={{ ...MONO, background: "rgba(245,158,11,0.92)", color: "#000", boxShadow: "0 4px 20px rgba(0,0,0,0.4)" }}>Click any candle to start replay from that point</div>
           </div>
         )}
 
@@ -936,18 +936,18 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
             <button onClick={() => scrollChart(-15)} title="Scroll left" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}` }}>
               <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M5 1L2 4l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
             </button>
-            <button onClick={() => zoomChart(true)} title="Zoom in" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-[11px] font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>+</button>
-            <button onClick={() => zoomChart(false)} title="Zoom out" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-[11px] font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>−</button>
+            <button onClick={() => zoomChart(true)} title="Zoom in" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-sm font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>+</button>
+            <button onClick={() => zoomChart(false)} title="Zoom out" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-sm font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>−</button>
             <button onClick={() => scrollChart(15)} title="Scroll right" className="flex h-6 w-6 cursor-pointer items-center justify-center rounded opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}` }}>
               <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M3 1l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
             </button>
-            <button onClick={fitToday} title="Fit to today" className="flex h-6 items-center justify-center rounded px-1.5 text-[9px] font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>1D</button>
+            <button onClick={fitToday} title="Fit to today" className="flex h-6 items-center justify-center rounded px-1.5 text-xs font-bold opacity-60 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: txtPrimary, border: `1px solid ${border}`, ...MONO }}>1D</button>
             {!replayMode ? (
-              <button onClick={startReplay} title="Replay" className="flex h-6 cursor-pointer items-center gap-1 rounded px-2 text-[9px] font-bold opacity-70 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: "#f59e0b", border: "1px solid #f59e0b50", ...MONO }}>
+              <button onClick={startReplay} title="Replay" className="flex h-6 cursor-pointer items-center gap-1 rounded px-2 text-xs font-bold opacity-70 hover:opacity-100" style={{ background: isDark ? "rgba(15,23,42,0.85)" : "rgba(255,255,255,0.85)", color: "#f59e0b", border: "1px solid #f59e0b50", ...MONO }}>
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><polygon points="1,0 8,4 1,8" fill="currentColor" /></svg>Replay
               </button>
             ) : replayPicking ? (
-              <button onClick={stopReplay} className="flex h-6 cursor-pointer items-center gap-1 rounded px-2 text-[9px] font-bold" style={{ background: "#f59e0b", color: "#000", ...MONO }}>Cancel</button>
+              <button onClick={stopReplay} className="flex h-6 cursor-pointer items-center gap-1 rounded px-2 text-xs font-bold" style={{ background: "#f59e0b", color: "#000", ...MONO }}>Cancel</button>
             ) : (
               <div className="flex items-center gap-1 rounded px-1.5 py-0.5" style={{ background: isDark ? "rgba(15,23,42,0.92)" : "rgba(255,255,255,0.92)", border: "1px solid #f59e0b60" }}>
                 <button onClick={() => stepReplay(-1)} disabled={replayPlaying} title="Step back" className="flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 hover:opacity-100 disabled:opacity-30" style={{ color: "#f59e0b" }}>
@@ -959,8 +959,8 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
                 <button onClick={() => stepReplay(1)} disabled={replayPlaying} title="Step forward" className="flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 hover:opacity-100 disabled:opacity-30" style={{ color: "#f59e0b" }}>
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1 1l4 3-4 3V1z" fill="currentColor" /><rect x="6.5" y="1" width="1.5" height="6" rx="0.5" fill="currentColor" /></svg>
                 </button>
-                <button onClick={() => setReplaySpeed(s => s === 1 ? 2 : s === 2 ? 4 : 1)} className="cursor-pointer px-1 text-[8px] font-bold" style={{ ...MONO, color: "#f59e0b" }}>{replaySpeed}x</button>
-                <span className="text-[8px] font-bold" style={{ ...MONO, color: "#f59e0b" }}>{replayIdx + 1}/{replayCandlesRef.current.length}</span>
+                <button onClick={() => setReplaySpeed(s => s === 1 ? 2 : s === 2 ? 4 : 1)} className="cursor-pointer px-1 text-xs font-bold" style={{ ...MONO, color: "#f59e0b" }}>{replaySpeed}x</button>
+                <span className="text-xs font-bold" style={{ ...MONO, color: "#f59e0b" }}>{replayIdx + 1}/{replayCandlesRef.current.length}</span>
                 <button onClick={stopReplay} title="Stop" className="flex h-5 w-5 cursor-pointer items-center justify-center rounded opacity-70 hover:opacity-100" style={{ color: "#e11d48" }}>
                   <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><rect x="0" y="0" width="8" height="8" rx="1" fill="currentColor" /></svg>
                 </button>
@@ -984,7 +984,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
           const top = Math.min(r.top, r.bottom), height = Math.max(2, Math.abs(r.bottom - r.top));
           return (
             <div key={i} className="pointer-events-none absolute z-10" style={{ left, width, top, height, background: `${color}22`, border: `1px solid ${color}80` }}>
-              <span className="absolute -top-4 left-0 whitespace-nowrap rounded px-1 text-[8px] font-bold" style={{ ...MONO, background: color, color: "#fff" }}>{r.concept}</span>
+              <span className="absolute -top-4 left-0 whitespace-nowrap rounded px-1 text-xs font-bold" style={{ ...MONO, background: color, color: "#fff" }}>{r.concept}</span>
             </div>
           );
         })}
@@ -993,7 +993,7 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
       {simpleMode && (
         <div className="flex flex-shrink-0 items-center gap-1 px-3 py-2" style={{ borderTop: `1px solid ${border}`, background: isDark ? "#080b0f" : "#f1f5f9" }}>
           {["1D", "1W", "1M", "3M", "6M", "1Y", "5Y"].map(p => (
-            <button key={p} onClick={() => handleSimplePeriod(p)} className="flex-1 cursor-pointer rounded py-1 text-[9px] font-black transition-all active:scale-95" style={{ ...MONO, background: simplePeriod === p ? "#16a34a" : "transparent", color: simplePeriod === p ? "#fff" : txtMuted }}>{p}</button>
+            <button key={p} onClick={() => handleSimplePeriod(p)} className="flex-1 cursor-pointer rounded py-1 text-xs font-black transition-all active:scale-95" style={{ ...MONO, background: simplePeriod === p ? "#16a34a" : "transparent", color: simplePeriod === p ? "#fff" : txtMuted }}>{p}</button>
           ))}
         </div>
       )}
@@ -1002,45 +1002,45 @@ export function ChartPanel({ token, tradingsymbol, strike, type, expiry, index =
         <div className="absolute bottom-0 left-0 right-0 z-30" style={{ borderTop: `1px solid ${border}`, background: panelBg }}>
           <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: `1px solid ${divider}` }}>
             <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-[11px] font-bold" style={{ ...MONO, color: txtPrimary }}>{chartLabel}</span>
-              <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold" style={{ ...MONO, background: isCE ? "#0284c720" : "#e11d4820", color: isCE ? "#0284c7" : "#e11d48" }}>{type}</span>
-              {liveOrLast > 0 && <span className="flex-shrink-0 text-[13px] font-black" style={{ ...MONO, color: txtPrimary }}>₹{liveOrLast.toFixed(2)}</span>}
+              <span className="truncate text-sm font-bold" style={{ ...MONO, color: txtPrimary }}>{chartLabel}</span>
+              <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-xs font-bold" style={{ ...MONO, background: isCE ? "#0284c720" : "#e11d4820", color: isCE ? "#0284c7" : "#e11d48" }}>{type}</span>
+              {liveOrLast > 0 && <span className="flex-shrink-0 text-base font-black" style={{ ...MONO, color: txtPrimary }}>₹{liveOrLast.toFixed(2)}</span>}
             </div>
             <div className="flex flex-shrink-0 items-center gap-2">
-              {orderState.result && <span className="text-[9px] font-bold" style={{ ...MONO, color: orderState.result.startsWith("✓") ? "#16a34a" : "#e11d48" }}>{orderState.result}</span>}
+              {orderState.result && <span className="text-xs font-bold" style={{ ...MONO, color: orderState.result.startsWith("✓") ? "#16a34a" : "#e11d48" }}>{orderState.result}</span>}
               <button onClick={() => setTO(false)} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full transition-colors hover:opacity-70" style={{ background: btnBg, color: txtMuted }}><IconX size={11} /></button>
             </div>
           </div>
           <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: `1px solid ${divider}` }}>
             <div className="flex flex-col items-start gap-0.5">
-              <span className="text-[8px] uppercase" style={{ ...MONO, color: txtMuted }}>Available</span>
-              <span className="text-[12px] font-bold" style={{ ...MONO, color: wallet !== null && !canBuy ? "#e11d48" : "#16a34a" }}>{fmtWallet}</span>
+              <span className="text-xs uppercase" style={{ ...MONO, color: txtMuted }}>Available</span>
+              <span className="text-sm font-bold" style={{ ...MONO, color: wallet !== null && !canBuy ? "#e11d48" : "#16a34a" }}>{fmtWallet}</span>
             </div>
             <div className="flex flex-col items-end gap-0.5">
-              <span className="text-[8px] uppercase" style={{ ...MONO, color: txtMuted }}>Approx Req</span>
-              <span className="text-[12px] font-bold" style={{ ...MONO, color: approxClr }}>₹{approxBuy.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
+              <span className="text-xs uppercase" style={{ ...MONO, color: txtMuted }}>Approx Req</span>
+              <span className="text-sm font-bold" style={{ ...MONO, color: approxClr }}>₹{approxBuy.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</span>
             </div>
           </div>
           <div className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: `1px solid ${divider}` }}>
-            <span className="text-[9px] uppercase" style={{ ...MONO, color: txtMuted }}>Lots</span>
-            <button onClick={() => setOL(v => Math.max(1, v - 1))} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[14px] font-bold" style={{ background: btnBg, color: btnClr }}>−</button>
-            <span className="w-6 text-center text-[14px] font-bold" style={{ ...MONO, color: txtPrimary }}>{orderLots}</span>
-            <button onClick={() => setOL(v => v + 1)} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[14px] font-bold" style={{ background: btnBg, color: btnClr }}>+</button>
-            <span className="ml-auto text-[9px]" style={{ ...MONO, color: txtMuted }}>{orderLots} × {activeLotSize} = {orderLots * activeLotSize} qty</span>
+            <span className="text-xs uppercase" style={{ ...MONO, color: txtMuted }}>Lots</span>
+            <button onClick={() => setOL(v => Math.max(1, v - 1))} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-base font-bold" style={{ background: btnBg, color: btnClr }}>−</button>
+            <span className="w-6 text-center text-base font-bold" style={{ ...MONO, color: txtPrimary }}>{orderLots}</span>
+            <button onClick={() => setOL(v => v + 1)} className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-base font-bold" style={{ background: btnBg, color: btnClr }}>+</button>
+            <span className="ml-auto text-xs" style={{ ...MONO, color: txtMuted }}>{orderLots} × {activeLotSize} = {orderLots * activeLotSize} qty</span>
           </div>
           {!canBuy && wallet !== null && (
-            <div className="mx-4 mb-2 rounded-lg px-3 py-1.5 text-center text-[9px] font-bold" style={{ ...MONO, background: "#e11d4815", color: "#e11d48", border: "1px solid #e11d4830" }}>Insufficient funds · Need ₹{(approxBuy - wallet).toLocaleString("en-IN", { maximumFractionDigits: 0 })} more</div>
+            <div className="mx-4 mb-2 rounded-lg px-3 py-1.5 text-center text-xs font-bold" style={{ ...MONO, background: "#e11d4815", color: "#e11d48", border: "1px solid #e11d4830" }}>Insufficient funds · Need ₹{(approxBuy - wallet).toLocaleString("en-IN", { maximumFractionDigits: 0 })} more</div>
           )}
           <div className="grid grid-cols-2 gap-2 px-4 pb-3 pt-2">
-            <button disabled={orderState.loading || !canBuy} onClick={() => placeOrder("SELL")} className="cursor-pointer rounded-lg py-1.5 text-[10px] font-black tracking-[0.5px] transition-opacity" style={{ ...MONO, background: "#e11d48", color: "#fff", opacity: orderState.loading || !canBuy ? 0.4 : 1 }}>{orderState.loading ? "..." : "↙ Sell @ Mkt"}</button>
-            <button disabled={orderState.loading || !canBuy} onClick={() => placeOrder("BUY")} className="cursor-pointer rounded-lg py-1.5 text-[10px] font-black tracking-[0.5px] transition-opacity" style={{ ...MONO, background: "#16a34a", color: "#fff", opacity: orderState.loading || !canBuy ? 0.4 : 1 }}>{orderState.loading ? "..." : "↗ Buy @ Mkt"}</button>
+            <button disabled={orderState.loading || !canBuy} onClick={() => placeOrder("SELL")} className="cursor-pointer rounded-lg py-1.5 text-sm font-black tracking-[0.5px] transition-opacity" style={{ ...MONO, background: "#e11d48", color: "#fff", opacity: orderState.loading || !canBuy ? 0.4 : 1 }}>{orderState.loading ? "..." : "↙ Sell @ Mkt"}</button>
+            <button disabled={orderState.loading || !canBuy} onClick={() => placeOrder("BUY")} className="cursor-pointer rounded-lg py-1.5 text-sm font-black tracking-[0.5px] transition-opacity" style={{ ...MONO, background: "#16a34a", color: "#fff", opacity: orderState.loading || !canBuy ? 0.4 : 1 }}>{orderState.loading ? "..." : "↗ Buy @ Mkt"}</button>
           </div>
           {tradeLines && (
             <div className="flex flex-wrap items-center gap-3 px-4 pb-2.5">
-              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#38bdf8" }} /><span className="text-[8px] font-bold" style={{ ...MONO, color: "#38bdf8" }}>Entry ₹{tradeLines.entry.toFixed(2)}</span></div>
-              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#22c55e" }} /><span className="text-[8px] font-bold" style={{ ...MONO, color: "#22c55e" }}>T1 ₹{tradeLines.target.toFixed(2)}</span></div>
-              {tradeLines.target2 != null && <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#15803d" }} /><span className="text-[8px] font-bold" style={{ ...MONO, color: "#15803d" }}>T2 ₹{tradeLines.target2.toFixed(2)}</span></div>}
-              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#e11d48" }} /><span className="text-[8px] font-bold" style={{ ...MONO, color: "#e11d48" }}>SL ₹{tradeLines.sl.toFixed(2)}</span></div>
+              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#38bdf8" }} /><span className="text-xs font-bold" style={{ ...MONO, color: "#38bdf8" }}>Entry ₹{tradeLines.entry.toFixed(2)}</span></div>
+              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#22c55e" }} /><span className="text-xs font-bold" style={{ ...MONO, color: "#22c55e" }}>T1 ₹{tradeLines.target.toFixed(2)}</span></div>
+              {tradeLines.target2 != null && <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#15803d" }} /><span className="text-xs font-bold" style={{ ...MONO, color: "#15803d" }}>T2 ₹{tradeLines.target2.toFixed(2)}</span></div>}
+              <div className="flex items-center gap-1"><div className="w-4 border-t" style={{ borderColor: "#e11d48" }} /><span className="text-xs font-bold" style={{ ...MONO, color: "#e11d48" }}>SL ₹{tradeLines.sl.toFixed(2)}</span></div>
             </div>
           )}
         </div>
