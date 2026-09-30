@@ -9,8 +9,12 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date"), expiry = searchParams.get("expiry");
   if (!date || !expiry) return NextResponse.json({ error: "date and expiry are required" }, { status: 400 });
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  if (new Date(date) >= today) return NextResponse.json({ error: "date must be a past date for backtesting" }, { status: 400 });
+  const nowIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  const todayIST = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const marketClosed = nowIST.getHours() > 15 || (nowIST.getHours() === 15 && nowIST.getMinutes() >= 30);
+  if (date > todayIST || (date === todayIST && !marketClosed)) {
+    return NextResponse.json({ error: "date must be a past date, or today after market close (3:30 PM IST), for backtesting" }, { status: 400 });
+  }
   try {
     console.log(`[VWAP930 Historical] Backtesting ${date} expiry ${expiry}...`);
     const result = await runBacktest(vwap930Config, date, expiry);
