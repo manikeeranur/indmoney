@@ -127,6 +127,14 @@ export async function runVWAP930Scan(expiry: string): Promise<any> {
   if (!isAfterEntryStart(h, m)) {
     return { signal: false, reason: `No entries before ${entryStartStr()} IST (now ${entryTime})` };
   }
+  // Decide only in the minute a 5-min candle has just closed (09:20, 09:25, …),
+  // exactly like the backtest's checkpoints. The scanner runs every minute, so
+  // without this a re-entry right after the cooldown (e.g. 09:49) was judged on
+  // a candle that closed minutes earlier (09:40–09:45) and filled at a live
+  // price that had already fallen back below VWAP.
+  if (m % VWAP930_CANDLE_MINUTES !== 0) {
+    return { signal: false, reason: `Waiting for the next ${VWAP930_CANDLE_MINUTES}-min candle close (now ${entryTime})` };
+  }
 
   const { ce, pe, ceBand, peBand, spot, atm } = await findCandidateLegs(expiry);
   if (!ce && !pe) {
@@ -139,7 +147,12 @@ export async function runVWAP930Scan(expiry: string): Promise<any> {
     pe ? getLegNMinState(pe.token, from, now) : Promise.resolve(null),
   ]);
 
-  const decision = decideDirection(ce, pe, stateCE, statePE);
+  // A side whose latest completed candle is not the one that just closed
+  // (historical feed lagging) is treated as not ready rather than judged on
+  // stale data.
+  const justClosedStart = Math.floor(now.getTime() / 60_000) * 60_000 - 60_000;
+  const fresh = (st: LegState | null) => st && new Date(st.candle.date).getTime() >= justClosedStart ? st : null;
+  const decision = decideDirection(ce, pe, fresh(stateCE), fresh(statePE));
   if (!decision) {
     return {
       signal: false,

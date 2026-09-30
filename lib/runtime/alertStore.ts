@@ -65,15 +65,33 @@ type Store = {
   scanRunning: boolean;
   lastMongoSync: number;
   activeTokenIndex: Map<number, string>;
+  /** IST date (todayIST() format) the in-memory alerts belong to. */
+  day: string;
 };
 
 function state(key: StrategyKey): Store {
   const g = globalThis as any;
   g.__INDMONEY_ALERTS__ ??= {};
   g.__INDMONEY_ALERTS__[key] ??= {
-    alerts: [], lastScanAt: null, scanRunning: false, lastMongoSync: 0, activeTokenIndex: new Map(),
+    alerts: [], lastScanAt: null, scanRunning: false, lastMongoSync: 0, activeTokenIndex: new Map(), day: todayIST(),
   } satisfies Store;
-  return g.__INDMONEY_ALERTS__[key];
+  const s: Store = g.__INDMONEY_ALERTS__[key];
+  // The server runs across days, but the live table is today-only: the first
+  // access after IST midnight drops yesterday's alerts from memory (Mongo
+  // keeps them for history). Without this they sat in the table until Clear
+  // was pressed — and a leftover ACTIVE one would block today's scan.
+  const today = todayIST();
+  if (s.day !== today) {
+    s.day = today;
+    s.alerts = s.alerts.filter(a => alertDay(a) === today);
+    s.activeTokenIndex = new Map(s.alerts.filter(a => a.status === "ACTIVE" && a.leg?.token).map(a => [a.leg!.token, a.id]));
+    s.lastMongoSync = 0;
+  }
+  return s;
+}
+
+function alertDay(a: AlertRecord): string {
+  return new Date(a.createdAt).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" });
 }
 
 function todayIST(): string {
